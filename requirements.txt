@@ -1,0 +1,12 @@
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-groq>=0.2.0
+langchain-huggingface>=0.1.0
+langchain-community>=0.3.0
+langgraph>=0.2.64
+sentence-transformers==3.0.1
+faiss-cpu==1.8.0
+python-dotenv==1.0.0
+duckduckgo-search>=8.0.0
+asteval>=1.0.0
+ddgs>=9.0.0
