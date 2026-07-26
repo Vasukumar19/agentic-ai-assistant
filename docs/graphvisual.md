@@ -282,17 +282,54 @@ Returns empty strings for sources not requested or not found.
 | | |
 |---|---|
 | **File** | [`nodes/rag_retriever.py`](../nodes/rag_retriever.py) |
-| **Purpose** | Search pre-built company document index. |
+| **Purpose** | Search pre-built company document index using hybrid retrieval. |
 | **Inputs** | `question`, `retrieval_plan` |
 | **Outputs** | `rag_context` |
 | **LLM** | No |
-| **FAISS** | Yes — search at `FAISS_INDEX_DIR`, `k=3` |
+| **FAISS** | Yes — search at `FAISS_INDEX_DIR`, `k=20` |
+| **BM25** | Yes — keyword search in parallel with FAISS |
+| **Reranker** | Yes — cross-encoder re-ranks top 20 candidates to top 5 |
 | **Filesystem** | No (reads FAISS index only) |
 | **Tools** | No |
+
+**Hybrid RAG Pipeline:**
+
+1. **Query Rewriting** — LLM rewrites the user's question into an optimized search query via `rewrite_prompt`
+2. **Dual Retrieval** — Both FAISS semantic search (`similarity_search_with_score`, k=20) and BM25 keyword search (`bm25_search`, k=20) run in parallel
+3. **Merge & Filter** — Results are merged by `chunk_id`. FAISS results with score > 0.8 threshold are dropped. BM25 results are always included
+4. **Cross-Encoder Reranking** — `cross-encoder/ms-marco-MiniLM-L6-v2` re-ranks up to 20 candidates, returns top 5
+5. **Formatting** — Results are labeled with source filename, page number, retriever type, and relevance score
 
 If `retrieval_plan.rag` is `false`, returns `{"rag_context": ""}` immediately.
 
 If `FAISS_INDEX_DIR` does not exist, logs a message and returns empty context.
+
+---
+
+### `bm25` (Helper Module)
+
+| | |
+|---|---|
+| **File** | [`nodes/bm25.py`](../nodes/bm25.py) |
+| **Purpose** | BM25 keyword-based retrieval for hybrid search. |
+| **Exports** | `bm25_search(query, k=5)` |
+| **Storage** | Pickled document chunks in `bm25_chunks.pkl` (created by `ingest.py`) |
+| **Dependencies** | `rank-bm25`, tokenized with regex `\w+` |
+
+Lazily loads the BM25 index on first call. Used by `rag_retriever_node` to supplement FAISS semantic search.
+
+---
+
+### `reranker` (Helper Module)
+
+| | |
+|---|---|
+| **File** | [`reranker.py`](../reranker.py) |
+| **Purpose** | Cross-encoder reranking for RAG results. |
+| **Exports** | `rerank(query, items, top_k=5)` |
+| **Model** | `cross-encoder/ms-marco-MiniLM-L6-v2` via `sentence-transformers` |
+
+Takes query + candidate documents, computes relevance scores via cross-encoder, returns top-k re-ranked results. Improves precision over pure embedding similarity.
 
 ---
 

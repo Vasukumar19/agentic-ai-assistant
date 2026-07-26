@@ -281,13 +281,55 @@ Semantic search uses `similarity_search(question, k=3)`.
 
 | | |
 |---|---|
-| **Purpose** | Search company document FAISS index |
+| **Purpose** | Search company document FAISS index using a hybrid retrieval pipeline |
 | **Function** | `rag_retriever_node(state)` |
 | **Inputs** | `question`, `retrieval_plan` |
 | **Outputs** | `rag_context` |
-| **Dependencies** | `config`, `embeddings`, `FAISS` |
+| **Dependencies** | `config`, `embeddings`, `FAISS`, `bm25`, `reranker`, `llm` |
 
-Expects a pre-built index at `FAISS_INDEX_DIR`. There is no index-building script in the current repository.
+**Hybrid RAG Pipeline (3 stages):**
+
+1. **Query Rewriting** — The user's question is rewritten into a concise, optimized search query via `ChatPromptTemplate` + LLM (`rewrite_prompt`)
+2. **Dual Retrieval** — Both FAISS semantic search (`similarity_search_with_score`, k=20) and BM25 keyword search (`bm25_search`, k=20) run. Results are merged by `chunk_id`. FAISS results above a similarity threshold of 0.8 are filtered out; BM25 results are always included
+3. **Cross-Encoder Reranking** — Up to 20 merged candidates are re-ranked using the `cross-encoder/ms-marco-MiniLM-L6-v2` model from `reranker.py`. The top 5 most relevant results are selected
+
+The FAISS vectorstore is **lazily loaded** on first call and cached globally. If the index is missing or corrupt, the node returns empty context rather than crashing the graph.
+
+### [`nodes/bm25.py`](../nodes/bm25.py)
+
+| | |
+|---|---|
+| **Purpose** | BM25 keyword-based retrieval for hybrid search |
+| **Key function** | `bm25_search(query, k=5)` |
+| **Dependencies** | `rank_bm25`, pickle |
+
+Tokenizes text using regex `\w+` and builds a `BM25Okapi` index from pickled document chunks (`bm25_chunks.pkl`). The index is lazily loaded on first call. Used by `rag_retriever_node` to supplement FAISS semantic search with keyword matching.
+
+### [`reranker.py`](../reranker.py)
+
+| | |
+|---|---|
+| **Purpose** | Cross-encoder reranking for RAG results |
+| **Key function** | `rerank(query, items, top_k=5)` |
+| **Dependencies** | `sentence-transformers` |
+
+Uses the `cross-encoder/ms-marco-MiniLM-L6-v2` model to compute relevance scores between the query and each candidate document. Returns the top-k items sorted by relevance. Improves precision over pure embedding similarity by using a dedicated cross-attention model.
+
+### [`ingest.py`](../ingest.py)
+
+| | |
+|---|---|
+| **Purpose** | Document ingestion pipeline |
+| **Key function** | `ingest_documents()` |
+| **Dependencies** | `TextLoader`, `RecursiveCharacterTextSplitter`, `FAISS`, `embeddings`, pickle |
+
+Processes `.txt` files from the `documents/` directory:
+1. Loads each file using `TextLoader`
+2. Splits into chunks using `RecursiveCharacterTextSplitter` (chunk_size=800, overlap=150)
+3. Enriches metadata with `document_id`, `chunk_id`, `source`, page info, etc.
+4. Builds a `FAISS` vector index from all chunks
+5. Saves the index to `faiss_index/`
+6. Pickles the chunk list to `bm25_chunks.pkl` for BM25 retrieval
 
 ---
 

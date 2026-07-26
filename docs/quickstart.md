@@ -94,36 +94,38 @@ agent_langGraph/
 ├── state.py                # AgentState TypedDict
 ├── config.py               # Paths, model name, temperature, max tool iterations
 ├── llm.py                  # Shared ChatGroq singleton
+├── ingest.py               # Document ingestion pipeline (FAISS + BM25)
+├── reranker.py             # Cross-encoder reranking model
 ├── requirements.txt
 ├── .env                    # GROQ_API_KEY (not committed)
+├── rag.md                  # Hybrid RAG pipeline documentation
 ├── nodes/
 │   ├── router.py           # intent_router — route classification
 │   ├── chat.py             # chat_node — direct LLM replies
 │   ├── memory_extractor.py # extract, save, confirm memory
 │   ├── retrieval_planner.py# retrieval_planner_node (planner)
 │   ├── memory_retriever.py # profile + semantic retrieval
-│   ├── rag_retriever.py    # document FAISS search
+│   ├── rag_retriever.py    # Hybrid RAG (FAISS + BM25 + reranker)
+│   ├── bm25.py             # BM25 keyword search module
 │   ├── context_builder.py  # merges context for agent
 │   ├── agent.py            # reasoning + tool binding
 │   ├── tools.py            # web_search, calculator, ToolNode
 │   ├── embeddings.py       # HuggingFace embeddings singleton
 │   └── __init__.py
+├── documents/              # Place .txt files here for ingestion
+├── faiss_index/            # FAISS vector index (built by ingest.py)
+├── bm25_chunks.pkl         # BM25 tokenized chunks (built by ingest.py)
 ├── memory/
 │   ├── memory.json         # profile memory (created on first save)
 │   ├── chat_history.json   # conversation log (created on first turn)
 │   └── semantic_memory/    # FAISS index for semantic memories
-├── faiss_index/            # RAG document index (must be built separately)
-├── tests/
-│   └── test_runtime_fixes.py
 └── docs/
     ├── graphvisual.md
     ├── implementation.md
     └── quickstart.md
 ```
 
-There is no `documents/` directory or index-builder script in the repository. RAG requires a pre-built `faiss_index/` at the project root.
-
-There is no `planner.py` — the planner lives in `nodes/retrieval_planner.py`.
+> **Note:** The planner lives in `nodes/retrieval_planner.py`, NOT `planner.py`.
 
 ---
 
