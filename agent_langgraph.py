@@ -19,11 +19,17 @@ Architecture:
 
 import json
 import os
+import logging
 from dotenv import load_dotenv
 from graph import create_runnable_graph
 from state import AgentState
-from config import CHAT_HISTORY_PATH
+from config import CHAT_HISTORY_PATH, MODEL_NAME
 from langchain_core.messages import HumanMessage, AIMessage
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
+for noisy_logger in ("httpx", "httpcore", "duckduckgo_search", "urllib3", "primp"):
+    logging.getLogger(noisy_logger).setLevel(logging.WARNING)
 
 # Load environment
 load_dotenv()
@@ -36,9 +42,9 @@ if not GROQ_API_KEY:
     )
 
 # Build the graph
-print("[Setup] Initializing LangGraph workflow...")
+logger.info("Initializing LangGraph workflow (model: %s)...", MODEL_NAME)
 graph = create_runnable_graph()
-print("[Setup] Graph compiled and ready.")
+logger.info("Graph compiled and ready.")
 
 
 def load_chat_history() -> list:
@@ -67,18 +73,13 @@ def load_chat_history() -> list:
 def ask(question: str) -> str:
     """
     Run the agent with a question.
-    
+
     Args:
         question: User's question or message
-    
+
     Returns:
         Agent's response
     """
-    print("\n" + "=" * 70)
-    print(f"Question: {question}")
-    print("=" * 70)
-    
-    # Initialize state with persisted conversation history
     initial_state: AgentState = {
         "question": question,
         "route": "",
@@ -92,47 +93,38 @@ def ask(question: str) -> str:
         "_combined_context": "",
         "messages": load_chat_history(),
     }
-    
-    # Run the graph
+
     try:
         result = graph.invoke(initial_state)
         answer = result.get("answer") or "I wasn't able to complete the request after several tool attempts."
     except Exception as e:
-        print(f"[Error] {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error("Unhandled error while processing question: %s", e, exc_info=True)
         answer = "I encountered an error processing your request. Please try again."
-    
-    print("-" * 70)
-    print(f"Answer: {answer}")
-    print("-" * 70)
-    
+
     return answer
 
 
 def main():
     """Interactive CLI."""
-    
-    print("\n" + "=" * 70)
     print("LangGraph Multi-Tool Agent")
-    print("=" * 70)
     print("Tools: web_search, calculator")
     print("Features: Intent routing, Memory storage, RAG retrieval")
     print("Type 'quit' or 'exit' to stop.\n")
-    
+
     while True:
         try:
-            user_input = input("\nYou: ").strip()
-            
+            user_input = input("You: ").strip()
+
             if not user_input:
                 continue
-            
+
             if user_input.lower() in ("quit", "exit", "q"):
                 print("Goodbye!")
                 break
-            
-            ask(user_input)
-            
+
+            answer = ask(user_input)
+            print(f"\n{answer}\n")
+
         except (KeyboardInterrupt, EOFError):
             print("\nGoodbye!")
             break
@@ -140,11 +132,9 @@ def main():
 
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) > 1:
-        # Run with command-line argument
         question = " ".join(sys.argv[1:])
-        ask(question)
+        print(ask(question))
     else:
-        # Interactive mode
         main()

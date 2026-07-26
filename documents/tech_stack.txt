@@ -1,0 +1,13 @@
+# GlobalTech Engineering Standards
+
+## 1. Approved Technology Stack
+- **Frontend**: We use React 18 with TypeScript. All styling must be done using TailwindCSS.
+- **Backend**: Our primary backend services are written in Python using FastAPI. Legacy services are built on Django.
+- **Database**: PostgreSQL is our primary relational database. Redis is used for caching.
+- **Infrastructure**: All services are containerized using Docker and orchestrated via Kubernetes on AWS.
+
+## 2. Code Review Process
+All pull requests must have at least two approvals from senior engineers before merging to the `main` branch. CI/CD pipelines must pass, including unit tests (minimum 80% coverage) and linting checks.
+
+## 3. Incident Management
+In the event of a Sev-1 incident (total system outage), the on-call engineer must open a war room on Slack (`#incidents-war-room`) and page the incident commander using PagerDuty. Post-mortems are required within 48 hours of resolving a Sev-1 incident.

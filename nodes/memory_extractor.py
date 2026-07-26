@@ -63,7 +63,8 @@ def memory_extractor_node(state: dict) -> dict:
         data = json.loads(content)
         extracted_profile = data.get("extracted_profile", default_profile) or default_profile
         extracted_semantic = data.get("extracted_semantic", default_semantic) or default_semantic
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        logger.warning("Memory extraction JSON parse failed: %s", e)
         extracted_profile = default_profile
         extracted_semantic = default_semantic
 
@@ -78,10 +79,10 @@ def memory_saver_node(state: dict) -> dict:
     Save extracted memory to disk.
     Updates memory.json with profile data.
     Adds semantic memories to FAISS index.
-    
+
     Args:
         state: AgentState with 'extracted_profile' and 'extracted_semantic' fields
-    
+
     Returns:
         Updated state (or None)
     """
@@ -89,34 +90,34 @@ def memory_saver_node(state: dict) -> dict:
     from langchain_core.documents import Document
     from langchain_community.vectorstores import FAISS
     from .embeddings import embeddings
-    
+
     extracted_profile = state.get("extracted_profile", {})
     extracted_semantic = state.get("extracted_semantic", [])
-    
+
     # Save profile memory
     if extracted_profile:
         MEMORY_FILE.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Load existing memory
         if MEMORY_FILE.exists():
             try:
                 with open(MEMORY_FILE, "r", encoding="utf-8") as f:
                     memory = json.load(f)
             except json.JSONDecodeError as e:
-                logger.warning(f"[Memory Saver] Profile JSON parse failed: {e}")
+                logger.warning("Profile JSON parse failed: %s", e)
                 memory = {}
         else:
             memory = {}
-        
+
         # Update with extracted data
         memory.update(extracted_profile)
-        
+
         # Save back
         with open(MEMORY_FILE, "w", encoding="utf-8") as f:
             json.dump(memory, f, indent=4)
-        
-        print(f"  [Memory Saver] Saved profile memory")
-    
+
+        logger.info("Saved profile memory")
+
     # Save semantic memories
     if extracted_semantic:
         SEMANTIC_MEMORY_DIR.mkdir(parents=True, exist_ok=True)
@@ -128,62 +129,62 @@ def memory_saver_node(state: dict) -> dict:
                     allow_dangerous_deserialization=True
                 )
             except Exception as e:
-                logger.warning(f"[Memory Saver] Error loading semantic memory FAISS index: {e}")
+                logger.warning("Error loading semantic memory FAISS index: %s", e)
                 vector_store = None
         else:
             vector_store = None
-        
+
         # Add each semantic memory
         for memory_text in extracted_semantic:
             doc = Document(
                 page_content=memory_text,
                 metadata={"timestamp": datetime.utcnow().isoformat()}
             )
-            
+
             if vector_store is None:
                 vector_store = FAISS.from_documents([doc], embeddings)
             else:
                 vector_store.add_documents([doc])
-        
+
         # Save index
         if vector_store is not None:
             vector_store.save_local(str(SEMANTIC_MEMORY_DIR))
-            print(f"  [Memory Saver] Saved {len(extracted_semantic)} semantic memories")
-    
+            logger.info("Saved %d semantic memories", len(extracted_semantic))
+
     return {}
 
 
 def memory_response_node(state: dict) -> dict:
     """
     Generate a confirmation response for memory update.
-    
+
     Args:
         state: AgentState with 'extracted_profile' and 'extracted_semantic' fields
-    
+
     Returns:
         Updated state with 'answer' field
     """
     extracted_profile = state.get("extracted_profile", {})
     extracted_semantic = state.get("extracted_semantic", [])
-    
+
     # Build confirmation message
     parts = ["Got it! I'll remember that"]
-    
+
     if "name" in extracted_profile:
         parts.append(f"your name is {extracted_profile['name']}")
-    
+
     if "goal" in extracted_profile:
         parts.append(f"your goal is to become an {extracted_profile['goal']}")
-    
+
     if extracted_semantic:
         parts.append(f"you {extracted_semantic[0].lower()}")
         for mem in extracted_semantic[1:]:
             parts.append(f"and you {mem.lower()}")
-    
+
     answer = ", ".join(parts) + "." if parts else "I've updated my memory."
-    
-    print(f"  [Memory Response] Confirmation: {answer[:60]}...")
-    
+
+    logger.debug("Memory update confirmation: %s...", answer[:60])
+
     return {
         "answer": answer,
     }

@@ -7,10 +7,18 @@ The core reasoning node for research queries.
 Uses llm.bind_tools() with only web_search and calculator.
 Memory and RAG retrieval are NOT tools - they're graph nodes.
 """
-
-from langchain_core.messages import HumanMessage, AIMessage
-
+import re
+import json
+import logging
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from llm import llm
+
+try:
+    from groq import BadRequestError as GroqBadRequestError
+except ImportError:
+    GroqBadRequestError = None
+
+logger = logging.getLogger(__name__)
 
 AGENT_SYSTEM_PROMPT = """You are an intelligent AI assistant capable of reasoning and using tools when necessary.
 
@@ -27,6 +35,11 @@ GUIDELINES:
 4. Use tools only when they provide information that is missing, external, or computational.
 
 5. Use the minimum number of tool calls necessary.
+5a. When calling web_search, never pass the user's raw vague phrasing directly.
+    Rewrite the query to be specific — add a topic, country, or category.
+    Examples: "today news" -> "India news today"; "latest news" -> "world news headlines today".
+    If you genuinely can't tell what topic the user means, ask a clarifying
+    question instead of searching with a vague query.
 
 6. After receiving a tool result, evaluate whether the information is sufficient to answer the question.
 
@@ -36,8 +49,21 @@ GUIDELINES:
 
 9. Never claim to have searched, calculated, or retrieved something unless the tool was actually used.
 
-CRITICAL INSTRUCTION FOR TOOL CALLING:
-Do NOT manually type out tool calls using XML tags like `<function=...>` or `<function\web_search...>`. You must use the official built-in JSON tool calling capability of your API. Just trigger the tool via the API natively. Do not output raw text containing function names.
+10. IMPORTANT: You must NEVER write a tool call as plain text (e.g. "<function>web_search {...}</function>"
+    or "<function=web_search {...}</function>"). Tool calls must ONLY be made through the actual
+    tool-calling mechanism provided to you. Writing a function call as text is a critical error.
+
+AVAILABLE TOOLS:
+
+1. web_search
+   Purpose: Search the web for current information
+   Use for: recent events, news, current facts, external knowledge
+   Examples: "Latest AI news", "Current gold price"
+
+2. calculator
+   Purpose: Perform arithmetic and math operations
+   Use for: mathematical calculations, expressions, numerical results
+   Examples: "2 + 2", "sqrt(144)", "100 * 3.14"
 
 DECISION PROCESS:
 
@@ -47,72 +73,238 @@ DECISION PROCESS:
 - For math/calculations → calculator
 - For everything else → reason without tools
 
-STRICT RESPONSE RULES:
-1. When answering based on RETRIEVED CONTEXT, do NOT hallucinate definitions or explain concepts (e.g. do not explain what "MERN stack" is unless asked).
-2. NEVER add conversational filler or apologies (e.g., "Unfortunately I don't have more details", "If you'd like to share more..."). 
-3. If the context is brief, your answer MUST be brief. Just state the facts.
+When answering, use the retrieved context (if any) combined with your knowledge.
 """
+
+# Matches hallucinated pseudo tool-call text, capturing tool name + JSON args, e.g.:
+# <function\web_search {"query": "..."}</function>
+# <function>calculator {"expression": "..."}</function>
+# <function=web_search{"query": "..."}</function>
+FAKE_TOOL_CALL_RE = re.compile(r"<function[\\=>]?\s*(\w+)\s*(\{.*?\})\s*>?\s*</function>", re.DOTALL)
+
+MAX_HISTORY_MESSAGES = 8        # how many messages we feed to the LLM
+MAX_STORED_MESSAGES = 40        # cap on what we keep in state at all
+
+FALLBACK_ANSWER = (
+    "I had trouble using a tool for that request. Could you rephrase your question, "
+    "or ask it more directly (e.g. 'search for today's news')?"
+)
+
+
+def _looks_like_fake_tool_call(content: str) -> bool:
+    if not content:
+        return False
+    return bool(FAKE_TOOL_CALL_RE.search(content))
+
+
+def _parse_intended_tool_call(text: str):
+    """
+    Extract (tool_name, args_dict) from a hallucinated <function=...>{...}</function>
+    string, if present. Returns None if nothing parseable is found.
+    """
+    if not text:
+        return None
+    m = FAKE_TOOL_CALL_RE.search(text)
+    if not m:
+        return None
+    tool_name, args_str = m.group(1), m.group(2)
+    try:
+        args = json.loads(args_str)
+    except json.JSONDecodeError:
+        return None
+    return tool_name, args
+
+
+def _extract_failed_generation(exc: Exception) -> str:
+    """
+    Groq's SDK typically attaches the parsed error body to `.body`.
+    Fall back to regex-parsing str(exc) if that's not available.
+    """
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        try:
+            return body["error"]["failed_generation"]
+        except (KeyError, TypeError):
+            pass
+    match = re.search(r"'failed_generation':\s*'(.*?)'\s*\}", str(exc))
+    if match:
+        try:
+            return match.group(1).encode().decode("unicode_escape")
+        except Exception:
+            return match.group(1)
+    return ""
+
+
+def _is_tool_use_failed_error(exc: Exception) -> bool:
+    if GroqBadRequestError is not None and isinstance(exc, GroqBadRequestError):
+        return True
+    msg = str(exc)
+    return "tool_use_failed" in msg or "Failed to call a function" in msg
+
+
+def _sanitize_history(messages: list) -> list:
+    """
+    Strip any prior AIMessage whose content is a hallucinated pseudo tool-call.
+    Prevents the model from imitating its own past mistakes.
+    """
+    cleaned = []
+    for msg in messages:
+        if isinstance(msg, AIMessage) and _looks_like_fake_tool_call(msg.content):
+            cleaned.append(AIMessage(content="[tool call executed]"))
+        else:
+            cleaned.append(msg)
+    return cleaned
+
+
+def _run_tool_by_name(tools, tool_name: str, args: dict):
+    """
+    Look up a bound tool by name and execute it directly with the given args.
+    Returns (result_str, error_str). Exactly one of the two will be non-None.
+    """
+    tool_map = {t.name: t for t in tools}
+    tool = tool_map.get(tool_name)
+    if tool is None:
+        return None, f"No tool named '{tool_name}' is available."
+    try:
+        result = tool.invoke(args)
+        return str(result), None
+    except Exception as exc:
+        return None, f"Tool '{tool_name}' raised an error: {exc}"
 
 
 def agent_node(state: dict) -> dict:
     """
     Main reasoning node. Decides when to use tools and generates answer.
-    
-    Uses streaming agentic loop:
-    1. Invoke LLM with bound tools
-    2. If tool is called, return tool_calls
-    3. If no tool is called, return final answer
-    
-    Args:
-        state: AgentState with question, context fields, and messages
-    
-    Returns:
-        Updated state with messages and potentially answer
     """
     from .tools import tools
-    from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-    
+
     question = state.get("question", "")
     messages = state.get("messages", [])
     context = state.get("_combined_context", "")
-    
-    system_prompt = AGENT_SYSTEM_PROMPT
+
     if context:
-        system_prompt += f"\n\nRETRIEVED CONTEXT:\n{context}"
-        
-    llm_input = [SystemMessage(content=system_prompt)]
-    llm_input.extend(messages)
-    
-    # Check if the current question is already the last HumanMessage
-    has_current_question = False
-    if messages and isinstance(messages[-1], HumanMessage) and messages[-1].content == question:
-        has_current_question = True
-    elif len(messages) >= 2 and isinstance(messages[-2], HumanMessage) and messages[-2].content == question:
-        has_current_question = True
-        
-    if not has_current_question:
-        llm_input.append(HumanMessage(content=question))
-    
-    # Bind tools to LLM
-    llm_with_tools = llm.bind_tools(tools)
-    
-    # Invoke LLM
-    response = llm_with_tools.invoke(llm_input)
-    
-    new_msgs = []
-    if not has_current_question:
-        new_msgs.append(HumanMessage(content=question))
-    new_msgs.append(response)
-    
-    # Check if we have tool calls
-    if hasattr(response, 'tool_calls') and response.tool_calls:
-        print(f"  [Agent] Calling {len(response.tool_calls)} tool(s)")
-        return {"messages": new_msgs}
+        user_prompt = f"RETRIEVED CONTEXT:\n{context}\n\nUser Query: {question}"
     else:
-        # No tool calls, this is the final answer
-        answer = response.content
-        print(f"  [Agent] Generated answer: {answer[:60]}...")
-        return {
-            "messages": new_msgs,
-            "answer": answer,
-        }
+        user_prompt = f"User Query: {question}"
+
+    llm_with_tools = llm.bind_tools(tools, tool_choice="auto")
+
+    if len(messages) > MAX_STORED_MESSAGES:
+        messages = messages[-MAX_STORED_MESSAGES:]
+
+    recent_messages = _sanitize_history(messages[-MAX_HISTORY_MESSAGES:])
+
+    def _invoke(extra_system_note: str = ""):
+        system_content = AGENT_SYSTEM_PROMPT + extra_system_note
+        return llm_with_tools.invoke([
+            SystemMessage(content=system_content),
+            *recent_messages,
+            HumanMessage(content=user_prompt),
+        ])
+
+    tool_result_text = None  # populated if we self-heal a failed tool call
+    healed_tool_name = None
+    response = None
+
+    try:
+        response = _invoke()
+    except Exception as exc:
+        if not _is_tool_use_failed_error(exc):
+            raise
+        logger.warning("Native tool call rejected (tool_use_failed): %s", exc)
+
+        # Try to recover the tool call the model actually intended, and run it ourselves.
+        failed_gen = _extract_failed_generation(exc)
+        parsed = _parse_intended_tool_call(failed_gen)
+
+        if parsed:
+            tool_name, args = parsed
+            result, err = _run_tool_by_name(tools, tool_name, args)
+            if result is not None:
+                tool_result_text = result
+                healed_tool_name = tool_name
+                logger.info("Self-healed tool call: %s(%s)", tool_name, args)
+            else:
+                logger.warning("Manual tool execution failed: %s", err)
+        else:
+            logger.warning("Could not parse an intended tool call from failed_generation")
+
+    if tool_result_text is not None:
+        # We recovered the tool output ourselves — ask the model to synthesize
+        # a final answer using it, without needing tools this time.
+        try:
+            response = llm.invoke([
+                SystemMessage(
+                    content=AGENT_SYSTEM_PROMPT
+                    + f"\n\nA '{healed_tool_name}' tool call was already executed on your behalf. "
+                      "Use its result below to answer the user directly. Do not attempt another tool call."
+                ),
+                *recent_messages,
+                HumanMessage(content=f"{user_prompt}\n\nTOOL RESULT ({healed_tool_name}):\n{tool_result_text}"),
+            ])
+        except Exception as exc:
+            logger.error("Synthesis call after manual tool execution failed: %s", exc)
+            new_messages = messages + [
+                HumanMessage(content=user_prompt),
+                AIMessage(content=FALLBACK_ANSWER),
+            ]
+            return {"messages": new_messages, "answer": FALLBACK_ANSWER}
+
+    elif response is None:
+        # Groq failed AND we couldn't recover/parse/execute the intended tool call.
+        # Last resort: answer without tools, but be honest this may be limited.
+        logger.warning("Falling back to plain reasoning — no tool result recovered")
+        try:
+            response = llm.invoke([
+                SystemMessage(
+                    content=AGENT_SYSTEM_PROMPT
+                    + "\n\nNOTE: Tool calling is temporarily unavailable and no tool result could be recovered. "
+                      "Answer as best you can, and if you truly cannot answer without a tool, say so plainly."
+                ),
+                *recent_messages,
+                HumanMessage(content=user_prompt),
+            ])
+        except Exception as exc:
+            logger.error("Fallback plain call also failed: %s", exc)
+            new_messages = messages + [
+                HumanMessage(content=user_prompt),
+                AIMessage(content=FALLBACK_ANSWER),
+            ]
+            return {"messages": new_messages, "answer": FALLBACK_ANSWER}
+
+    # If the model hallucinated a tool call as plain text (but didn't trigger
+    # Groq's hard error), retry once with a stricter nudge.
+    if not (hasattr(response, "tool_calls") and response.tool_calls) and _looks_like_fake_tool_call(response.content):
+        logger.warning("Detected pseudo tool-call text in output, retrying once")
+        try:
+            response = _invoke(
+                extra_system_note="\n\nREMINDER: Do not write tool calls as text under any circumstances. "
+                                   "Either use the real tool-calling mechanism, or answer directly without a tool."
+            )
+        except Exception as exc:
+            if not _is_tool_use_failed_error(exc):
+                raise
+            logger.warning("Retry also hit tool_use_failed: %s", exc)
+
+    if hasattr(response, 'tool_calls') and response.tool_calls:
+        new_messages = messages + [
+            HumanMessage(content=user_prompt),
+            AIMessage(content=response.content, tool_calls=response.tool_calls)
+        ]
+        return {"messages": new_messages}
+
+    answer = response.content
+
+    if _looks_like_fake_tool_call(answer) or not answer:
+        logger.warning("Still no usable answer after retries — using fallback message")
+        answer = FALLBACK_ANSWER
+
+    new_messages = messages + [
+        HumanMessage(content=user_prompt),
+        AIMessage(content=answer)
+    ]
+
+    return {
+        "messages": new_messages,
+        "answer": answer,
+    }

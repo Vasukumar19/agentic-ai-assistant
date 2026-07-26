@@ -12,11 +12,7 @@ Nodes are composed into a StateGraph with explicit edges.
 
 from .router import intent_router
 from .chat import chat_node
-from .memory_extractor import (
-    memory_extractor_node,
-    memory_saver_node,
-    memory_response_node,
-)
+from .memory_extractor import memory_extractor_node, memory_saver_node, memory_response_node
 from .retrieval_planner import retrieval_planner_node
 from .memory_retriever import memory_retriever_node
 from .rag_retriever import rag_retriever_node

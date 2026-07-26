@@ -9,8 +9,11 @@ Routes incoming question to one of three paths:
 """
 
 import json
+import logging
 
 from llm import llm
+
+logger = logging.getLogger(__name__)
 
 ROUTER_PROMPT = """Classify the message route.
 
@@ -107,6 +110,7 @@ def _classify_with_llm(question: str) -> str:
     if route is not None:
         return route
 
+    logger.warning("Router LLM returned unparseable output twice; defaulting to research_query")
     return "research_query"
 
 
@@ -121,7 +125,6 @@ def intent_router(state: dict) -> dict:
     else:
         route = _classify_with_llm(question)
 
-    print(f"  [Router] Question: '{question[:50]}...'")
-    print(f"  [Router] Route: {route}")
+    logger.debug("Routed '%s...' -> %s", question[:50], route)
 
     return {"route": route}

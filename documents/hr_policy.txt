@@ -1,0 +1,14 @@
+# GlobalTech HR Policy - Remote Work & Leave
+
+## 1. Remote Work Policy
+GlobalTech offers a hybrid work environment. Employees are expected to be in the office at least 2 days a week (typically Tuesdays and Thursdays) and may work remotely for the remaining 3 days. Full remote work is only permitted for employees designated as "Remote-First" in their employment contracts.
+Employees working remotely must ensure they have a stable internet connection and are available on Slack during core hours (10:00 AM to 3:00 PM EST).
+
+## 2. Annual Leave
+All full-time employees are entitled to 20 days of paid annual leave per year. Unused leave does not roll over to the next year. Leave requests must be submitted at least two weeks in advance through the Workday portal.
+
+## 3. Hardware Stipend
+GlobalTech provides a one-time hardware stipend of $1,000 for new employees to purchase home office equipment. This can be used for monitors, ergonomic chairs, or standing desks.
+
+## 4. Sick Leave
+Employees receive 10 days of paid sick leave annually. A doctor's note is required if an employee is out sick for more than 3 consecutive days.
