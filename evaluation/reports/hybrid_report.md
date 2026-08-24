@@ -6,7 +6,7 @@ Dataset:
   50 test cases
 
 Routing Accuracy:
-  16.0%
+  14.0%
 
 Tool Selection Accuracy:
   0.0%
@@ -39,13 +39,13 @@ Reranker Latency:
   0.00 s
 
 Average Total Latency:
-  1.33 s
+  2.15 s
 
 Median Total Latency:
   0.03 s
 
 P95 Total Latency:
-  1.10 s
+  1.31 s
 
 Average LLM Calls:
   0.0
@@ -59,11 +59,11 @@ Estimated Cost / Query:
 
 ## Failure Analysis
 - routing_failure: 1 (2.0%)
-- exception: 41 (82.0%)
+- exception: 42 (84.0%)
 
 ## Slowest Cases
-- calculator_036: 57.13s
-- chat_006: 1.24s
-- chat_002: 1.10s
-- chat_004: 1.06s
-- memory_update_013: 1.00s
+- chat_010: 61.55s
+- chat_007: 39.08s
+- chat_002: 1.31s
+- chat_006: 1.05s
+- chat_004: 0.75s
