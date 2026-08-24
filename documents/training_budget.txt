@@ -1,0 +1,7 @@
+# Employee Training Budget
+
+## Allocation
+Each full-time employee has a $1,500 annual budget for professional development. This can be used for conferences, courses, or books.
+
+## Approval
+Approval from the direct manager is required before booking any courses. Receipts must be submitted through Workday.

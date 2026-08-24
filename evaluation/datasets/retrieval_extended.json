@@ -1,0 +1,410 @@
+[
+  {
+    "id": "rag_100",
+    "category": "rag",
+    "query": "What days are we expected in the office?",
+    "expected_sources": [
+      5
+    ]
+  },
+  {
+    "id": "rag_101",
+    "category": "rag",
+    "query": "How many days of remote work from another country?",
+    "expected_sources": [
+      5
+    ]
+  },
+  {
+    "id": "rag_102",
+    "category": "rag",
+    "query": "How many PTO days do we get?",
+    "expected_sources": [
+      5
+    ]
+  },
+  {
+    "id": "rag_103",
+    "category": "rag",
+    "query": "Does sick leave roll over?",
+    "expected_sources": [
+      5
+    ]
+  },
+  {
+    "id": "rag_104",
+    "category": "rag",
+    "query": "What laptop do engineers get?",
+    "expected_sources": [
+      7
+    ]
+  },
+  {
+    "id": "rag_105",
+    "category": "rag",
+    "query": "How much is the home office hardware stipend?",
+    "expected_sources": [
+      7
+    ]
+  },
+  {
+    "id": "rag_106",
+    "category": "rag",
+    "query": "When must expense claims for hardware be submitted?",
+    "expected_sources": [
+      7
+    ]
+  },
+  {
+    "id": "rag_107",
+    "category": "rag",
+    "query": "Do non-engineers get a MacBook Pro?",
+    "expected_sources": [
+      7
+    ]
+  },
+  {
+    "id": "rag_108",
+    "category": "rag",
+    "query": "What frontend framework do we use?",
+    "expected_sources": [
+      4
+    ]
+  },
+  {
+    "id": "rag_109",
+    "category": "rag",
+    "query": "Is Next.js approved?",
+    "expected_sources": [
+      4
+    ]
+  },
+  {
+    "id": "rag_110",
+    "category": "rag",
+    "query": "What database does Celery use?",
+    "expected_sources": [
+      4
+    ]
+  },
+  {
+    "id": "rag_111",
+    "category": "rag",
+    "query": "Do we use Kubernetes?",
+    "expected_sources": [
+      4
+    ]
+  },
+  {
+    "id": "rag_112",
+    "category": "rag",
+    "query": "What to do in a Sev-1 incident?",
+    "expected_sources": [
+      6
+    ]
+  },
+  {
+    "id": "rag_113",
+    "category": "rag",
+    "query": "How many approvals for a PR?",
+    "expected_sources": [
+      6
+    ]
+  },
+  {
+    "id": "rag_114",
+    "category": "rag",
+    "query": "What is the minimum test coverage?",
+    "expected_sources": [
+      6
+    ]
+  },
+  {
+    "id": "rag_115",
+    "category": "rag",
+    "query": "Who is the target audience for sales?",
+    "expected_sources": [
+      14
+    ]
+  },
+  {
+    "id": "rag_116",
+    "category": "rag",
+    "query": "How much does the enterprise tier cost?",
+    "expected_sources": [
+      14
+    ]
+  },
+  {
+    "id": "rag_117",
+    "category": "rag",
+    "query": "Who can approve a 15% discount?",
+    "expected_sources": [
+      14
+    ]
+  },
+  {
+    "id": "rag_118",
+    "category": "rag",
+    "query": "What is the primary brand color hex code?",
+    "expected_sources": [
+      8
+    ]
+  },
+  {
+    "id": "rag_119",
+    "category": "rag",
+    "query": "Who reviews social media posts?",
+    "expected_sources": [
+      8
+    ]
+  },
+  {
+    "id": "rag_120",
+    "category": "rag",
+    "query": "When do we publish blog posts on Medium?",
+    "expected_sources": [
+      8
+    ]
+  },
+  {
+    "id": "rag_121",
+    "category": "rag",
+    "query": "When can I book Premium Economy?",
+    "expected_sources": [
+      20
+    ]
+  },
+  {
+    "id": "rag_122",
+    "category": "rag",
+    "query": "Who approves Business class flights?",
+    "expected_sources": [
+      20
+    ]
+  },
+  {
+    "id": "rag_123",
+    "category": "rag",
+    "query": "What is the hotel per diem?",
+    "expected_sources": [
+      20
+    ]
+  },
+  {
+    "id": "rag_124",
+    "category": "rag",
+    "query": "Which password manager do we use?",
+    "expected_sources": [
+      15
+    ]
+  },
+  {
+    "id": "rag_125",
+    "category": "rag",
+    "query": "How often must passwords be rotated?",
+    "expected_sources": [
+      15
+    ]
+  },
+  {
+    "id": "rag_126",
+    "category": "rag",
+    "query": "What encryption is used for databases at rest?",
+    "expected_sources": [
+      15
+    ]
+  },
+  {
+    "id": "rag_127",
+    "category": "rag",
+    "query": "What time is the IT orientation on day 1?",
+    "expected_sources": [
+      10
+    ]
+  },
+  {
+    "id": "rag_128",
+    "category": "rag",
+    "query": "When is the security compliance training due?",
+    "expected_sources": [
+      10
+    ]
+  },
+  {
+    "id": "rag_129",
+    "category": "rag",
+    "query": "Does the company pay 100% of dependent health insurance?",
+    "expected_sources": [
+      0
+    ]
+  },
+  {
+    "id": "rag_130",
+    "category": "rag",
+    "query": "What is the 401k match limit?",
+    "expected_sources": [
+      0
+    ]
+  },
+  {
+    "id": "rag_131",
+    "category": "rag",
+    "query": "What is the Q3 focus for the core platform?",
+    "expected_sources": [
+      12
+    ]
+  },
+  {
+    "id": "rag_132",
+    "category": "rag",
+    "query": "When is the iOS app version 2 launching?",
+    "expected_sources": [
+      12
+    ]
+  },
+  {
+    "id": "rag_133",
+    "category": "rag",
+    "query": "Does the new app have Dark Mode?",
+    "expected_sources": [
+      12
+    ]
+  },
+  {
+    "id": "rag_134",
+    "category": "rag",
+    "query": "When are performance reviews?",
+    "expected_sources": [
+      11
+    ]
+  },
+  {
+    "id": "rag_135",
+    "category": "rag",
+    "query": "What is the minimum rating for a bonus?",
+    "expected_sources": [
+      11
+    ]
+  },
+  {
+    "id": "rag_136",
+    "category": "rag",
+    "query": "Where is the Austin office located?",
+    "expected_sources": [
+      9
+    ]
+  },
+  {
+    "id": "rag_137",
+    "category": "rag",
+    "query": "Is the HVAC on at night?",
+    "expected_sources": [
+      9
+    ]
+  },
+  {
+    "id": "rag_138",
+    "category": "rag",
+    "query": "Who approves software purchases over 5000?",
+    "expected_sources": [
+      21
+    ]
+  },
+  {
+    "id": "rag_139",
+    "category": "rag",
+    "query": "Do external contractors need an NDA?",
+    "expected_sources": [
+      21
+    ]
+  },
+  {
+    "id": "rag_140",
+    "category": "rag",
+    "query": "What is the SLA for enterprise high-priority tickets?",
+    "expected_sources": [
+      2
+    ]
+  },
+  {
+    "id": "rag_141",
+    "category": "rag",
+    "query": "Where are tickets escalated after 48 hours?",
+    "expected_sources": [
+      2
+    ]
+  },
+  {
+    "id": "rag_142",
+    "category": "rag",
+    "query": "What tool is used for UI automation?",
+    "expected_sources": [
+      13
+    ]
+  },
+  {
+    "id": "rag_143",
+    "category": "rag",
+    "query": "What blocks a release?",
+    "expected_sources": [
+      13
+    ]
+  },
+  {
+    "id": "rag_144",
+    "category": "rag",
+    "query": "How long are access logs kept in Elasticsearch?",
+    "expected_sources": [
+      3
+    ]
+  },
+  {
+    "id": "rag_145",
+    "category": "rag",
+    "query": "What happens to logs after 90 days?",
+    "expected_sources": [
+      3
+    ]
+  },
+  {
+    "id": "rag_146",
+    "category": "rag",
+    "query": "How long do we have for GDPR account deletion?",
+    "expected_sources": [
+      3
+    ]
+  },
+  {
+    "id": "rag_147",
+    "category": "rag",
+    "query": "What is the training budget per year?",
+    "expected_sources": [
+      19
+    ]
+  },
+  {
+    "id": "rag_148",
+    "category": "rag",
+    "query": "Are board meeting minutes available to employees?",
+    "expected_sources": [
+      1
+    ]
+  },
+  {
+    "id": "rag_149",
+    "category": "rag",
+    "query": "Where is the annual retreat this year?",
+    "expected_sources": [
+      16
+    ]
+  },
+  {
+    "id": "rag_150",
+    "category": "rag",
+    "query": "What is the monthly team lunch budget?",
+    "expected_sources": [
+      16
+    ]
+  }
+]

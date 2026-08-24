@@ -1,0 +1,7 @@
+# Customer Support SLA
+
+## Response Times
+For Enterprise customers, the SLA for first response is 1 hour for high-priority tickets. For Standard customers, the SLA is 24 hours.
+
+## Escalation
+If a ticket remains unresolved for 48 hours, it must be escalated to the Tier 3 Engineering Support team via Jira Service Desk.

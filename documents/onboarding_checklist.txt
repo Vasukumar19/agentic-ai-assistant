@@ -1,0 +1,7 @@
+# New Hire Onboarding Checklist
+
+## Day 1
+Attend the IT orientation session at 10:00 AM. Setup Okta SSO and verify access to Slack, Jira, and Confluence.
+
+## Week 1
+Complete the mandatory security compliance training on Workday. Schedule 1-on-1 intro meetings with your immediate team members.

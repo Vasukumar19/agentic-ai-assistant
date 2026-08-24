@@ -1,0 +1,7 @@
+# Core Company Values
+
+## Innovation
+We encourage taking calculated risks and thinking outside the box. Failure is a stepping stone to success, provided we learn from it.
+
+## Transparency
+We default to open communication. All company metrics and board meeting minutes are available to employees on Confluence.

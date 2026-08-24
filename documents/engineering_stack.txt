@@ -1,0 +1,7 @@
+# GlobalTech Engineering Standards
+
+## 1. Approved Technology Stack
+- **Frontend**: We use React 18 with TypeScript and TailwindCSS. Next.js is approved for SEO-facing pages.
+- **Backend**: Our primary backend framework is FastAPI (Python). Legacy microservices are written in Go 1.19.
+- **Database**: PostgreSQL 15 is our primary relational database. Redis is used for caching and Celery task queues.
+- **Infrastructure**: All workloads run on AWS EKS (Kubernetes).

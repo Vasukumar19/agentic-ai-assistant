@@ -1,0 +1,7 @@
+# Enterprise Sales Playbook
+
+## Target Audience
+We target CTOs and VPs of Engineering at companies with 500-2000 employees. Our key value proposition is reducing cloud infrastructure costs by 30% without sacrificing reliability.
+
+## Pricing Model
+The enterprise tier costs $50,000 annually. It includes 24/7 priority support and dedicated account management. Discounts up to 15% can be approved by the Regional Sales Director.

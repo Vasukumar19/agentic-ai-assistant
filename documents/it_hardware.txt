@@ -1,0 +1,7 @@
+# IT Hardware Standards
+
+## 1. Laptop Allocations
+Engineers receive a MacBook Pro 16-inch (M3 Max, 64GB RAM). Non-engineers receive a MacBook Air 15-inch (M3, 16GB RAM).
+
+## 2. Hardware Stipend
+GlobalTech provides a one-time hardware stipend of $1,000 for new employees to purchase home office equipment, such as monitors, ergonomic chairs, or standing desks. Expense claims must be submitted within the first 60 days of employment.

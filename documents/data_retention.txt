@@ -1,0 +1,7 @@
+# Data Retention Policy
+
+## User Logs
+Application access logs are retained for 90 days in Elasticsearch before being archived to AWS S3 Glacier. Archived logs are kept for 7 years for compliance reasons.
+
+## Account Deletion
+When a user requests account deletion (GDPR RTBF), all associated PII must be completely purged from our databases within 30 days.

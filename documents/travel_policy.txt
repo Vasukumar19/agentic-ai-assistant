@@ -1,0 +1,7 @@
+# Corporate Travel Policy
+
+## Flight Bookings
+All flights under 6 hours must be booked in Economy class. Flights over 6 hours may be booked in Premium Economy. Business class requires VP approval.
+
+## Hotel & Per Diem
+Hotel bookings are capped at $250 per night. The daily meal per diem is $75. All receipts over $25 must be uploaded to Expensify.

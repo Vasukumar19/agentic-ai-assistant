@@ -1,0 +1,7 @@
+# Information Security Protocol
+
+## Passwords
+Employees must use a password manager (1Password). Passwords must be at least 16 characters long and rotated every 90 days. Multi-factor authentication (MFA) is mandatory for all internal systems.
+
+## Data Handling
+Customer data (PII) must never be stored on local machines. All PII data in databases must be encrypted at rest using AES-256.

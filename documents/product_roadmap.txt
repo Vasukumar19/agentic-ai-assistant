@@ -1,0 +1,7 @@
+# Q3 Product Roadmap
+
+## Core Platform
+The main focus for Q3 is migrating the user authentication service from Auth0 to our in-house Go-based microservice. This is expected to finish by August 15th.
+
+## Mobile App
+Version 2.0 of the iOS app will launch in September, featuring the new Dark Mode interface and offline sync capabilities.

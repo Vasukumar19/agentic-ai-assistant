@@ -1,0 +1,7 @@
+# QA & Testing Standards
+
+## Release Testing
+Before any major release, a full regression test suite must be run. The release is blocked if there are any open Sev-1 or Sev-2 bugs.
+
+## Automation
+We aim for 90% automation in our UI tests using Cypress. Manual testing is reserved for exploratory testing of new features.

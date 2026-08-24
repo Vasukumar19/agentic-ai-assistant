@@ -1,0 +1,7 @@
+# Vendor Management Policy
+
+## Procurement
+Any software purchase over $5,000 requires a formal vendor security assessment (VSA) and approval from the CFO. Software renewals must be reviewed 60 days before expiration.
+
+## NDAs
+All external contractors must sign a standard Non-Disclosure Agreement before receiving access to any internal documentation or source code.

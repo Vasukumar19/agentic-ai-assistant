@@ -1,0 +1,5 @@
+## 3. Incident Management
+In the event of a Sev-1 incident (total system outage), the on-call engineer must open a bridge on Slack (#incident-sev1) and page the secondary on-call via PagerDuty. A post-mortem document is required within 48 hours of resolution.
+
+## 4. Code Reviews
+All pull requests require at least two approvals from code owners. CI pipelines enforce a minimum of 80% test coverage using pytest for Python and Jest for TypeScript.
