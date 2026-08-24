@@ -1,0 +1,434 @@
+[
+  {
+    "id": "chat_001",
+    "category": "chat",
+    "query": "Hi there!",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_002",
+    "category": "chat",
+    "query": "Hello, how are you?",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_003",
+    "category": "chat",
+    "query": "Good morning agent.",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_004",
+    "category": "chat",
+    "query": "Hey!",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_005",
+    "category": "chat",
+    "query": "Thanks for your help.",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_006",
+    "category": "chat",
+    "query": "Goodbye!",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_007",
+    "category": "chat",
+    "query": "See ya later.",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_008",
+    "category": "chat",
+    "query": "Good night.",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_009",
+    "category": "chat",
+    "query": "hello there",
+    "expected_route": "chat"
+  },
+  {
+    "id": "chat_010",
+    "category": "chat",
+    "query": "hi",
+    "expected_route": "chat"
+  },
+  {
+    "id": "memory_update_011",
+    "category": "memory_update",
+    "query": "My name is John Doe and I am a software engineer.",
+    "expected_route": "memory_update"
+  },
+  {
+    "id": "memory_update_012",
+    "category": "memory_update",
+    "query": "I prefer using Python for all my backend projects.",
+    "expected_route": "memory_update"
+  },
+  {
+    "id": "memory_update_013",
+    "category": "memory_update",
+    "query": "My favorite technology is React.",
+    "expected_route": "memory_update"
+  },
+  {
+    "id": "memory_update_014",
+    "category": "memory_update",
+    "query": "I recently completed a course on machine learning.",
+    "expected_route": "memory_update"
+  },
+  {
+    "id": "memory_update_015",
+    "category": "memory_update",
+    "query": "I live in New York and I love pizza.",
+    "expected_route": "memory_update"
+  },
+  {
+    "id": "personal_query_016",
+    "category": "personal_query",
+    "query": "What is my name?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "John Doe"
+    ]
+  },
+  {
+    "id": "personal_query_017",
+    "category": "personal_query",
+    "query": "What backend language do I prefer?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "Python"
+    ]
+  },
+  {
+    "id": "personal_query_018",
+    "category": "personal_query",
+    "query": "What is my favorite technology?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "React"
+    ]
+  },
+  {
+    "id": "personal_query_019",
+    "category": "personal_query",
+    "query": "Did I take any recent courses?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "machine learning"
+    ]
+  },
+  {
+    "id": "personal_query_020",
+    "category": "personal_query",
+    "query": "Where do I live?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "New York"
+    ]
+  },
+  {
+    "id": "rag_021",
+    "category": "rag",
+    "query": "What is the company policy on remote work?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "hybrid schedule",
+      "Tuesdays and Thursdays",
+      "Remote-First"
+    ]
+  },
+  {
+    "id": "rag_022",
+    "category": "rag",
+    "query": "How many days of annual leave do I get?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "20 days",
+      "annual leave"
+    ]
+  },
+  {
+    "id": "rag_023",
+    "category": "rag",
+    "query": "Is there a hardware stipend for home office?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "$1,000",
+      "hardware stipend"
+    ]
+  },
+  {
+    "id": "rag_024",
+    "category": "rag",
+    "query": "How many days of sick leave are allowed?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "10 days",
+      "sick leave",
+      "doctor's note"
+    ]
+  },
+  {
+    "id": "rag_025",
+    "category": "rag",
+    "query": "What frontend technology stack is approved?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "React 18",
+      "TypeScript",
+      "TailwindCSS"
+    ]
+  },
+  {
+    "id": "rag_026",
+    "category": "rag",
+    "query": "What backend framework do we use?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "Python",
+      "FastAPI",
+      "Django"
+    ]
+  },
+  {
+    "id": "rag_027",
+    "category": "rag",
+    "query": "What database should I use for caching?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "Redis"
+    ]
+  },
+  {
+    "id": "rag_028",
+    "category": "rag",
+    "query": "How many approvals are needed for a pull request?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "two approvals",
+      "senior engineers"
+    ]
+  },
+  {
+    "id": "rag_029",
+    "category": "rag",
+    "query": "What is the minimum test coverage required?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "80% coverage"
+    ]
+  },
+  {
+    "id": "rag_030",
+    "category": "rag",
+    "query": "What is the process for a Sev-1 incident?",
+    "expected_route": "research_query",
+    "expected_context_keywords": [
+      "war room",
+      "#incidents-war-room",
+      "PagerDuty",
+      "Post-mortems"
+    ]
+  },
+  {
+    "id": "calculator_031",
+    "category": "calculator",
+    "query": "What is 45 * 12?",
+    "expected_route": "research_query",
+    "expected_answer": "540",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_032",
+    "category": "calculator",
+    "query": "Calculate 1024 / 8",
+    "expected_route": "research_query",
+    "expected_answer": "128",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_033",
+    "category": "calculator",
+    "query": "What is the square root of 144?",
+    "expected_route": "research_query",
+    "expected_answer": "12",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_034",
+    "category": "calculator",
+    "query": "Add 50, 75, and 125 together.",
+    "expected_route": "research_query",
+    "expected_answer": "250",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_035",
+    "category": "calculator",
+    "query": "What is 15 percent of 200?",
+    "expected_route": "research_query",
+    "expected_answer": "30",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_036",
+    "category": "calculator",
+    "query": "2 to the power of 10",
+    "expected_route": "research_query",
+    "expected_answer": "1024",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_037",
+    "category": "calculator",
+    "query": "100 minus 37",
+    "expected_route": "research_query",
+    "expected_answer": "63",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "calculator_038",
+    "category": "calculator",
+    "query": "Calculate 5 * (4 + 6)",
+    "expected_route": "research_query",
+    "expected_answer": "50",
+    "expected_tools": [
+      "calculator"
+    ]
+  },
+  {
+    "id": "web_search_039",
+    "category": "web_search",
+    "query": "Who is the current CEO of Microsoft?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "web_search_040",
+    "category": "web_search",
+    "query": "What is the capital of France?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "web_search_041",
+    "category": "web_search",
+    "query": "When was the James Webb Space Telescope launched?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "web_search_042",
+    "category": "web_search",
+    "query": "What is the weather in Tokyo right now?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "web_search_043",
+    "category": "web_search",
+    "query": "Who won the World Series in 2023?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "web_search_044",
+    "category": "web_search",
+    "query": "What is the latest version of Python?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "web_search_045",
+    "category": "web_search",
+    "query": "Who directed the movie Inception?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search"
+    ]
+  },
+  {
+    "id": "multi_step_046",
+    "category": "multi_step",
+    "query": "Find the population of California and multiply it by 2.",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ]
+  },
+  {
+    "id": "multi_step_047",
+    "category": "multi_step",
+    "query": "What is the height of Mount Everest in feet divided by 10?",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ]
+  },
+  {
+    "id": "multi_step_048",
+    "category": "multi_step",
+    "query": "Get the current stock price of Apple and add 50 to it.",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ]
+  },
+  {
+    "id": "multi_step_049",
+    "category": "multi_step",
+    "query": "Find the distance from Earth to the Moon in miles and divide by 100.",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ]
+  },
+  {
+    "id": "multi_step_050",
+    "category": "multi_step",
+    "query": "Find the release year of the first iPhone and add 10 to it.",
+    "expected_route": "research_query",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ]
+  }
+]

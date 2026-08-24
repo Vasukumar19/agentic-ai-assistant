@@ -1,0 +1,286 @@
+id,category,query,expected_route,actual_route,route_correct,expected_tools,actual_tools,tool_success,context_coverage,answer,answer_correct,faithfulness,latency_ms,llm_calls,tokens,estimated_cost,passed,failure_category,details
+chat_001,chat,Hi there!,chat,chat,True,,[],,,Hello! How can I help you today?,,,574,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_002,chat,"Hello, how are you?",chat,research_query,False,,[],,,"Hello! I'm doing great, thank you for asking. How can I assist you today?",,,1538,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,routing_failure,Expected route chat but got research_query
+chat_003,chat,Good morning agent.,chat,chat,True,,[],,,Good morning! How can I assist you today?,,,455,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_004,chat,Hey!,chat,chat,True,,[],,,Hey there! 👋 How can I help you today?,,,825,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_005,chat,Thanks for your help.,chat,chat,True,,[],,,"You’re very welcome! If there’s anything else you’d like to know or discuss, just let me know—I’m happy to help.",,,571,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_006,chat,Goodbye!,chat,chat,True,,[],,,"Goodbye! If you ever need anything else, just let me know. Have a great day!",,,1094,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_007,chat,See ya later.,chat,chat,True,,[],,,Take care! See you later! 🌟,,,1173,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_008,chat,Good night.,chat,chat,True,,[],,,Good night! 🌙 I hope you have a restful and peaceful sleep. Take care!,,,1047,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_009,chat,hello there,chat,chat,True,,[],,,Hello! 👋 How can I help you today?,,,502,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+chat_010,chat,hi,chat,chat,True,,[],,,Hello! How can I help you today?,,,596,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+memory_update_011,memory_update,My name is John Doe and I am a software engineer.,memory_update,memory_update,True,,[],,,"Got it! I'll remember that, your name is John Doe, your goal is to become an .",,,1214,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+memory_update_012,memory_update,I prefer using Python for all my backend projects.,memory_update,memory_update,True,,[],,,"Got it! I'll remember that, your name is , your goal is to become an , you uses python for backend projects.",,,1942,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+memory_update_013,memory_update,My favorite technology is React.,memory_update,memory_update,True,,[],,,"Got it! I'll remember that, your name is , your goal is to become an .",,,1314,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+memory_update_014,memory_update,I recently completed a course on machine learning.,memory_update,memory_update,True,,[],,,"Got it! I'll remember that, your name is , your goal is to become an , you completed a machine learning course.",,,1916,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+memory_update_015,memory_update,I live in New York and I love pizza.,memory_update,memory_update,True,,[],,,"Got it! I'll remember that, your name is , your goal is to become an .",,,1395,0,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 0}",0.0,True,,
+personal_query_016,personal_query,What is my name?,research_query,research_query,True,,[],,0.0,I’m sorry—I don’t have your name on record. It wasn’t included in the profile information you provided.,,,611,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+personal_query_017,personal_query,What backend language do I prefer?,research_query,research_query,True,,[],,0.0,I’m not seeing any information about your preferred backend language in the profile you provided. Could you let me know which language you like best?,,,1208,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+personal_query_018,personal_query,What is my favorite technology?,research_query,research_query,True,,[],,0.0,I’m not seeing any information about a favorite technology in the profile you provided. Could you let me know what technology you consider your favorite?,,,2021,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+personal_query_019,personal_query,Did I take any recent courses?,research_query,research_query,True,,[],,1.0,"Based on the semantic memories that have been retrieved for you, the only course recorded is a **machine‑learning course** (it appears twice in the list). No other courses are listed, so that is the only recent coursework the system knows about. If you’ve taken additional courses that aren’t reflected here, feel free to let me know!",,,3501,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,True,,
+personal_query_020,personal_query,Where do I live?,research_query,research_query,True,,[],,0.0,"I’m sorry—I don’t have any information about your location. If you’d like to share where you live, I can keep that in mind for future conversations.",,,5544,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_021,rag,What is the company policy on remote work?,research_query,research_query,True,,[],,0.6666666666666666,"**GlobalTech Remote Work Policy**
+
+- **Hybrid Work Model:** Employees are expected to work in the office at least **2 days per week** (typically Tuesdays and Thursdays).  
+- **Remote Days:** The remaining **3 days** of the workweek can be done remotely.  
+- **Remote‑First Employees:** Only employees whose contracts designate them as **“Remote‑First”** may work fully remote.  
+- **Requirements for Remote Work:**  
+  - Maintain a **stable internet connection**.  
+  - Be **available on Slack** during core hours **10:00 AM – 3:00 PM EST**.  
+
+These are the key points of GlobalTech’s remote work policy.",,supported,5739,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 66.66666666666666%
+rag_022,rag,How many days of annual leave do I get?,research_query,research_query,True,,[],,0.0,"I’m not sure which organization’s policy you’re referring to. Could you let me know the company, country, or specific employment agreement you’d like information about? That way I can give you the correct number of annual‑leave days.",,,8745,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_023,rag,Is there a hardware stipend for home office?,research_query,research_query,True,,[],,0.0,"I don’t have the specific details of your organization’s home‑office hardware stipend policy. For the most accurate information, please consult your employee handbook, the HR portal, or reach out directly to your HR or facilities team—they’ll be able to confirm whether a hardware stipend is offered and, if so, the eligibility criteria and amount.",,,10129,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_024,rag,How many days of sick leave are allowed?,research_query,research_query,True,,[],,0.0,"The number of sick‑leave days you’re entitled to depends on your employer’s specific policy (and, in some cases, local labor laws). Below are the most common arrangements you’ll see:
+
+| Policy type | Typical annual allowance* |
+|-------------|---------------------------|
+| **Fixed‑day policies** | 5 – 10 paid sick days per year (often prorated for part‑time staff) |
+| **Accrual‑based policies** | 1 – 1.5 days earned each month (≈12 – 18 days after a full year) |
+| **Unlimited / “as needed” policies** | No set cap; you may take sick days as long as they’re reasonable and approved by your manager |
+| **Statutory minimums** | Varies by country/state (e.g., 5 days in many U.S. states, 10 days in the UK, 12 days in Canada’s provinces) |
+
+\*These figures are typical examples; the exact number for your organization will be spelled out in your employee handbook, HR portal, or employment contract.
+
+**What to do next**
+
+1. **Check your employee handbook or HR intranet** – the “Sick Leave” or “Paid Time Off” section will list the precise number of days, any accrual schedule, and any carry‑over rules.  
+2. **Ask your HR representative** – if the policy isn’t clear or you have special circumstances (e.g., a chronic condition), HR can confirm the entitlement and any documentation required.  
+3. **Review local labor‑law requirements** – some jurisdictions mandate a minimum number of paid sick days that your employer must meet or exceed.
+
+If you let me know the name of your company or the jurisdiction you’re in, I can give a more tailored answer.",,,7132,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_025,rag,What frontend technology stack is approved?,research_query,research_query,True,,[],,0.0,"I’m not sure which organization or project you’re referring to. Could you let me know the context (e.g., the company, team, or specific guidelines) so I can provide the correct approved frontend technology stack?",,,8063,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_026,rag,What backend framework do we use?,research_query,research_query,True,,[],,0.0,"I’m sorry, but I don’t have information about which backend framework your organization uses. If you can provide more context or details, I’ll do my best to help.",,,8105,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_027,rag,What database should I use for caching?,research_query,research_query,True,,[],,0.0,"When you need a fast, transient store for caching, the most common and effective choices are **in‑memory key‑value databases**. The two industry‑standard options are:
+
+| Database | Strengths | Typical Use‑Cases | When to Prefer It |
+|----------|-----------|-------------------|-------------------|
+| **Redis** | • Rich data structures (strings, hashes, lists, sets, sorted sets, streams, bitmaps, hyperloglogs) <br>• Built‑in persistence (RDB snapshots, AOF) <br>• Pub/Sub, Lua scripting, transactions, clustering, replication <br>• Strong community & ecosystem (client libraries for virtually every language) | • General‑purpose caching (object, query, page, session) <br>• Leaderboards, rate limiting, distributed locks, job queues <br>• Scenarios where you might later need more than simple key‑value (e.g., caching complex objects, using sorted sets for ranking) | • You need more than plain string caching or want optional durability <br>• You anticipate scaling out with clustering or need high‑availability features |
+| **Memcached** | • Extremely simple design – pure key‑value store <br>• Very low latency & high throughput for simple get/set <br>• Small memory footprint (no persistence overhead) | • Straightforward caching of rendered pages, database query results, API responses <br>• Scenarios where you only need “store and retrieve” semantics and can tolerate data loss on restart | • You want the absolute minimal overhead and only need simple string/value caching <br>• Your deployment environment already includes Memcached or you need a very lightweight solution |
+
+### How to Choose
+
+1. **Complexity of cached data**  
+   - If you only need to store opaque blobs (e.g., serialized JSON, binary blobs) and don’t need advanced operations, **Memcached** is perfectly adequate.  
+   - If you want to cache structured data (hashes, lists, sets) or perform atomic operations (increment, expire, compare‑and‑set), **Redis** is the better fit.
+
+2. **Durability requirements**  
+   - Neither cache is meant to be a primary data store, but Redis can be configured for snapshotting or append‑only logging, giving you a safety net after a crash.  
+   - Memcached loses all data on restart; if that’s acceptable, it stays simple.
+
+3. **Scalability & HA**  
+   - Redis offers built‑in replication, sentinel for automatic failover, and cluster mode for sharding across many nodes.  
+   - Memcached can be scaled horizontally by adding more nodes, but you need client‑side consistent hashing; there’s no native replication.
+
+4. **Operational considerations**  
+   - **Redis**: Slightly higher memory usage due to metadata, but still very efficient. Requires monitoring of persistence files if enabled.  
+   - **Memcached**: Very lightweight, easy to deploy, but you lose the ability to persist or run complex commands.
+
+### Quick Recommendation
+
+- **Start with Redis** if you’re unsure. It covers all Memcached use‑cases and adds many more features without a large penalty. You can always use it in a “cache‑only” mode (disable persistence) to keep it as fast as Memcached.
+- **Pick Memcached** only if you have strict memory constraints, need the absolute simplest setup, and are certain you’ll never need Redis‑specific data structures or durability.
+
+### Example Setup (Redis)
+
+```bash
+# Docker quick‑start
+docker run -d --name redis-cache -p 6379:6379 redis:7-alpine
+```
+
+```python
+# Python example using redis-py
+import redis, json, time
+
+r = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+# Cache a DB query result for 5 minutes
+key = ""user:123:profile""
+value = json.dumps({""name"": ""Alice"", ""age"": 30})
+r.setex(key, 300, value)   # expires after 300 seconds
+
+# Retrieve
+cached = r.get(key)
+if cached:
+    profile = json.loads(cached)
+    print(""Cache hit:"", profile)
+else:
+    print(""Cache miss – fetch from DB"")
+```
+
+### Example Setup (Memcached)
+
+```bash
+docker run -d --name memcached -p 11211:11211 memcached:alpine
+```
+
+```python
+# Python example using python‑memcached
+import memcache, json
+
+mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+
+key = ""user:123:profile""
+value = json.dumps({""name"": ""Alice"", ""age"": 30})
+mc.set(key, value, time=300)   # 5‑minute TTL
+
+cached = mc.get(key)
+if cached:
+    profile = json.loads(cached)
+    print(""Cache hit:"", profile)
+else:
+    print(""Cache miss – fetch from DB"")
+```
+
+### Bottom Line
+
+- **Redis** = feature‑rich, optional persistence, easy scaling → best all‑round choice.  
+- **Memcached** = ultra‑simple, pure in‑memory, minimal overhead → good for very basic caching needs.
+
+Pick the one that aligns with your data‑structure needs, durability expectations, and operational preferences.",,,8049,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_028,rag,How many approvals are needed for a pull request?,research_query,research_query,True,,[],,0.0,"The number of approvals required for a pull request can vary depending on the platform you’re using (GitHub, GitLab, Azure DevOps, Bitbucket, etc.) and any specific rules your organization has set up. Could you let me know which version‑control system or organization’s policy you’re referring to? That way I can give you the most accurate answer.",,,6996,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_029,rag,What is the minimum test coverage required?,research_query,research_query,True,,[],,0.0,"Could you let me know the context you’re asking about? For example, are you referring to a particular organization’s policy, a specific industry standard, a type of software project, or a regulatory requirement? Knowing the relevant domain will help me give you the most accurate answer.",,,5574,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+rag_030,rag,What is the process for a Sev-1 incident?,research_query,research_query,True,,[],,0.0,"A **Severity‑1 (Sev‑1) incident** is the highest‑priority outage—typically a complete service‑wide failure or a critical security breach that impacts a large number of users or core business functions. Because the impact is so severe, the response process is fast‑paced, highly coordinated, and tightly documented. Below is a typical end‑to‑end workflow that many organizations (including most IT‑service‑management frameworks such as ITIL, NOC/SOC operations, and cloud‑service providers) follow for a Sev‑1 incident.
+
+---
+
+## 1. Detection & Initial Triage  
+
+| Action | Owner | Details |
+|--------|-------|---------|
+| **Automated alert** (monitoring, health checks, SIEM) | Monitoring system | Triggers an alert when a predefined threshold is breached (e.g., 100 % error rate, service down, critical security event). |
+| **Manual report** (customer, support ticket, on‑call) | Anyone (customer, support rep, employee) | Immediate notification via phone, chat, or ticketing system. |
+| **Triage** | First‑line on‑call engineer / NOC | Verify that the alert is genuine, assess scope (single component vs. whole service), and confirm that it meets Sev‑1 criteria. |
+| **Create incident record** | First‑line engineer | Open a ticket in the incident‑management tool (e.g., ServiceNow, Jira Service Management) with: <br>• Title “Sev‑1 – [service] outage” <br>• Timestamp <br>• Initial impact description <br>• Severity set to **1**. |
+| **Escalate to incident commander** | First‑line engineer | Immediately page the **Incident Commander (IC)** (often the on‑call senior engineer or manager). |
+
+---
+
+## 2. Immediate Notification & Mobilization  
+
+| Action | Owner | Details |
+|--------|-------|---------|
+| **Incident commander acknowledges** | IC | Takes ownership, updates the ticket, and declares the incident “Sev‑1 – Active”. |
+| **Notify stakeholders** | IC / Communications lead | • All‑hands conference bridge (phone + video). <br>• Relevant product owners, engineering leads, SREs, security, and senior leadership. <br>• Customer‑facing teams (Support, Account Management). |
+| **Public status page** (if applicable) | Communications | Post a brief “We are experiencing a service outage” notice with an ETA for updates. |
+| **Document initial facts** | IC & Scribe (often a dedicated role) | Capture: time of detection, affected services, known symptoms, initial hypothesis. |
+
+---
+
+## 3. Diagnosis & Containment  
+
+| Action | Owner | Details |
+|--------|-------|---------|
+| **Gather data** | Assigned engineers (SRE/DevOps) | Pull logs, metrics, traces, dashboards, recent deployments, configuration changes. |
+| **Run quick health checks** | Engineers | Verify network, DNS, database connectivity, third‑party dependencies. |
+| **Identify root cause hypothesis** | Engineers | Prioritize likely causes (e.g., recent code release, infrastructure change, DDoS). |
+| **Containment** | Engineers | If possible, isolate the failing component (e.g., roll back a deployment, disable a feature flag, route traffic away). |
+| **Implement temporary work‑around** | Engineers | Aim to restore partial functionality or reduce impact while a permanent fix is being built. |
+| **Update status** | Scribe | Record each step, timestamps, and decisions in the incident ticket and on the status page. |
+
+---
+
+## 4. Resolution  
+
+| Action | Owner | Details |
+|--------|-------|---------|
+| **Develop fix** | Engineering team | Write, test (in a staging environment if time permits), and prepare a rollback‑safe deployment. |
+| **Validate fix** | Engineers & QA (if feasible) | Verify that the fix resolves the issue without side effects. |
+| **Deploy fix** | Release engineering / SRE | Push the change to production using the standard deployment pipeline, with monitoring for regressions. |
+| **Confirm service restoration** | IC & Scribe | Verify that all key metrics are back to normal, end‑users can access the service, and no new errors appear. |
+| **Close incident** | IC | Mark the ticket as **Resolved**; add a concise resolution summary. |
+| **Communicate closure** | Communications | Update the public status page and send a “Service Restored” notification to customers and internal stakeholders. |
+
+---
+
+## 5. Post‑Incident Review (Post‑Mortem)  
+
+| Action | Owner | Details |
+|--------|-------|---------|
+| **Schedule post‑mortem meeting** | IC (within 24‑48 h) | Invite all participants, including on‑call engineers, product owners, and leadership. |
+| **Root‑cause analysis (RCA)** | Participants | Use the “5 Whys” or fishbone diagram to drill down to the underlying technical and process failures. |
+| **Document findings** | Scribe / Documentation owner | Create a post‑mortem document that includes: <br>• Timeline of events <br>• Root cause <br>• Impact metrics (users affected, revenue loss, SLA breach) <br>• What went well <br>• What could be improved <br>• Action items with owners and due dates. |
+| **Implement action items** | Assigned owners | Examples: <br>– Add missing monitoring/alerting <br>– Improve deployment validation <br>– Update runbooks <br>– Conduct training or fire‑drill. |
+| **Close post‑mortem** | Incident manager | Verify that all action items are tracked in the project management system and that owners acknowledge them. |
+| **Share learnings** | Communications | Distribute the post‑mortem summary (redacted if needed) to the broader engineering organization and, when appropriate, to customers. |
+
+---
+
+## 6. Continuous Improvement  
+
+1. **Runbook updates** – Incorporate new troubleshooting steps, escalation contacts, and containment procedures discovered during the incident.  
+2. **Metric & alert refinement** – Add or adjust thresholds to catch similar failures earlier.  
+3. **Training & drills** – Conduct regular “Sev‑1 simulation” exercises to keep the response team sharp.  
+4. **Feedback loop** – Periodically review the overall Sev‑1 process (e.g., quarterly) to reduce mean time to detection (MTTD) and mean time to resolution (MTTR).  
+
+---
+
+### Quick Reference Checklist (for the on‑call engineer)
+
+| ✅ | Step |
+|----|------|
+| 1 | Verify alert → confirm Sev‑1 criteria |
+| 2 | Open incident ticket, set severity to 1 |
+| 3 | Page Incident Commander (IC) |
+| 4 | Start conference bridge; add stakeholders |
+| 5 | Gather logs/metrics; hypothesize cause |
+| 6 | Contain/mitigate (rollback, feature flag, traffic shift) |
+| 7 | Build & deploy fix |
+| 8 | Confirm service restored; close ticket |
+| 9 | Publish post‑mortem within 48 h |
+|10| Track and complete action items |
+
+---
+
+### Key Principles Behind the Process  
+
+| Principle | Why it matters |
+|-----------|----------------|
+| **Speed** – Immediate paging and a pre‑established bridge keep communication fast. |
+| **Visibility** – Public status updates and internal dashboards keep everyone informed and reduce speculation. |
+| **Ownership** – A single Incident Commander ensures decisions are coordinated and not duplicated. |
+| **Documentation** – Real‑time scribing creates an accurate timeline for later analysis. |
+| **Containment first** – Restoring partial service or limiting impact buys time for a safe fix. |
+| **Post‑mortem culture** – Treat every Sev‑1 as a learning opportunity, not a blame exercise. |
+
+---
+
+#### TL;DR (one‑sentence summary)
+
+A Sev‑1 incident is handled by **detect → page the Incident Commander → convene an all‑hands bridge → diagnose, contain, and fix the issue → verify restoration → close the ticket → conduct a post‑mortem and implement improvements**, all while keeping stakeholders continuously informed.",,,12549,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,retrieval_failure,Context coverage was 0.0%
+calculator_031,calculator,What is 45 * 12?,research_query,research_query,True,['calculator'],[],,,45 × 12 = 540.,True,,19180,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['calculator'] but got []
+calculator_032,calculator,Calculate 1024 / 8,research_query,research_query,True,['calculator'],['calculator'],True,,1024 divided by 8 equals **128**.,True,,9903,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,True,,
+calculator_033,calculator,What is the square root of 144?,research_query,research_query,True,['calculator'],['calculator'],True,,The square root of 144 is 12.,True,,2030,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,True,,
+calculator_034,calculator,"Add 50, 75, and 125 together.",research_query,research_query,True,['calculator'],[],,,The sum of 50 + 75 + 125 is **250**.,True,,4523,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['calculator'] but got []
+calculator_035,calculator,What is 15 percent of 200?,research_query,research_query,True,['calculator'],[],,,15 percent of 200 is \(0.15 \times 200 = 30\).,True,,9187,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['calculator'] but got []
+calculator_036,calculator,2 to the power of 10,research_query,research_query,True,['calculator'],['calculator'],True,,\(2^{10} = 1024\),True,,7523,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,True,,
+calculator_037,calculator,100 minus 37,research_query,research_query,True,['calculator'],['calculator'],True,,The result of 100 minus 37 is **63**.,True,,9129,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,True,,
+calculator_038,calculator,Calculate 5 * (4 + 6),research_query,research_query,True,['calculator'],['calculator'],True,,The result of \(5 \times (4 + 6)\) is **50**.,True,,12039,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,True,,
+web_search_039,web_search,Who is the current CEO of Microsoft?,research_query,research_query,True,['web_search'],['web_search'],True,,The current chief executive officer (CEO) of Microsoft is **Satya Nadella**. He has held the position since 2014.,,,6898,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,True,,
+web_search_040,web_search,What is the capital of France?,research_query,research_query,True,['web_search'],[],,,The capital of France is **Paris**.,,,8121,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['web_search'] but got []
+web_search_041,web_search,When was the James Webb Space Telescope launched?,research_query,research_query,True,['web_search'],[],,,"The James Webb Space Telescope was launched on **December 25, 2021**.",,,3587,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['web_search'] but got []
+web_search_042,web_search,What is the weather in Tokyo right now?,research_query,research_query,True,['web_search'],['web_search'],True,,,,,34246,5,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 5}",0.0,True,,
+web_search_043,web_search,Who won the World Series in 2023?,research_query,research_query,True,['web_search'],[],,,"The Texas Rangers won the 2023 World Series, defeating the Arizona Diamondbacks to claim their first championship.",,,1443,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['web_search'] but got []
+web_search_044,web_search,What is the latest version of Python?,research_query,research_query,True,['web_search'],['web_search'],True,,"The most recent stable release of the Python language is **Python 3.14.7** – the seventh maintenance update to the 3.14 series, published in mid‑2026. This version includes dozens of bug‑fixes, security patches, and documentation improvements over the earlier 3.14.x releases. (Python 3.15 is currently in development but has not yet been released as a stable version.)",,,18778,3,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 3}",0.0,True,,
+web_search_045,web_search,Who directed the movie Inception?,research_query,research_query,True,['web_search'],[],,,The movie **Inception** was directed by **Christopher Nolan**.,,,13325,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,Tool selection failed. Expected ['web_search'] but got []
+multi_step_046,multi_step,Find the population of California and multiply it by 2.,research_query,research_query,True,"['web_search', 'calculator']","['calculator', 'web_search']",True,,"The most recent estimate from the U.S. Census Bureau’s 2023 American Community Survey (5‑year) lists California’s population as **39,242,785**.  
+
+Multiplying that figure by 2:
+
+**39,242,785 × 2 = 78,485,570**
+
+So, twice the current population of California is **approximately 78.5 million people**.",,,17354,3,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 3}",0.0,True,,
+multi_step_047,multi_step,What is the height of Mount Everest in feet divided by 10?,research_query,research_query,True,"['web_search', 'calculator']",['calculator'],True,,"Mount Everest’s height is about **8,848.86 m**. Converting to feet (1 m ≈ 3.28084 ft) gives roughly **29,031.7 ft**. Dividing that by 10 yields approximately **2,903 feet** (≈ 2,903.17 ft).",,,10228,2,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 2}",0.0,False,tool_selection_failure,"Tool selection failed. Expected ['web_search', 'calculator'] but got ['calculator']"
+multi_step_048,multi_step,Get the current stock price of Apple and add 50 to it.,research_query,research_query,True,"['web_search', 'calculator']","['calculator', 'web_search']",True,,"The latest price I could find for Apple (AAPL) is **US $309.35** (as of the most recent quote on August 22 2026). Adding $50 to that gives:
+
+**$309.35 + $50 = $359.35**.",,,25257,3,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 3}",0.0,True,,
+multi_step_049,multi_step,Find the distance from Earth to the Moon in miles and divide by 100.,research_query,research_query,True,"['web_search', 'calculator']",[],,,"The average distance from Earth to the Moon is about **238 855 miles**.  
+
+Dividing that distance by 100:
+
+\[
+\frac{238\,855\ \text{miles}}{100} = 2\,388.55\ \text{miles}
+\]
+
+**Result:** roughly **2 389 miles** (2 388.55 miles).",,,2316,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,"Tool selection failed. Expected ['web_search', 'calculator'] but got []"
+multi_step_050,multi_step,Find the release year of the first iPhone and add 10 to it.,research_query,research_query,True,"['web_search', 'calculator']",[],,,The original iPhone was released in **2007**. Adding 10 years gives **2017**.,,,4987,1,"{""input_tokens"": 0, ""output_tokens"": 0, ""total_tokens"": 0, ""llm_calls"": 1}",0.0,False,tool_selection_failure,"Tool selection failed. Expected ['web_search', 'calculator'] but got []"
