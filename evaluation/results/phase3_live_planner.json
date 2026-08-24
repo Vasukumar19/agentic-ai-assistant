@@ -1,0 +1,110 @@
+[
+  {
+    "id": "live_001",
+    "category": "single_tool_calc",
+    "query": "What is 128 divided by 8?",
+    "expected_tools": [
+      "calculator"
+    ],
+    "actual_sequence": [],
+    "arg_trace": [],
+    "final_answer": "I'm sorry, I encountered an internal error while planning the next step.",
+    "llm_calls": 0,
+    "tool_call_count": 0,
+    "total_latency_s": 0.597,
+    "execution_status": "error",
+    "failure_type": "missing_tool",
+    "tool_selection_correct": false,
+    "sequence_correct": false,
+    "arg_accuracy": null,
+    "dep_accuracy": 0.0,
+    "status": "completed"
+  },
+  {
+    "id": "live_002",
+    "category": "single_tool_search",
+    "query": "Who is the current CEO of Tesla?",
+    "expected_tools": [
+      "web_search"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_003",
+    "category": "search_then_calc",
+    "query": "Find the current population of Japan and calculate what 0.5% of it would be.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_004",
+    "category": "search_then_calc",
+    "query": "Search for the approximate speed of light in km/s and multiply it by 60 to get the distance light travels in one minute.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_005",
+    "category": "rag_then_calc",
+    "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
+    "expected_tools": [
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_006",
+    "category": "rag_then_calc",
+    "query": "Based on the documents, what is the hardware reimbursement limit? Calculate the total amount if 3 employees claim it.",
+    "expected_tools": [
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_007",
+    "category": "multi_search_compare",
+    "query": "Find the population of Brazil and the population of Argentina. Which one is larger and by how much?",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_008",
+    "category": "multi_search_compare",
+    "query": "What is the current price of gold per ounce and the current price of silver per ounce? What is the gold-to-silver price ratio?",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_009",
+    "category": "memory_tool",
+    "query": "Remember that my favorite language is Python.",
+    "expected_tools": [],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "live_010",
+    "category": "complex_multistep",
+    "query": "Find the GDP of India and the GDP of Pakistan. Calculate the ratio of India's GDP to Pakistan's GDP and tell me how many times larger India's economy is.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  }
+]

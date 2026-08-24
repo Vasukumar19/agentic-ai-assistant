@@ -1,0 +1,92 @@
+[
+  {
+    "id": "live_001",
+    "category": "single_tool_calc",
+    "query": "What is 128 divided by 8?",
+    "expected_tools": ["calculator"],
+    "expected_sequence": ["calculator"],
+    "requires_multi_step": false,
+    "description": "Simple arithmetic — single calculator call"
+  },
+  {
+    "id": "live_002",
+    "category": "single_tool_search",
+    "query": "Who is the current CEO of Tesla?",
+    "expected_tools": ["web_search"],
+    "expected_sequence": ["web_search"],
+    "requires_multi_step": false,
+    "description": "Simple factual lookup — single web_search call"
+  },
+  {
+    "id": "live_003",
+    "category": "search_then_calc",
+    "query": "Find the current population of Japan and calculate what 0.5% of it would be.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "requires_multi_step": true,
+    "description": "web_search to get population, calculator to compute 0.5%"
+  },
+  {
+    "id": "live_004",
+    "category": "search_then_calc",
+    "query": "Search for the approximate speed of light in km/s and multiply it by 60 to get the distance light travels in one minute.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "requires_multi_step": true,
+    "description": "web_search for speed of light, calculator for 60x"
+  },
+  {
+    "id": "live_005",
+    "category": "rag_then_calc",
+    "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
+    "expected_tools": ["calculator"],
+    "expected_sequence": ["calculator"],
+    "requires_multi_step": true,
+    "description": "RAG provides PTO days (from context), calculator computes remainder"
+  },
+  {
+    "id": "live_006",
+    "category": "rag_then_calc",
+    "query": "Based on the documents, what is the hardware reimbursement limit? Calculate the total amount if 3 employees claim it.",
+    "expected_tools": ["calculator"],
+    "expected_sequence": ["calculator"],
+    "requires_multi_step": true,
+    "description": "RAG provides reimbursement limit, calculator multiplies by 3"
+  },
+  {
+    "id": "live_007",
+    "category": "multi_search_compare",
+    "query": "Find the population of Brazil and the population of Argentina. Which one is larger and by how much?",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "requires_multi_step": true,
+    "description": "Two web_searches for populations, calculator for difference"
+  },
+  {
+    "id": "live_008",
+    "category": "multi_search_compare",
+    "query": "What is the current price of gold per ounce and the current price of silver per ounce? What is the gold-to-silver price ratio?",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "requires_multi_step": true,
+    "description": "Two web_searches for commodity prices, calculator for ratio"
+  },
+  {
+    "id": "live_009",
+    "category": "memory_tool",
+    "query": "Remember that my favorite language is Python.",
+    "expected_tools": [],
+    "expected_sequence": [],
+    "requires_multi_step": false,
+    "description": "Memory update — routed directly to memory_update path, no tool calls in planner"
+  },
+  {
+    "id": "live_010",
+    "category": "complex_multistep",
+    "query": "Find the GDP of India and the GDP of Pakistan. Calculate the ratio of India's GDP to Pakistan's GDP and tell me how many times larger India's economy is.",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "requires_multi_step": true,
+    "description": "Complex: two GDP lookups, then division to compute ratio"
+  }
+]
