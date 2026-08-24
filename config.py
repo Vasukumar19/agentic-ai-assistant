@@ -12,5 +12,5 @@ TEMPERATURE = 0.3
 MAX_TOOL_ITERATIONS = 5
 
 # Phase 2 Config
-RETRIEVAL_MODE = "faiss" # Options: faiss, hybrid, rrf, reranker
+RETRIEVAL_MODE = "hybrid" # Options: faiss, hybrid, rrf, reranker
 RRF_K = 60
