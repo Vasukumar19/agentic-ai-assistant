@@ -68,3 +68,11 @@ class AgentState(TypedDict):
     
     # Message history
     messages: Annotated[list, add_messages]
+    
+    # Execution State for Orchestration
+    current_step: str
+    completed_steps: list[str]
+    tool_results: list[dict]
+    execution_status: str
+    tool_call_count: int
+    max_steps: int

@@ -12,7 +12,7 @@ Constructs the complete workflow graph with:
 from langgraph.graph import StateGraph, END
 from langgraph.types import Send
 from state import AgentState
-from config import MAX_TOOL_ITERATIONS, CHAT_HISTORY_PATH
+from config import MAX_TOOL_STEPS, CHAT_HISTORY_PATH
 from nodes import (
     intent_router,
     chat_node,
@@ -23,7 +23,7 @@ from nodes import (
     memory_retriever_node,
     rag_retriever_node,
     context_builder_node,
-    agent_node,
+    planner_node,
     tool_node,
 )
 import json
@@ -77,30 +77,15 @@ def save_history_node(state: dict) -> dict:
 def should_continue(state: dict):
     """
     Determine if agent should continue to tool use or return final answer.
-
-    Used in research_query path to loop back to agent after tool execution.
     """
-    messages = state.get("messages", [])
-
-    if not messages:
+    if state.get("tool_call_count", 0) >= MAX_TOOL_STEPS:
+        logger.info("Max tool iterations (%d) reached", MAX_TOOL_STEPS)
         return "end"
 
-    # Count tool call rounds
-    tool_rounds = sum(
-        1 for m in messages
-        if hasattr(m, 'tool_calls') and m.tool_calls
-    )
-    if tool_rounds >= MAX_TOOL_ITERATIONS:
-        logger.info("Max tool iterations (%d) reached", MAX_TOOL_ITERATIONS)
-        return "end"
-
-    last_message = messages[-1]
-
-    # If last message has tool_calls, we need to execute tools
-    if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
+    status = state.get("execution_status")
+    if status == "running":
         return "tools"
-
-    # Otherwise, we're done
+    
     return "end"
 
 
@@ -165,7 +150,7 @@ def build_graph() -> StateGraph:
     graph.add_node("memory_retriever", memory_retriever_node)
     graph.add_node("rag_retriever", rag_retriever_node)
     graph.add_node("context_builder", context_builder_node)
-    graph.add_node("agent", agent_node)
+    graph.add_node("planner", planner_node)
     graph.add_node("tools", tool_node)
 
     # Save history (used by all paths)
@@ -199,11 +184,11 @@ def build_graph() -> StateGraph:
     )
     graph.add_edge("memory_retriever", "context_builder")
     graph.add_edge("rag_retriever", "context_builder")
-    graph.add_edge("context_builder", "agent")
+    graph.add_edge("context_builder", "planner")
 
-    # Agent → tools loop or end
+    # Planner -> tools loop or end
     graph.add_conditional_edges(
-        "agent",
+        "planner",
         should_continue,
         {
             "tools": "tools",
@@ -211,8 +196,8 @@ def build_graph() -> StateGraph:
         }
     )
 
-    # Tools → back to agent
-    graph.add_edge("tools", "agent")
+    # Tools -> back to planner
+    graph.add_edge("tools", "planner")
 
     # All paths end at save_history
     graph.add_edge("save_history", END)

@@ -2,6 +2,11 @@ import json
 import argparse
 import os
 import sys
+
+if "--mock" in sys.argv:
+    os.environ["MOCK_LLM"] = "1"
+    print("MOCK_LLM enabled via CLI.")
+
 from statistics import mean, median
 
 from evaluation.runners.agent_runner import run_agent
@@ -259,6 +264,8 @@ Estimated Cost / Query:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--mock", action="store_true")
+    parser.add_argument("--live", action="store_true")
     args = parser.parse_args()
     
     run_benchmark(args.limit)

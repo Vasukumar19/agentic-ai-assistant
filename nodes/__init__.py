@@ -17,7 +17,7 @@ from .retrieval_planner import retrieval_planner_node
 from .memory_retriever import memory_retriever_node
 from .rag_retriever import rag_retriever_node
 from .context_builder import context_builder_node
-from .agent import agent_node
+from .planner_node import planner_node
 from .tools import tool_node, tools
 
 __all__ = [
@@ -30,7 +30,7 @@ __all__ = [
     "memory_retriever_node",
     "rag_retriever_node",
     "context_builder_node",
-    "agent_node",
+    "planner_node",
     "tool_node",
     "tools",
 ]

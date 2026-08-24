@@ -9,7 +9,7 @@ FAISS_INDEX_DIR = PROJECT_ROOT / "faiss_index"
 # MODEL_NAME = "llama-3.1-8b-instant"
 MODEL_NAME = "openai/gpt-oss-120b"
 TEMPERATURE = 0.3
-MAX_TOOL_ITERATIONS = 5
+MAX_TOOL_STEPS = 5
 
 # Phase 2 Config
 RETRIEVAL_MODE = "hybrid" # Options: faiss, hybrid, rrf, reranker
