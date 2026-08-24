@@ -3,91 +3,106 @@
     "id": "chat_001",
     "category": "chat",
     "query": "Hi there!",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_002",
     "category": "chat",
     "query": "Hello, how are you?",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_003",
     "category": "chat",
     "query": "Good morning agent.",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_004",
     "category": "chat",
     "query": "Hey!",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_005",
     "category": "chat",
     "query": "Thanks for your help.",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_006",
     "category": "chat",
     "query": "Goodbye!",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_007",
     "category": "chat",
     "query": "See ya later.",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_008",
     "category": "chat",
     "query": "Good night.",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_009",
     "category": "chat",
     "query": "hello there",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "chat_010",
     "category": "chat",
     "query": "hi",
-    "expected_route": "chat"
+    "expected_route": "chat",
+    "expected_sources": []
   },
   {
     "id": "memory_update_011",
     "category": "memory_update",
     "query": "My name is John Doe and I am a software engineer.",
-    "expected_route": "memory_update"
+    "expected_route": "memory_update",
+    "expected_sources": []
   },
   {
     "id": "memory_update_012",
     "category": "memory_update",
     "query": "I prefer using Python for all my backend projects.",
-    "expected_route": "memory_update"
+    "expected_route": "memory_update",
+    "expected_sources": []
   },
   {
     "id": "memory_update_013",
     "category": "memory_update",
     "query": "My favorite technology is React.",
-    "expected_route": "memory_update"
+    "expected_route": "memory_update",
+    "expected_sources": []
   },
   {
     "id": "memory_update_014",
     "category": "memory_update",
     "query": "I recently completed a course on machine learning.",
-    "expected_route": "memory_update"
+    "expected_route": "memory_update",
+    "expected_sources": []
   },
   {
     "id": "memory_update_015",
     "category": "memory_update",
     "query": "I live in New York and I love pizza.",
-    "expected_route": "memory_update"
+    "expected_route": "memory_update",
+    "expected_sources": []
   },
   {
     "id": "personal_query_016",
@@ -96,7 +111,8 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "John Doe"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "personal_query_017",
@@ -105,7 +121,8 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "Python"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "personal_query_018",
@@ -114,7 +131,8 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "React"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "personal_query_019",
@@ -123,7 +141,8 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "machine learning"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "personal_query_020",
@@ -132,7 +151,8 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "New York"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "rag_021",
@@ -143,6 +163,9 @@
       "hybrid schedule",
       "Tuesdays and Thursdays",
       "Remote-First"
+    ],
+    "expected_sources": [
+      0
     ]
   },
   {
@@ -153,6 +176,9 @@
     "expected_context_keywords": [
       "20 days",
       "annual leave"
+    ],
+    "expected_sources": [
+      0
     ]
   },
   {
@@ -163,6 +189,9 @@
     "expected_context_keywords": [
       "$1,000",
       "hardware stipend"
+    ],
+    "expected_sources": [
+      1
     ]
   },
   {
@@ -174,6 +203,9 @@
       "10 days",
       "sick leave",
       "doctor's note"
+    ],
+    "expected_sources": [
+      0
     ]
   },
   {
@@ -185,6 +217,9 @@
       "React 18",
       "TypeScript",
       "TailwindCSS"
+    ],
+    "expected_sources": [
+      2
     ]
   },
   {
@@ -196,6 +231,9 @@
       "Python",
       "FastAPI",
       "Django"
+    ],
+    "expected_sources": [
+      2
     ]
   },
   {
@@ -205,6 +243,9 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "Redis"
+    ],
+    "expected_sources": [
+      2
     ]
   },
   {
@@ -215,6 +256,9 @@
     "expected_context_keywords": [
       "two approvals",
       "senior engineers"
+    ],
+    "expected_sources": [
+      2
     ]
   },
   {
@@ -224,6 +268,9 @@
     "expected_route": "research_query",
     "expected_context_keywords": [
       "80% coverage"
+    ],
+    "expected_sources": [
+      2
     ]
   },
   {
@@ -236,6 +283,9 @@
       "#incidents-war-room",
       "PagerDuty",
       "Post-mortems"
+    ],
+    "expected_sources": [
+      3
     ]
   },
   {
@@ -246,7 +296,8 @@
     "expected_answer": "540",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_032",
@@ -256,7 +307,8 @@
     "expected_answer": "128",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_033",
@@ -266,7 +318,8 @@
     "expected_answer": "12",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_034",
@@ -276,7 +329,8 @@
     "expected_answer": "250",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_035",
@@ -286,7 +340,8 @@
     "expected_answer": "30",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_036",
@@ -296,7 +351,8 @@
     "expected_answer": "1024",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_037",
@@ -306,7 +362,8 @@
     "expected_answer": "63",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "calculator_038",
@@ -316,7 +373,8 @@
     "expected_answer": "50",
     "expected_tools": [
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_039",
@@ -325,7 +383,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_040",
@@ -334,7 +393,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_041",
@@ -343,7 +403,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_042",
@@ -352,7 +413,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_043",
@@ -361,7 +423,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_044",
@@ -370,7 +433,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "web_search_045",
@@ -379,7 +443,8 @@
     "expected_route": "research_query",
     "expected_tools": [
       "web_search"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "multi_step_046",
@@ -389,7 +454,8 @@
     "expected_tools": [
       "web_search",
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "multi_step_047",
@@ -399,7 +465,8 @@
     "expected_tools": [
       "web_search",
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "multi_step_048",
@@ -409,7 +476,8 @@
     "expected_tools": [
       "web_search",
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "multi_step_049",
@@ -419,7 +487,8 @@
     "expected_tools": [
       "web_search",
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   },
   {
     "id": "multi_step_050",
@@ -429,6 +498,7 @@
     "expected_tools": [
       "web_search",
       "calculator"
-    ]
+    ],
+    "expected_sources": []
   }
 ]

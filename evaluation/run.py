@@ -9,6 +9,7 @@ from evaluation.metrics.deterministic import (
     evaluate_routing, evaluate_tool_selection, evaluate_tool_success,
     evaluate_context_coverage, extract_token_usage, calculate_cost
 )
+from evaluation.metrics.retrieval import evaluate_retrieval
 from evaluation.metrics.semantic import evaluate_semantic
 from config import MODEL_NAME
 
@@ -80,6 +81,8 @@ def run_benchmark(limit=None):
         tokens = extract_token_usage(final_state.get("messages", []))
         cost = calculate_cost(MODEL_NAME, tokens["input_tokens"], tokens["output_tokens"])
         
+        retrieval_metrics_ground_truth = evaluate_retrieval(case.get("expected_sources", []), final_state.get("retrieved_chunks", []))
+        
         result = {
             "id": case["id"],
             "category": case["category"],
@@ -91,10 +94,17 @@ def run_benchmark(limit=None):
             "actual_tools": tool_metrics["actual_tools"] if tool_metrics else [],
             "tool_success": tool_success["success_rate"] == 1.0 if tool_success else None,
             "context_coverage": ctx_coverage,
+            "recall_at_1": retrieval_metrics_ground_truth.get("recall_at_1") if retrieval_metrics_ground_truth else None,
+            "recall_at_3": retrieval_metrics_ground_truth.get("recall_at_3") if retrieval_metrics_ground_truth else None,
+            "recall_at_5": retrieval_metrics_ground_truth.get("recall_at_5") if retrieval_metrics_ground_truth else None,
+            "recall_at_10": retrieval_metrics_ground_truth.get("recall_at_10") if retrieval_metrics_ground_truth else None,
+            "mrr": retrieval_metrics_ground_truth.get("mrr") if retrieval_metrics_ground_truth else None,
             "answer": final_state.get("answer", ""),
             "answer_correct": semantic_metrics.get("answer_correctness", {}).get("correct"),
             "faithfulness": semantic_metrics.get("faithfulness", {}).get("status"),
             "latency_ms": int(latency * 1000),
+            "retrieval_latency_ms": int(final_state.get("retrieval_metrics", {}).get("retrieval_latency", 0) * 1000),
+            "reranker_latency_ms": int(final_state.get("retrieval_metrics", {}).get("reranker_latency", 0) * 1000),
             "llm_calls": tokens["llm_calls"],
             "tokens": tokens,
             "estimated_cost": cost,
@@ -161,6 +171,16 @@ def generate_report(results, total_cases):
         if r["failure_category"]:
             failures[r["failure_category"]] = failures.get(r["failure_category"], 0) + 1
             
+    valid_ret_lat = [r["retrieval_latency_ms"] for r in results if r["retrieval_latency_ms"] > 0]
+    avg_ret_lat = mean(valid_ret_lat) if valid_ret_lat else 0
+    valid_rer_lat = [r["reranker_latency_ms"] for r in results if r["reranker_latency_ms"] > 0]
+    avg_rer_lat = mean(valid_rer_lat) if valid_rer_lat else 0
+    
+    valid_rec = [r for r in results if r.get("recall_at_1") is not None]
+    rec1 = mean(r["recall_at_1"] for r in valid_rec) if valid_rec else 0
+    rec5 = mean(r["recall_at_5"] for r in valid_rec) if valid_rec else 0
+    mrr = mean(r["mrr"] for r in valid_rec) if valid_rec else 0
+    
     report_md = f"""==================================================
 AGENT BASELINE EVALUATION
 ==================================================
@@ -174,6 +194,15 @@ Routing Accuracy:
 Tool Selection Accuracy:
   {tool_acc*100:.1f}%
 
+Recall@1:
+  {rec1*100:.1f}%
+
+Recall@5:
+  {rec5*100:.1f}%
+
+MRR:
+  {mrr:.3f}
+
 Context Keyword Coverage:
   {ctx_cov*100:.1f}%
 
@@ -186,13 +215,19 @@ Faithfulness:
 Tool Success Rate:
   {tool_succ*100:.1f}%
 
-Average Latency:
+Retrieval Latency:
+  {avg_ret_lat/1000:.2f} s
+
+Reranker Latency:
+  {avg_rer_lat/1000:.2f} s
+
+Average Total Latency:
   {avg_lat/1000:.2f} s
 
-Median Latency:
+Median Total Latency:
   {p50_lat/1000:.2f} s
 
-P95 Latency:
+P95 Total Latency:
   {p95_lat/1000:.2f} s
 
 Average LLM Calls:

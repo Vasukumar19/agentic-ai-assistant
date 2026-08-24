@@ -7,19 +7,20 @@ Formats results for LLM consumption.
 """
 
 import logging
+import time
 from pathlib import Path
 from langchain_community.vectorstores import FAISS
-from config import FAISS_INDEX_DIR
+from config import FAISS_INDEX_DIR, RETRIEVAL_MODE, RRF_K
 from .embeddings import embeddings
 from langchain_core.prompts import ChatPromptTemplate
 from llm import llm
 from .bm25 import bm25_search
 from reranker import rerank
+from .rrf import reciprocal_rank_fusion
 
 logger = logging.getLogger(__name__)
 
 SIMILARITY_THRESHOLD = 0.8
-
 
 rewrite_prompt = ChatPromptTemplate.from_messages([
         (
@@ -38,27 +39,16 @@ rewrite_prompt = ChatPromptTemplate.from_messages([
     ])
 chain = rewrite_prompt | llm
 
-# Vectorstore is lazily loaded and cached on first use (see _get_vectorstore()).
-# Loading it at import time would crash the whole app on startup if the index
-# is missing or corrupted, instead of letting rag_retriever_node degrade
-# gracefully to "no RAG context available" for that turn.
 _vectorstore = None
 _vectorstore_load_failed = False
 
-
 def _get_vectorstore():
-    """
-    Lazily load and cache the FAISS vectorstore. Returns None if the index
-    doesn't exist or fails to load, so the caller can degrade gracefully
-    instead of crashing.
-    """
     global _vectorstore, _vectorstore_load_failed
 
     if _vectorstore is not None:
         return _vectorstore
 
     if _vectorstore_load_failed:
-        # Already tried and failed this run; don't keep retrying every call.
         return None
 
     if not FAISS_INDEX_DIR.exists():
@@ -78,86 +68,79 @@ def _get_vectorstore():
         _vectorstore_load_failed = True
         return None
 
-
 def rag_retriever_node(state: dict) -> dict:
-    """
-    Retrieve relevant documents from FAISS index.
-
-    Args:
-        state: AgentState with 'retrieval_plan' and 'question' fields
-
-    Returns:
-        Updated state with 'rag_context' field
-    """
     retrieval_plan = state.get("retrieval_plan", {})
 
     if not retrieval_plan.get("rag", False):
-        return {"rag_context": ""}
+        return {"rag_context": "", "retrieved_chunks": [], "retrieval_metrics": {}}
 
     vectorstore = _get_vectorstore()
     if vectorstore is None:
-        # Index missing or failed to load — degrade gracefully, don't crash the graph.
-        return {"rag_context": ""}
+        return {"rag_context": "", "retrieved_chunks": [], "retrieval_metrics": {}}
 
     question = state.get("question", "")
     search_query = chain.invoke({"question": question}).content.strip()
 
     rag_context = ""
-
+    candidate_items = []
+    
+    t0 = time.time()
+    t_retrieval_start = time.time()
+    rerank_lat = 0
+    
     try:
-        # Search for relevant documents
-        results = vectorstore.similarity_search_with_score(search_query, k=20)
-        bm25_results = bm25_search(search_query, k=20)
-        merged = {}
-        for doc, score in results:
-            merged[doc.metadata["chunk_id"]] = {
-                "doc": doc,
-                "score": score,
-                "retriever": "faiss",
-            }
+        if RETRIEVAL_MODE == "faiss":
+            results = vectorstore.similarity_search_with_score(search_query, k=5)
+            for doc, score in results:
+                if score <= SIMILARITY_THRESHOLD:
+                    candidate_items.append({
+                        "doc": doc,
+                        "score": score,
+                        "retriever": "faiss"
+                    })
+        elif RETRIEVAL_MODE == "hybrid":
+            results = vectorstore.similarity_search_with_score(search_query, k=5)
+            bm25_results = bm25_search(search_query, k=5)
+            merged = {}
+            for doc, score in results:
+                if score <= SIMILARITY_THRESHOLD:
+                    merged[doc.metadata["chunk_id"]] = {
+                        "doc": doc,
+                        "score": score,
+                        "retriever": "faiss",
+                    }
+            for doc in bm25_results:
+                merged.setdefault(
+                    doc.metadata["chunk_id"],
+                    {
+                        "doc": doc,
+                        "score": None,
+                        "retriever": "bm25",
+                    },
+                )
+            candidate_items = list(merged.values())
+        elif RETRIEVAL_MODE == "rrf":
+            faiss_results = vectorstore.similarity_search_with_score(search_query, k=20)
+            faiss_docs = [doc for doc, score in faiss_results] # Ignore threshold for RRF
+            bm25_results = bm25_search(search_query, k=20)
+            candidate_items = reciprocal_rank_fusion(faiss_docs, bm25_results, k=RRF_K)[:5]
+        elif RETRIEVAL_MODE == "reranker":
+            faiss_results = vectorstore.similarity_search_with_score(search_query, k=20)
+            faiss_docs = [doc for doc, score in faiss_results]
+            bm25_results = bm25_search(search_query, k=20)
+            fused_items = reciprocal_rank_fusion(faiss_docs, bm25_results, k=RRF_K)
+            
+            t_rerank_start = time.time()
+            candidate_items = rerank(search_query, fused_items, top_k=5)
+            t_rerank_end = time.time()
+            rerank_lat = t_rerank_end - t_rerank_start
+        else:
+            rerank_lat = 0
+            
+        t_retrieval_end = time.time()
 
-        for doc in bm25_results:
-            merged.setdefault(
-                doc.metadata["chunk_id"],
-                {
-                    "doc": doc,
-                    "score": None,
-                    "retriever": "bm25",
-                },
-            )
-
-        if not results:
-            logger.debug("No relevant documents found")
-            return {"rag_context": ""}
-            # tune later
-
-        filtered = []
-
-        for item in merged.values():
-            if item["retriever"] == "bm25":
-                filtered.append(item)
-            elif item["score"] <= SIMILARITY_THRESHOLD:
-                filtered.append(item)
-
-        if not filtered:
-            logger.debug("No documents passed filtering")
-            return {"rag_context": ""}
-
-        filtered.sort(
-            key=lambda x: (
-                x["score"] is None,
-                x["score"] if x["score"] is not None else float("inf")
-            )
-        )
-
-        candidate_items = rerank(
-            search_query,
-            filtered[:20],
-            top_k=5,
-        )
-
-        # Format results
         lines = ["=== COMPANY DOCUMENTS ==="]
+        retrieved_chunks = []
 
         for i, item in enumerate(candidate_items, 1):
             doc = item["doc"]
@@ -166,8 +149,9 @@ def rag_retriever_node(state: dict) -> dict:
 
             source = doc.metadata.get("source", "unknown")
             page = doc.metadata.get("page", "")
+            chunk_id = doc.metadata.get("chunk_id", -1)
+            retrieved_chunks.append(chunk_id)
 
-            # Format document reference
             label = f"[Doc {i} | {Path(source).name}"
             if page != "":
                 label += f" p.{page + 1}]"
@@ -179,11 +163,21 @@ def rag_retriever_node(state: dict) -> dict:
             if score is not None:
                 lines.append(f"Score     : {score:.4f}")
             lines.append(doc.page_content.strip())
-            lines.append("")  # Blank line between documents
+            lines.append("")
 
         rag_context = "\n".join(lines)
+        
+        metrics = {
+            "retrieval_latency": t_retrieval_end - t_retrieval_start - rerank_lat,
+            "reranker_latency": rerank_lat
+        }
 
     except Exception as e:
         logger.error("RAG retrieval error: %s", e, exc_info=True)
+        metrics = {}
 
-    return {"rag_context": rag_context}
+    return {
+        "rag_context": rag_context,
+        "retrieved_chunks": retrieved_chunks if 'retrieved_chunks' in locals() else [],
+        "retrieval_metrics": metrics if 'metrics' in locals() else {}
+    }

@@ -62,5 +62,9 @@ class AgentState(TypedDict):
     # Combined context for reasoning
     _combined_context: str
     
+    # Retrieval Ground Truth and Metrics
+    retrieved_chunks: list
+    retrieval_metrics: dict
+    
     # Message history
     messages: Annotated[list, add_messages]
