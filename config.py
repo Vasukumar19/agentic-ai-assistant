@@ -37,3 +37,10 @@ TIMEOUT_TOOL_S = float(os.getenv("TIMEOUT_TOOL_S", "15"))
 # Retry
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "1"))
 MAX_TOOL_FAILURES_PER_TOOL = int(os.getenv("MAX_TOOL_FAILURES_PER_TOOL", "3"))
+
+# Phase 6A — MCP
+TIMEOUT_MCP_S = float(os.getenv("TIMEOUT_MCP_S", "15"))
+MCP_CONFIG_FILE = os.getenv("MCP_CONFIG_FILE", "")
+# MCP_SERVERS is a JSON array string or a path; parsed by mcp/registry.py
+# Example: '[{"name":"test","transport":"stdio","command":"python","args":["mcp_test_server.py"]}]'
+MCP_SERVERS_RAW = os.getenv("MCP_SERVERS", "")

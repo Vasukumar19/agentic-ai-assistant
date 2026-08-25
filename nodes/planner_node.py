@@ -7,25 +7,80 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from llm import llm
-from .tools import tools
 from config import MAX_TOOL_STEPS, TIMEOUT_LLM_S, LLM_PROVIDER, LLM_MODEL_OVERRIDE, MODEL_NAME
 
 logger = logging.getLogger(__name__)
 
-TOOL_INFO = "\n".join([f"- {t.name}: {t.description}\n  Schema: {t.args_schema.model_json_schema() if t.args_schema else 'None'}" for t in tools])
-VALID_TOOL_NAMES = [t.name for t in tools]
+# Dynamic tool info via registry — keeps Planner agnostic to native vs MCP
+def _get_registry():
+    try:
+        from mcp_layer.registry import registry
+        return registry
+    except Exception:
+        return None
 
-class PlannerDecision(BaseModel):
-    action: Literal["tool", "final"] = Field(description="Choose 'tool' to call a tool, or 'final' to provide the final answer.")
-    tool: Optional[str] = Field(default=None, description=f"If action is 'tool', provide the exact name of the tool to call. Valid options: {VALID_TOOL_NAMES}")
-    arguments: Optional[dict] = Field(default=None, description="If action is 'tool', provide a JSON object of arguments matching the tool's schema.")
-    answer: Optional[str] = Field(default=None, description="If action is 'final', provide the final response to the user.")
+def _ensure_mcp_discovery():
+    reg = _get_registry()
+    if reg is None:
+        return
+    try:
+        if not reg._discovered:
+            # load from env/file if not already
+            if not reg._servers:
+                reg.load_servers_from_config()
+            if reg._servers:
+                reg.discover()
+                # refresh tools global after discovery
+                try:
+                    from .tools import _refresh_tool_node
+                    _refresh_tool_node()
+                except Exception:
+                    pass
+    except Exception:
+        pass
 
-PLANNER_SYSTEM_PROMPT = f"""You are a precise, reliable multi-step execution planner.
+def _get_valid_names():
+    _ensure_mcp_discovery()
+    reg = _get_registry()
+    if reg is not None:
+        try:
+            return reg.valid_names()
+        except Exception:
+            pass
+    try:
+        from .tools import tools as _tools
+        return [t.name for t in _tools]
+    except Exception:
+        return ["web_search", "calculator"]
+
+def _get_tool_info():
+    _ensure_mcp_discovery()
+    reg = _get_registry()
+    if reg is not None:
+        try:
+            return reg.tool_info()
+        except Exception:
+            pass
+    try:
+        from .tools import tools as _tools
+        return "\n".join([f"- {t.name}: {t.description}\n  Schema: {t.args_schema.model_json_schema() if t.args_schema else 'None'}" for t in _tools])
+    except Exception:
+        return "- web_search: Search the web\n- calculator: Evaluate expressions"
+
+# keep legacy globals for external imports (but they are now dynamic)
+def _legacy_tool_info():
+    return _get_tool_info()
+def _legacy_valid():
+    return _get_valid_names()
+
+TOOL_INFO = _legacy_tool_info()
+VALID_TOOL_NAMES = _legacy_valid()
+
+PLANNER_SYSTEM_PROMPT_TEMPLATE = """You are a precise, reliable multi-step execution planner.
 Your job is to analyze the user's query, any retrieved context, and all previous tool executions, then decide the SINGLE next action.
 
 Available Tools:
-{TOOL_INFO}
+{tool_info}
 
 MANDATORY RULES:
 1. Action Selection: You may only output 'action': 'tool' OR 'action': 'final'.
@@ -45,6 +100,15 @@ MANDATORY RULES:
 6. Pure Context Queries:
    - If 'RETRIEVED CONTEXT' contains the exact information needed AND NO arithmetic/calculation/search was requested, return 'action': 'final'.
 """
+
+class PlannerDecision(BaseModel):
+    action: Literal["tool", "final"] = Field(description="Choose 'tool' to call a tool, or 'final' to provide the final answer.")
+    tool: Optional[str] = Field(default=None, description=f"If action is 'tool', provide the exact name of the tool to call. Valid options: {VALID_TOOL_NAMES}")
+    arguments: Optional[dict] = Field(default=None, description="If action is 'tool', provide a JSON object of arguments matching the tool's schema.")
+    answer: Optional[str] = Field(default=None, description="If action is 'final', provide the final response to the user.")
+
+# legacy alias for imports that expect PLANNER_SYSTEM_PROMPT
+PLANNER_SYSTEM_PROMPT = PLANNER_SYSTEM_PROMPT_TEMPLATE.format(tool_info=TOOL_INFO)
 
 def check_completion_guard(question: str, completed_steps: list[str], tool_results: list[dict], context: str) -> tuple[bool, str]:
     q_lower = question.lower()
@@ -136,13 +200,15 @@ def planner_node(state: dict) -> dict:
             history_str += f"Result: {res.get('result', 'Error/No Result')}\n"
         user_prompt = f"{history_str}\n\n{user_prompt}"
 
+    # dynamic prompt per-request (registry may have new MCP tools)
+    _prompt = PLANNER_SYSTEM_PROMPT_TEMPLATE.format(tool_info=_get_tool_info())
     structured_llm = llm.with_structured_output(PlannerDecision)
-    
+
     t_llm_start = time.perf_counter()
     try:
         from observability.timeout import run_with_timeout, TimeoutError as ObsTimeout
         def _call_llm():
-            return structured_llm.invoke([SystemMessage(content=PLANNER_SYSTEM_PROMPT), HumanMessage(content=user_prompt)])
+            return structured_llm.invoke([SystemMessage(content=_prompt), HumanMessage(content=user_prompt)])
         try:
             decision = run_with_timeout(_call_llm, TIMEOUT_LLM_S)
         except ObsTimeout as te:
@@ -217,7 +283,7 @@ def planner_node(state: dict) -> dict:
             try:
                 from observability.timeout import run_with_timeout, TimeoutError as ObsTimeout
                 def _call_guard():
-                    return structured_llm.invoke([SystemMessage(content=PLANNER_SYSTEM_PROMPT), HumanMessage(content=guard_prompt)])
+                    return structured_llm.invoke([SystemMessage(content=_prompt), HumanMessage(content=guard_prompt)])
                 try:
                     decision = run_with_timeout(_call_guard, TIMEOUT_LLM_S)
                 except ObsTimeout:
@@ -233,7 +299,7 @@ def planner_node(state: dict) -> dict:
                 logger.error(f"Planner re-prompt failed: {e}")
 
     if decision.action == "tool":
-        if decision.tool not in VALID_TOOL_NAMES:
+        if decision.tool not in _get_valid_names():
             logger.warning(f"Planner hallucinated tool: {decision.tool}")
             try:
                 from observability.errors import make_error_payload, ErrorType
