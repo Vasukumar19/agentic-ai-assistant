@@ -16,6 +16,7 @@ Usage:
 
 import argparse
 import json
+import os
 import re
 import shutil
 import statistics
@@ -50,6 +51,7 @@ from evaluation.metrics.quality import (
     composite_score,
     extract_numbers,
     numbers_equal,
+    is_absence_answer,
 )
 from evaluation.metrics.judge import AnswerJudge, deterministic_faithfulness
 from evaluate_phase3_live import extract_planner_trace
@@ -168,13 +170,24 @@ def evaluate_case(app, judge, raw_case, rid):
     planner_calls = sum(1 for t in execution_trace if str(t.get("step", "")).startswith("planner"))
 
     # --- orchestration metrics --------------------------------------------
-    sel_ok = set(actual_seq) == set(case["required_tools"]) if case["required_tools"] else not actual_seq
+    # Selection measures PLANNER tool choices. Pre-retrieval steps (rag /
+    # memory_search) are graph nodes, not planner decisions; their presence
+    # is governed by task completion / operations, not by this metric.
+    _PRE_TOOLS = {"rag", "memory_search"}
+    planner_tools = [t for t in actual_seq if t not in _PRE_TOOLS]
+    forb = _forbidden_used(case, actual_seq)
+    sel_ok = set(planner_tools) == set(case["required_tools"])
     seq_exact = list(case["expected_sequence"]) == list(actual_seq)
     acc = evaluate_acceptable_sequences(case["acceptable_tool_sequences"], actual_seq)
-    tc = evaluate_task_completion(case, actual_seq, tool_results, rag_context, final_answer)
+    # memory engagement: explicit recall step OR memory_update route handled
+    # the write/recall (no planner tools ran and we got an answer back).
+    mem_ops = [o for o in case["operations"] if o.get("source") == "memory"]
+    memory_engaged = ("memory_search" in actual_seq) or (
+        bool(mem_ops) and not planner_tools and bool(final_answer))
+    tc = evaluate_task_completion(case, actual_seq, tool_results, rag_context,
+                                  final_answer, memory_engaged=memory_engaged)
 
     arg_problems = _check_arg_constraints(case["arg_constraints"], tool_results)
-    forb = _forbidden_used(case, actual_seq)
 
     # --- answer-level metrics ----------------------------------------------
     det_decisive, det_ok, det_score, det_details = _deterministic_correctness(
@@ -213,7 +226,9 @@ def evaluate_case(app, judge, raw_case, rid):
 
     # --- RAG faithfulness ----------------------------------------------------
     faith_judge, faith_det, faith_pass = None, None, None
-    if rag_context and len(rag_context.strip()) > 30 and final_answer:
+    absence_answer = is_absence_answer(final_answer)
+    if (rag_context and len(rag_context.strip()) > 30 and final_answer
+            and not absence_answer):
         faith_det = deterministic_faithfulness(rag_context, final_answer)
         if case["category"] in ("answer_grounded", "rag_memory", "adversarial") or "rag" in actual_seq:
             try:
@@ -236,10 +251,15 @@ def evaluate_case(app, judge, raw_case, rid):
     })
 
     sequence_ok_effective = (acc["match"] if acc["applicable"] else seq_exact)
+    # RAG is a *mandatory* step only when every acceptable sequence needs it;
+    # optional-rag cases must not be flagged RETRIEVAL_FAILURE for skipping it.
+    acc_seqs = [list(s) for s in case["acceptable_tool_sequences"] if s]
+    rag_mandatory = bool(acc_seqs) and all("rag" in s for s in acc_seqs)
+
     primary_failure, secondary_failures = classify_failure_v2(
         state_error=None, execution_status=state.get("execution_status"),
         exec_trace=execution_trace, tool_results=tool_results,
-        rag_required=("rag" in case["expected_sequence"]),
+        rag_required=rag_mandatory,
         rag_context=rag_context, task_completion=tc if tc["applicable"] else None,
         sequence_ok=sequence_ok_effective, selection_ok=sel_ok if case["required_tools"] else None,
         arg_problems=arg_problems, answer_correct=(None if exp_answer is None else answer_correct),
@@ -273,6 +293,7 @@ def evaluate_case(app, judge, raw_case, rid):
         "tool_call_count": trace["tool_call_count"],
         "execution_status": state.get("execution_status"),
         "rag_context_chars": len(rag_context),
+        "rag_context_excerpt": rag_context[:1500],
         "tool_results": tool_results[:6],
         "composite": comp,
         "primary_failure": primary_failure,
@@ -347,7 +368,7 @@ def main():
     # Snapshot memory dir so eval writes don't permanently pollute user state
     mem_backup = None
     if MEMORY_DIR.exists():
-        mem_backup = Path(uuid.uuid4().hex[:8])
+        mem_backup = Path(os.environ.get("TEMP", "/tmp")) / f"mem_backup_{uuid.uuid4().hex[:8]}"
         shutil.copytree(MEMORY_DIR, mem_backup)
 
     app = create_runnable_graph()

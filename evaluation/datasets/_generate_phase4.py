@@ -58,12 +58,10 @@ add(id="p4_calc_09", category="single_tool", query="Multiply 77 by 31.",
     acceptable_tool_sequences=[["calculator"]], ground_truth_source="arithmetic")
 add(id="p4_calc_10", category="single_tool",
     query="If a hotel costs 250 dollars per night, what is the cost of a 4-night stay? Calculate it.",
-    expected_answer="1000", operations=[
-        {"op_id": "rate_ctx", "source": "rag"},
-        op_calc()],
-    required_information=["1000"],
+    expected_answer="1000",
+    operations=[op_calc()],
     required_tools=["calculator"], acceptable_tool_sequences=[["rag", "calculator"], ["calculator"]],
-    expected_context=["travel_policy"], notes="rate stated in query; doc context optional",
+    notes="rate stated in query; RAG context optional and NOT a required operation",
     ground_truth_source="documents/travel_policy.txt")
 
 add(id="p4_web_01", category="single_tool", query="What is the current population of Japan?",
@@ -142,11 +140,11 @@ add(id="p4_mem_02", category="rag_memory",
     ground_truth_source="runtime_memory", notes="write case")
 add(id="p4_mem_03", category="rag_memory", query="What is my name?",
     operations=[{"op_id": "mem_read", "source": "memory"}], required_tools=[],
-    acceptable_tool_sequences=[[]], expected_answer="Phase4User{rid}",
+    acceptable_tool_sequences=[["memory_search"], []], expected_answer="Phase4User{rid}",
     ground_truth_source="runtime_memory", depends_on="p4_mem_01")
 add(id="p4_mem_04", category="rag_memory", query="What is my goal?",
     operations=[{"op_id": "mem_read", "source": "memory"}], required_tools=[],
-    acceptable_tool_sequences=[[]], expected_answer="AI engineer{rid}",
+    acceptable_tool_sequences=[["memory_search"], []], expected_answer="AI engineer{rid}",
     ground_truth_source="runtime_memory", depends_on="p4_mem_02")
 add(id="p4_mem_05", category="rag_memory",
     query="Remember that my favorite programming language is Rust{rid}.",
@@ -155,7 +153,7 @@ add(id="p4_mem_05", category="rag_memory",
     ground_truth_source="runtime_memory", notes="write case")
 add(id="p4_mem_06", category="rag_memory", query="What is my favorite programming language?",
     operations=[{"op_id": "mem_read", "source": "memory"}], required_tools=[],
-    acceptable_tool_sequences=[[]], expected_answer="Rust",
+    acceptable_tool_sequences=[["memory_search"], []], expected_answer="Rust",
     ground_truth_source="runtime_memory", depends_on="p4_mem_05")
 
 # ════════════════════════ 3. MULTI_STEP (20) ════════════════════════════════

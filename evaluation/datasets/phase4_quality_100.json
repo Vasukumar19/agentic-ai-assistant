@@ -216,17 +216,10 @@
     "expected_answer": "1000",
     "operations": [
       {
-        "op_id": "rate_ctx",
-        "source": "rag"
-      },
-      {
         "op_id": "calc",
         "tool": "calculator",
         "depends_on_output": true
       }
-    ],
-    "required_information": [
-      "1000"
     ],
     "required_tools": [
       "calculator"
@@ -240,10 +233,7 @@
         "calculator"
       ]
     ],
-    "expected_context": [
-      "travel_policy"
-    ],
-    "notes": "rate stated in query; doc context optional",
+    "notes": "rate stated in query; RAG context optional and NOT a required operation",
     "ground_truth_source": "documents/travel_policy.txt"
   },
   {
@@ -830,6 +820,9 @@
     ],
     "required_tools": [],
     "acceptable_tool_sequences": [
+      [
+        "memory_search"
+      ],
       []
     ],
     "expected_answer": "Phase4User{rid}",
@@ -848,6 +841,9 @@
     ],
     "required_tools": [],
     "acceptable_tool_sequences": [
+      [
+        "memory_search"
+      ],
       []
     ],
     "expected_answer": "AI engineer{rid}",
@@ -884,6 +880,9 @@
     ],
     "required_tools": [],
     "acceptable_tool_sequences": [
+      [
+        "memory_search"
+      ],
       []
     ],
     "expected_answer": "Rust",

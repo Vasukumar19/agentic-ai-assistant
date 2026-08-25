@@ -20,4 +20,8 @@ Thumbs.db
 
 # Project-specific state
 memory/
+# Memory snapshot backups created by evaluation runners (UUID-named dirs)
+[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/
+# Benchmark run logs
+evaluation/results/*.txt
 faiss_index/

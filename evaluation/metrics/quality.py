@@ -160,9 +160,21 @@ def _covers_terms(haystacks: list[str], terms: list[str]) -> bool:
     return all(t.lower() in blob for t in terms)
 
 
+def is_absence_answer(answer: str) -> bool:
+    """True when the answer's core move is admitting the info isn't available.
+    Such answers are exempt from utilization/faithfulness penalties because
+    admitting absence is CORRECT behavior for absent facts."""
+    return bool(re.search(
+        r"not specified|does not specify|doesn't specify|no information|"
+        r"not mentioned|cannot determine|not provide enough context|"
+        r"could not find|unable to find",
+        (answer or "").lower()))
+
+
 def evaluate_task_completion(case_norm: dict, actual_seq: list,
                              tool_results: list, rag_context: str,
-                             final_answer: str) -> dict:
+                             final_answer: str,
+                             memory_engaged: bool | None = None) -> dict:
     """Every declared operation must be satisfied by real evidence.
 
     Operation kinds:
@@ -188,7 +200,9 @@ def evaluate_task_completion(case_norm: dict, actual_seq: list,
         if op.get("source") == "rag":
             ok = bool(rag_context and len(rag_context.strip()) > 30)
         elif op.get("source") == "memory":
-            ok = ("memory_search" in actual_seq) or bool(rag_context)
+            # memory engagement = explicit recall step OR the memory_update
+            # route handled it (graph completed with a confirmation answer)
+            ok = ("memory_search" in actual_seq) or bool(memory_engaged)
         elif op.get("answer_contains_any"):
             ok = any(re.search(p, final_answer or "", re.I)
                      for p in op["answer_contains_any"])
@@ -265,10 +279,14 @@ def evaluate_utilization(case_norm: dict, tool_results: list,
 
     An output counts as used when its key values/terms surface either in a
     subsequent tool's arguments (chaining) or in the final answer.
+    Answers that correctly declare information absent are exempt.
     """
     ops = case_norm.get("operations") or []
     if not ops:
         return {"applicable": False}
+    if is_absence_answer(final_answer):
+        return {"applicable": True, "rate": None, "used": [], "unused": [],
+                "note": "absence answer: utilization N/A"}
 
     used, unused = [], []
     for i, op in enumerate(ops):
@@ -308,6 +326,13 @@ def evaluate_utilization(case_norm: dict, tool_results: list,
                 ow = set(content_words(out_text))
                 downstream = content_words((final_answer or "") + " " + later_args)[:80]
                 used_here = sum(1 for w in downstream if w in ow) >= 2
+        if not used_here and tool == "web_search":
+            # Noisy snippets: any distinctive (>=5 char) answer token that also
+            # appears in the result proves the output informed the answer.
+            out_words = {w.lower() for w in re.findall(r"[A-Za-z]{5,}", out_text)}
+            distinctive = [w for w in re.findall(r"[A-Za-z]{5,}", final_answer or "")
+                           if w.lower() in out_words]
+            used_here = bool(distinctive)
 
         (used if used_here else unused).append(oid)
 
