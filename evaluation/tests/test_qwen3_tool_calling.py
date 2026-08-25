@@ -5,17 +5,29 @@ Runs ONLY when LLM_PROVIDER=ollama. Validates that Qwen3 produces real
 bind_tools() tool calls and that the tools actually execute.
 """
 
-import os
+import importlib
 
 import pytest
 from langchain_core.messages import HumanMessage
 
-from llm import llm
-from nodes.tools import tools, run_tool
+import llm as llm_module
+
+
+def _ensure_real_llm():
+    """If an earlier test module cached MockLLM in sys.modules, reload the
+    real provider so this test exercises actual model execution."""
+    if type(llm_module.llm).__name__ == "MockLLM":
+        importlib.reload(llm_module)
+    return llm_module.llm
+
+
+llm = _ensure_real_llm()
+
+from nodes.tools import tools, run_tool  # noqa: E402
 
 pytestmark = pytest.mark.skipif(
-    os.getenv("LLM_PROVIDER", "").lower() != "ollama",
-    reason="Requires LLM_PROVIDER=ollama",
+    type(llm).__name__ != "ChatOllama",
+    reason="Requires the real Ollama provider (LLM_PROVIDER=ollama)",
 )
 
 

@@ -7,18 +7,31 @@ Qwen3 via with_structured_output(). A PASS means the model actually produced
 a validated PlannerDecision.
 """
 
+import importlib
 import os
 import time
 
 import pytest
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from llm import llm
-from nodes.planner_node import PlannerDecision, PLANNER_SYSTEM_PROMPT
+import llm as llm_module
+
+
+def _ensure_real_llm():
+    """If an earlier test module cached MockLLM in sys.modules, reload the
+    real provider so this test exercises actual model execution."""
+    if type(llm_module.llm).__name__ == "MockLLM":
+        importlib.reload(llm_module)
+    return llm_module.llm
+
+
+llm = _ensure_real_llm()
+
+from nodes.planner_node import PlannerDecision, PLANNER_SYSTEM_PROMPT  # noqa: E402
 
 pytestmark = pytest.mark.skipif(
-    os.getenv("LLM_PROVIDER", "").lower() != "ollama",
-    reason="Requires LLM_PROVIDER=ollama",
+    type(llm).__name__ != "ChatOllama",
+    reason="Requires the real Ollama provider (LLM_PROVIDER=ollama)",
 )
 
 

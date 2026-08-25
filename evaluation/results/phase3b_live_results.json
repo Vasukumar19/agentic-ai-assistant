@@ -3,90 +3,1012 @@
     "id": "p3b_nec_001",
     "category": "tool_necessity",
     "query": "What is 128 divided by 8?",
+    "expected_tools": [
+      "calculator"
+    ],
     "expected_sequence": [
       "calculator"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "calculator"
+    ],
+    "final_answer": "128 divided by 8 is 16.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 1.518,
+    "total_latency_s": 7.219,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_002",
     "category": "tool_necessity",
     "query": "Calculate 15% of 850.",
+    "expected_tools": [
+      "calculator"
+    ],
     "expected_sequence": [
       "calculator"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "calculator"
+    ],
+    "final_answer": "15% of 850 is 127.5.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 1.546,
+    "total_latency_s": 2.219,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_003",
     "category": "tool_necessity",
     "query": "Find the square root of 144.",
+    "expected_tools": [
+      "calculator"
+    ],
     "expected_sequence": [
       "calculator"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "calculator"
+    ],
+    "final_answer": "The square root of 144 is 12.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 1.214,
+    "total_latency_s": 1.777,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_004",
     "category": "tool_necessity",
     "query": "Who is the current CEO of Microsoft?",
+    "expected_tools": [
+      "web_search"
+    ],
     "expected_sequence": [
       "web_search"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "web_search"
+    ],
+    "final_answer": "The current CEO of Microsoft is Satya Nadella.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 1.363,
+    "total_latency_s": 4.544,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_005",
     "category": "tool_necessity",
     "query": "What is the current stock price of Apple?",
+    "expected_tools": [
+      "web_search"
+    ],
     "expected_sequence": [
       "web_search"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "web_search"
+    ],
+    "final_answer": "The current stock price of Apple (AAPL) is US$ 310.34.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 1.563,
+    "total_latency_s": 7.92,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_006",
     "category": "tool_necessity",
     "query": "According to the company policy document, what is our remote work policy?",
+    "expected_tools": [
+      "rag"
+    ],
     "expected_sequence": [
       "rag"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "According to the company policy document, the remote work policy allows employees to work remotely from another country for up to 30 days per calendar year. The hybrid work environment requires employees to be in the office 2 days a week (Tuesday and Thursday).",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 3.925,
+    "total_latency_s": 3.99,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_007",
     "category": "tool_necessity",
     "query": "What is the health insurance provider listed in our employee benefits document?",
+    "expected_tools": [
+      "rag"
+    ],
     "expected_sequence": [
       "rag"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "The health insurance provider listed in the employee benefits document is BlueCross BlueShield.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 1.019,
+    "total_latency_s": 1.531,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_008",
     "category": "tool_necessity",
     "query": "What database technology does our engineering stack use according to our internal doc?",
+    "expected_tools": [
+      "rag"
+    ],
     "expected_sequence": [
       "rag"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "According to the internal documents, the engineering stack uses PostgreSQL 15 as the primary relational database. Redis is used for caching.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 1.277,
+    "total_latency_s": 1.794,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_009",
     "category": "tool_necessity",
     "query": "What is the capital of France?",
+    "expected_tools": [
+      "web_search"
+    ],
     "expected_sequence": [
       "web_search"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [],
+    "final_answer": "The capital of France is Paris.",
+    "execution_status": "completed",
+    "failure_type": "missing_tool",
+    "tool_selection_correct": false,
+    "sequence_correct": false,
+    "multistep_correct": true,
+    "guard_correct": false,
+    "final_before_required_tool": true,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 0.488,
+    "total_latency_s": 0.985,
+    "status": "completed"
   },
   {
     "id": "p3b_nec_010",
     "category": "tool_necessity",
     "query": "According to our documents, what is the annual hardware reimbursement limit?",
+    "expected_tools": [
+      "rag"
+    ],
     "expected_sequence": [
       "rag"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "The annual hardware reimbursement limit is $1,000.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 0.954,
+    "total_latency_s": 1.454,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_001",
+    "category": "premature_termination",
+    "query": "Find the current population of Japan and calculate what 0.5% of it would be.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The current population of Japan is approximately 123,802,000. 0.5% of this population is 619,010.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.311,
+    "total_latency_s": 6.699,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_002",
+    "category": "premature_termination",
+    "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "According to the company policy, you get 20 days of Paid Time Off (PTO) per year. If you take 5 days off, you will have 15 days left.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 3.051,
+    "total_latency_s": 3.84,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_003",
+    "category": "premature_termination",
+    "query": "Based on our internal document, what is the training budget per employee? Multiply it by 5 for a team of 5.",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "Based on the internal document, the training budget per employee is $1,500. Multiplying this by 5 for a team of 5 gives a total training budget of $7,500.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 2.755,
+    "total_latency_s": 3.506,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_004",
+    "category": "premature_termination",
+    "query": "Find the GDP of Germany and calculate 1% of it.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The GDP of Germany is 5050.92 billion US dollars. 1% of this GDP is 50.5092 billion US dollars.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.053,
+    "total_latency_s": 5.705,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_005",
+    "category": "premature_termination",
+    "query": "Search for the price of 1 Bitcoin in USD and multiply it by 3.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The price of 1 Bitcoin in USD is $79,834.47. When multiplied by 3, the result is $239,503.41.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.495,
+    "total_latency_s": 6.802,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_006",
+    "category": "premature_termination",
+    "query": "According to the policy, what is the hardware reimbursement limit and what would 3 employees receive in total?",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "Task terminated to prevent repeated execution of the same tool without new information.",
+    "execution_status": "repeated_tool_call",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 0.0,
+    "tool_loop_detected": true,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 2.617,
+    "total_latency_s": 2.646,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_007",
+    "category": "premature_termination",
+    "query": "Find the population of Tokyo and divide it by 10.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The population of Tokyo is 14,195,730. When divided by 10, the result is 1,419,573.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.284,
+    "total_latency_s": 6.03,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_008",
+    "category": "premature_termination",
+    "query": "What is the wellness stipend in our policy? Calculate what 25% of that stipend is.",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "The wellness stipend is not explicitly mentioned in the provided policy documents. However, the hardware stipend is $1,000. 25% of the hardware stipend is $250.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 3.057,
+    "total_latency_s": 4.007,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_009",
+    "category": "premature_termination",
+    "query": "Search for the speed of light in km/s and multiply it by 60.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The speed of light is approximately 300,000 kilometers per second. When multiplied by 60, it equals 18,000,000 kilometers per minute. The exact calculation based on the precise value of the speed of light (299,792.458 km/s) gives 17,987,547.48 kilometers per minute.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 4.351,
+    "total_latency_s": 7.731,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_010",
+    "category": "premature_termination",
+    "query": "Find the height of Mount Everest in meters and divide it by 2.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The height of Mount Everest is 8,848.86 meters. When divided by 2, it equals 4,424.43 meters.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.105,
+    "total_latency_s": 5.945,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_001",
+    "category": "multistep_dependency",
+    "query": "Find the population of Brazil and the population of Argentina. Which one is larger and by how much?",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search"
+    ],
+    "final_answer": "The population of Brazil is 213,562,666, and the population of Argentina is not fully provided in the retrieved context. However, based on the information given, Brazil's population is larger than Argentina's. To determine the exact difference, the population of Argentina needs to be explicitly provided.",
+    "execution_status": "completed",
+    "failure_type": "premature_stop",
+    "tool_selection_correct": false,
+    "sequence_correct": false,
+    "multistep_correct": false,
+    "guard_correct": false,
+    "final_before_required_tool": true,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.623,
+    "total_latency_s": 8.683,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_002",
+    "category": "multistep_dependency",
+    "query": "What is the price of gold per ounce and the price of silver per ounce? What is the gold-to-silver price ratio?",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator",
+      "web_search"
+    ],
+    "final_answer": "The current price of gold is $4,702.40 per troy ounce, and the current price of silver is $68.30 per troy ounce. The gold-to-silver price ratio is calculated as the price of gold divided by the price of silver, which is $4,702.40 / $68.30 \u2248 68.85.",
+    "execution_status": "completed",
+    "failure_type": "wrong_order",
+    "tool_selection_correct": true,
+    "sequence_correct": false,
+    "multistep_correct": false,
+    "guard_correct": false,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 7.089,
+    "total_latency_s": 13.518,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_003",
+    "category": "multistep_dependency",
+    "query": "Find the GDP of India and the GDP of Pakistan. Calculate the ratio of India's GDP to Pakistan's GDP.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The GDP of India is $3.96 trillion, and the GDP of Pakistan is $407 billion. The ratio of India's GDP to Pakistan's GDP is approximately 9.73.",
+    "execution_status": "completed",
+    "failure_type": "wrong_order",
+    "tool_selection_correct": true,
+    "sequence_correct": false,
+    "multistep_correct": false,
+    "guard_correct": false,
+    "final_before_required_tool": true,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 3.289,
+    "total_latency_s": 5.665,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_004",
+    "category": "multistep_dependency",
+    "query": "Find the populations of India and China, subtract them, and find 10% of the difference.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The population of India is 1,460,000,000 and the population of China is 1,410,000,000. The difference between their populations is 50,000,000. 10% of this difference is 5,000,000.",
+    "execution_status": "completed",
+    "failure_type": "wrong_order",
+    "tool_selection_correct": true,
+    "sequence_correct": false,
+    "multistep_correct": false,
+    "guard_correct": false,
+    "final_before_required_tool": true,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 4.582,
+    "total_latency_s": 6.703,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_005",
+    "category": "multistep_dependency",
+    "query": "Find the tallest building in New York and the tallest building in Dubai, and tell me the difference in height.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The tallest building in New York is the Woolworth Building, which is 792 feet tall. The tallest building in Dubai is the Burj Khalifa, which is 828 feet tall. The difference in height between the two buildings is 36 feet.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 4.557,
+    "total_latency_s": 10.635,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_006",
+    "category": "multistep_dependency",
+    "query": "Check our hardware policy for the laptop budget, search for a MacBook Pro retail price, and calculate if it is within budget.",
+    "expected_tools": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search",
+      "calculator",
+      "web_search"
+    ],
+    "final_answer": "According to the hardware policy, engineers are allocated a MacBook Pro 16-inch (M3 Max, 64GB RAM). The retail price for this model is $2,499. The global stipend for home office equipment is $1,000, which is less than the laptop cost. Therefore, the laptop is not within the stipend budget.",
+    "execution_status": "completed",
+    "failure_type": "wrong_order",
+    "tool_selection_correct": true,
+    "sequence_correct": false,
+    "multistep_correct": false,
+    "guard_correct": false,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 6.612,
+    "total_latency_s": 9.19,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_007",
+    "category": "multistep_dependency",
+    "query": "What is our training budget according to policy? Find the cost of an AWS Solutions Architect exam online, and calculate remaining budget.",
+    "expected_tools": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator",
+      "web_search"
+    ],
+    "final_answer": "According to the policy, each full-time employee has a $1,500 annual training budget for professional development. The cost of an AWS Solutions Architect exam is $150. After subtracting the exam cost from the training budget, the remaining budget is $1,350.",
+    "execution_status": "completed",
+    "failure_type": "wrong_order",
+    "tool_selection_correct": true,
+    "sequence_correct": false,
+    "multistep_correct": false,
+    "guard_correct": false,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 4.549,
+    "total_latency_s": 6.675,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_008",
+    "category": "multistep_dependency",
+    "query": "According to our internal docs, what frontend framework do we use, and what is its latest release version on the web?",
+    "expected_tools": [
+      "rag",
+      "web_search"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "final_answer": "According to our internal documentation, we use React 18 as our frontend framework. The latest release version of React on the web is 19.3.-canary-ec61f187-20260806, as indicated in the web search results.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 3.543,
+    "total_latency_s": 5.072,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_009",
+    "category": "multistep_dependency",
+    "query": "Find the CEO of our company in internal docs, and search the web for their latest news.",
+    "expected_tools": [
+      "rag",
+      "web_search"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "final_answer": "The CEO of GlobalTech is Dan Green. According to the latest news, Dan Green has been leading the company's strategic shift toward a service-centric model, which has resulted in improved Adjusted EBITDA and reduced net loss.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 2.93,
+    "total_latency_s": 4.582,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_010",
+    "category": "multistep_dependency",
+    "query": "Find the distance from Earth to Mars in km, and from Earth to Venus in km, and compute the difference.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The distance from Earth to Mars is approximately 225 million km, and the distance from Earth to Venus is approximately 108 million km. The difference between these distances is 117 million km.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 5.034,
+    "total_latency_s": 10.937,
+    "status": "completed"
   }
 ]

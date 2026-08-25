@@ -1,131 +1,94 @@
-# Phase 3 Tool Orchestration Report — Real LLM Validation
+# Phase 3 Tool Orchestration Report
 
-**Generated**: 2026-08-24T16:15:00Z  
-**Primary Free Provider**: Google Gemini (`gemini-3.6-flash`)  
-**Secondary Free Provider**: OpenRouter Free Tier (`nvidia/nemotron-3-super-120b-a12b:free`)
+Generated: 2026-08-25T10:01:31Z
+Model: gemini-3.6-flash
 
----
+## MOCK RESULTS (Deterministic, No API Calls)
 
-## 1. Provider & Environment Configuration Audit
-
-Per instructions, the environment variables were inspected without exposing secret values:
-
-| Provider | Environment Variable | Status |
-|---|---|---|
-| Google Gemini | `google_api_key` / `GOOGLE_API_KEY` | **Configured** |
-| OpenRouter | `open_router_api` / `OPENROUTER_API_KEY` | **Configured** |
-| Groq | `GROQ_API_KEY` | **Configured** *(Quota Exhausted)* |
-
-### Provider Smoke Test & Compatibility
-
-1. **Google Gemini (`gemini-3.6-flash`)**:
-   - **Structured Output**: Supported via `with_structured_output(PlannerDecision)`. Pydantic parsing succeeded.
-   - **API Rate Limit**: Free tier daily limit (20 requests per day per project per model).
-2. **OpenRouter Free Models**:
-   - `google/gemma-4-31b-it:free`: Returned HTTP 429 (Provider overloaded).
-   - `google/gemma-4-26b-a4b-it:free`: Returned HTTP 429 (Provider overloaded).
-   - `nvidia/nemotron-3-super-120b-a12b:free`: Function calling / structured output returned `finish_reason: error` (`STRUCTURED_OUTPUT_UNSUPPORTED`).
-
----
-
-## 2. Frozen Phase 2 Baseline (Reference)
-
-The Phase 2 baseline remains frozen and was not modified:
-
-| Metric | Baseline Value | Status |
-|---|---:|---|
-| Routing Accuracy | 98.0% | Frozen |
-| RAG Recall@1 | 96.1% | Frozen |
-| RAG Recall@3 | 100.0% | Frozen |
-| RAG Recall@5 | 100.0% | Frozen |
-| MRR | 0.980 | Frozen |
-| Tool Success Rate | 100.0% | Frozen |
-
----
-
-## 3. MOCK RESULTS (Deterministic, No API Calls)
-
-These results were produced using the deterministic `MockLLM` harness across 50 benchmark cases to test the orchestration control flow:
+These results were produced using a deterministic Mock LLM to validate the orchestration infrastructure logic only.
+They do **NOT** represent real LLM capability.
 
 | Metric | ReAct (Mock) | Planner (Mock) | Δ |
 |---|---:|---:|---:|
-| Tool Selection Accuracy | 24.0% | 44.0% | +20.0 pp |
-| Sequence Accuracy | 20.0% | 40.0% | +20.0 pp |
-| Multi-Step Completion | 20.0% | 40.0% | +20.0 pp |
-| Missing Tool Rate | 36.0% | 12.0% | -24.0 pp |
-| Premature Stop Rate | 24.0% | 16.0% | -8.0 pp |
-| Unnecessary Tool Rate | 20.0% | 18.0% | -2.0 pp |
+| Tool Selection Accuracy | 24.0% | 44.0% | +20.0pp |
+| Sequence Accuracy | 20.0% | 40.0% | +20.0pp |
+| Multi-Step Completion | 20.0% | 40.0% | +20.0pp |
 | Avg Latency | 0.84s | 1.56s | +0.72s |
 
-> **Note**: Mock LLM results demonstrate that the Planner's step-by-step state machine prevents the premature termination and hallucinated multi-tool dispatch issues present in the ReAct baseline.
+> **Note:** Mock deltas reflect improved orchestration logic, not real LLM reasoning quality.
 
 ---
 
-## 4. REAL LLM LIVE VALIDATION
+## REAL LLM VALIDATION
 
-**Dataset**: `evaluation/datasets/phase3_live_10.json` (10 representative cases)  
-**Evaluated Model**: `gemini-3.6-flash` (Google Free Tier)
+- **Dataset**: `evaluation/datasets/phase3_live_10.json` (10 cases)
+- **Cases attempted**: 10
+- **Cases completed**: 10
+- **Cases rate-limited**: 0
 
-### Execution Summary
-- **Cases Attempted**: 10
-- **Cases Completed**: 5
-- **Cases Rate-Limited**: 5 (stopped immediately on `RESOURCE_EXHAUSTED` at `live_006`)
+### Before/After Comparison (Real LLM)
 
-### Real LLM Metrics (Completed Cases)
+| Metric | ReAct (Real) | Planner (Real) | Δ |
+|---|---:|---:|---:|
+| Tool Selection Accuracy | not run | 90.0% | N/A |
+| Sequence Accuracy | not run | 70.0% | N/A |
+| Multi-Step Completion | not run | 57.1% | N/A |
+| Missing Tool Rate | not run | 0.0% | N/A |
+| Wrong Tool Rate | not run | 20.0% | N/A |
+| Premature Stop Rate | not run | 10.0% | N/A |
+| Unnecessary Tool Rate | not run | 0.0% | N/A |
+| Arg Accuracy | not run | 100.0% | N/A |
+| Dep Accuracy | not run | 81.5% | N/A |
+| Tool Success Rate | not run | 70.0% | N/A |
+| Avg LLM Calls | not run | 2.3 | N/A |
+| Avg Tool Calls | not run | 1.4 | N/A |
+| Mean Latency (s) | not run | 4.99 | N/A |
+| P50 Latency (s) | not run | 4.49 | N/A |
+| P95 Latency (s) | not run | 8.98 | N/A |
 
-| Metric | ReAct (Real Baseline) | Planner (Real Gemini 3.6 Flash) |
-|---|---:|---:|
-| Tool Selection Accuracy | 24.0% (50-case) | **40.0%** (2/5) |
-| Sequence Accuracy | 20.0% (50-case) | **40.0%** (2/5) |
-| Multi-Step Completion Rate | 20.0% (50-case) | **33.3%** (1/3) |
-| Missing Tool Rate | 36.0% | 40.0% (2/5) |
-| Wrong Tool Rate | — | 0.0% (0/5) |
-| Premature Stop Rate | 24.0% | 20.0% (1/5) |
-| Unnecessary Tool Rate | 20.0% | 0.0% (0/5) |
-| Tool Argument Accuracy | — | **100.0%** |
-| Tool Dependency Accuracy | — | 50.0% |
-| Tool Success Rate | 100.0% | **100.0%** (for executed tools) |
-| Avg LLM Calls / Query | 1.0 | 1.2 |
-| Avg Tool Calls / Query | 0.5 | 0.6 |
-| Mean Total Latency | 6.60s | 27.18s |
-| P50 Latency | 5.27s | 34.84s |
-| P95 Latency | 19.18s | 41.43s |
+### Per-Case Trace
 
----
+| ID | Category | Expected | Actual | Status | Failure | Latency | LLM Calls |
+|---|---|---|---|---|---|---:|---:|
+| live_001 | single_tool_calc | calculator | calculator | completed | ✅ pass | 3.70s | 2 |
+| live_002 | single_tool_search | web_search | web_search | completed | ✅ pass | 3.29s | 2 |
+| live_003 | search_then_calc | web_search, calculator | web_search, calculator | completed | ✅ pass | 5.86s | 3 |
+| live_004 | search_then_calc | web_search, calculator | web_search, calculator | completed | ✅ pass | 5.00s | 3 |
+| live_005 | rag_then_calc | rag, calculator | rag, calculator | completed | ✅ pass | 3.98s | 2 |
+| live_006 | rag_then_calc | rag, calculator | rag, calculator | completed | ✅ pass | 3.07s | 2 |
+| live_007 | multi_search_compare | web_search, web_search, calculator | web_search, web_search | completed | premature_stop | 8.98s | 3 |
+| live_008 | multi_search_compare | web_search, web_search, calculator | web_search, calculator | completed | wrong_tool | 7.14s | 3 |
+| live_009 | memory_tool |  |  | completed | ✅ pass | 1.52s | 0 |
+| live_010 | complex_multistep | web_search, web_search, calculator | web_search, calculator | completed | wrong_tool | 7.35s | 3 |
 
-## 5. Per-Case Execution Traces
+### Failure Analysis
 
-| Case ID | Category | Expected Tools | Actual Tools Executed | Result | Latency | Traced Tool Sequence |
-|---|---|---|---|---|---:|---|
-| `live_001` | single_tool_calc | `['calculator']` | `['calculator']` | ✅ PASS | 8.46s | `calculator(expression="128 / 8") -> "16.0"` |
-| `live_002` | single_tool_search | `['web_search']` | `[]` | ❌ Missing Tool | 15.02s | Model answered directly without tool |
-| `live_003` | search_then_calc | `['web_search', 'calculator']` | `['web_search', 'calculator']` | ✅ PASS | 34.84s | `web_search(query="current population of Japan") -> "...125 million...", calculator(expression="125000000 * 0.005") -> "625000.0"` |
-| `live_004` | search_then_calc | `['web_search', 'calculator']` | `[]` | ❌ Missing Tool | 41.43s | Model answered directly without tool |
-| `live_005` | rag_then_calc | `['rag', 'calculator']` | `['rag']` | ❌ Premature Stop | 36.16s | Pre-retrieval RAG succeeded, but model synthesized answer instead of calling calculator |
-| `live_006` | rag_then_calc | `['rag', 'calculator']` | — | ⛔ RATE_LIMITED | — | Free tier daily quota exhausted |
-| `live_007` | multi_search_compare | `['web_search', 'web_search', 'calculator']` | — | ⛔ RATE_LIMITED | — | Free tier daily quota exhausted |
-| `live_008` | multi_search_compare | `['web_search', 'web_search', 'calculator']` | — | ⛔ RATE_LIMITED | — | Free tier daily quota exhausted |
-| `live_009` | memory_tool | `[]` | — | ⛔ RATE_LIMITED | — | Free tier daily quota exhausted |
-| `live_010` | complex_multistep | `['web_search', 'web_search', 'calculator']` | — | ⛔ RATE_LIMITED | — | Free tier daily quota exhausted |
+**live_007** — premature_stop
+- Query: Find the population of Brazil and the population of Argentina. Which one is larger and by how much?
+- Expected: `['web_search', 'web_search', 'calculator']`
+- Actual: `['web_search', 'web_search']`
+- Tool calls:
+  - `web_search({'query': 'population of Brazil'})` → `Brazil had an official resident population of 203 million in 2022, according to the Brazilian Institute of Geography and`
+  - `web_search({'query': 'population of Argentina'})` → `Demographics of Argentina ... This is a demography of Argentina including population density, ethnicity, economic status`
 
----
+**live_008** — wrong_tool
+- Query: What is the current price of gold per ounce and the current price of silver per ounce? What is the gold-to-silver price ratio?
+- Expected: `['web_search', 'web_search', 'calculator']`
+- Actual: `['web_search', 'calculator']`
+- Tool calls:
+  - `web_search({'query': 'current price of gold per ounce and current price of silver per ounce'})` → `Live Price of Gold provides up-to-date live gold prices in multiple currencies for all countries, available 24/7. You ca`
+  - `calculator({'expression': 'gold_price / silver_price'})` → `Error: ('NameError', "gold_price / silver_price\nNameError: name 'gold_price' is not defined")`
 
-## 6. Key Findings & Analysis
+**live_010** — wrong_tool
+- Query: Find the GDP of India and the GDP of Pakistan. Calculate the ratio of India's GDP to Pakistan's GDP and tell me how many times larger India's economy is.
+- Expected: `['web_search', 'web_search', 'calculator']`
+- Actual: `['web_search', 'calculator']`
+- Tool calls:
+  - `web_search({'query': 'GDP of India and GDP of Pakistan'})` → `Gross domestic product (GDP) is the market value of all final goods and services from a nation in a given year. [2] Coun`
+  - `calculator({'expression': '3.96 / 0.407'})` → `9.72972972972973`
 
-1. **Multi-Step Tool Orchestration Works with Real LLM**:
-   - `live_003` demonstrated the core capability of the new Planner architecture: it issued `web_search`, received the population data, ingested the result into its execution context, determined that arithmetic was still needed, issued `calculator(expression='125000000 * 0.005')`, and synthesized the correct final answer.
-2. **Deterministic Output & Schema Conformance**:
-   - On all queries where tools were called, the argument accuracy was **100%** with zero invalid tool names and zero argument malformations.
-3. **Latency vs. Reliability Tradeoff**:
-   - The multi-step Planner loop requires `N+1` LLM calls for `N` tool operations. Under the free tier, API response times averaged ~8-15s per LLM call, resulting in higher end-to-end latency (mean 27.18s) compared to single-shot ReAct.
-4. **Primary Failure Modes in Real LLM**:
-   - **Parametric Knowledge Shortcut (Missing Tool)**: For well-known facts (e.g., speed of light, CEO of Tesla), the LLM chose `final` immediately rather than calling `web_search`.
-   - **Premature Stop on RAG Context**: When internal context was pre-retrieved, the LLM attempted mental math on the context rather than invoking the `calculator` tool.
+### Latency Overhead Analysis
 
----
+The Planner architecture issues **one structured LLM call per tool step** plus a final call, versus the ReAct loop which used one call per reasoning round. This typically results in N+1 LLM calls for an N-tool task.
 
-## 7. Phase 2 Regression Validation
-
-All offline unit tests and retrieval checks pass cleanly:
-- `pytest`: **5 passed, 0 failed** ✅
-- RAG retrieval pipeline metrics remain at **Recall@1 = 96.1%**, **Recall@3 = 100.0%**, **MRR = 0.980**.
+Observed mean latency: **4.99s** with avg **2.3** LLM calls per query.
