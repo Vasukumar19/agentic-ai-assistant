@@ -112,16 +112,64 @@ def _parse_retrieval_plan(content: str) -> dict | None:
 
 def retrieval_planner_node(state: dict) -> dict:
     """Create a retrieval plan from the current question."""
+    import time
+    t0 = time.perf_counter()
     question = state.get("question", "")
+    try:
+        heuristic_plan = _heuristic_retrieval_plan(question)
+        if heuristic_plan is not None:
+            dur = int((time.perf_counter() - t0) * 1000)
+            try:
+                from observability.trace import make_event, append_event, add_latency
+                add_latency(state, "retrieval_planner", dur)
+                ev = make_event(state, "RETRIEVAL", "retrieval_planner", duration_ms=dur, status="success",
+                                metadata={"plan": heuristic_plan, "method": "heuristic"})
+                append_event(state, ev)
+            except Exception:
+                pass
+            return {"retrieval_plan": heuristic_plan, "trace_events": state.get("trace_events"),
+                    "trace_step": state.get("trace_step"), "latency_breakdown": state.get("latency_breakdown")}
 
-    heuristic_plan = _heuristic_retrieval_plan(question)
-    if heuristic_plan is not None:
-        return {"retrieval_plan": heuristic_plan}
-
-    prompt = PLANNER_PROMPT.replace("{question}", question)
-    response = llm.invoke(prompt)
-    retrieval_plan = _parse_retrieval_plan(response.content)
-    if retrieval_plan is None:
-        retrieval_plan = DEFAULT_PLAN
-
-    return {"retrieval_plan": retrieval_plan}
+        prompt = PLANNER_PROMPT.replace("{question}", question)
+        llm_t0 = time.perf_counter()
+        response = llm.invoke(prompt)
+        llm_dur = int((time.perf_counter() - llm_t0) * 1000)
+        try:
+            from observability.trace import extract_llm_usage
+            from config import LLM_PROVIDER, LLM_MODEL_OVERRIDE, MODEL_NAME
+            usage = extract_llm_usage(response, llm_dur)
+            usage.update({"provider": LLM_PROVIDER or "unknown", "model": LLM_MODEL_OVERRIDE or MODEL_NAME, "node": "retrieval_planner"})
+            if state.get("llm_usage") is None:
+                state["llm_usage"] = []
+            state["llm_usage"].append(usage)
+        except Exception:
+            pass
+        retrieval_plan = _parse_retrieval_plan(response.content)
+        if retrieval_plan is None:
+            retrieval_plan = DEFAULT_PLAN
+        dur = int((time.perf_counter() - t0) * 1000)
+        try:
+            from observability.trace import make_event, append_event, add_latency
+            add_latency(state, "retrieval_planner", dur)
+            ev = make_event(state, "RETRIEVAL", "retrieval_planner", duration_ms=dur, status="success",
+                            metadata={"plan": retrieval_plan, "method": "llm", "llm_latency_ms": llm_dur})
+            append_event(state, ev)
+        except Exception:
+            pass
+        return {"retrieval_plan": retrieval_plan, "trace_events": state.get("trace_events"),
+                "trace_step": state.get("trace_step"), "latency_breakdown": state.get("latency_breakdown"),
+                "llm_usage": state.get("llm_usage")}
+    except Exception as exc:
+        dur = int((time.perf_counter() - t0) * 1000)
+        try:
+            from observability.trace import make_event, append_event, add_latency
+            from observability.errors import classify_error, make_error_payload
+            add_latency(state, "retrieval_planner", dur)
+            err_type = classify_error(exc, component="retrieval_planner")
+            err = make_error_payload(err_type, "retrieval_planner", str(exc), trace_id=state.get("trace_id"))
+            ev = make_event(state, "RETRIEVAL", "retrieval_planner", duration_ms=dur, status="error",
+                            metadata={"error": str(exc)[:300]}, error=err)
+            append_event(state, ev)
+        except Exception:
+            pass
+        raise

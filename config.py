@@ -26,3 +26,14 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 # Phase 2 Config
 RETRIEVAL_MODE = "hybrid" # Options: faiss, hybrid, rrf, reranker
 RRF_K = 60
+
+# Phase 5 — Observability & Reliability
+TRACE_DIR = PROJECT_ROOT / "evaluation" / "traces"
+# Timeouts (seconds) — conservative defaults; a single hanging call must not hang the agent
+TIMEOUT_LLM_S = float(os.getenv("TIMEOUT_LLM_S", "30"))
+TIMEOUT_WEB_SEARCH_S = float(os.getenv("TIMEOUT_WEB_SEARCH_S", "15"))
+TIMEOUT_RETRIEVAL_S = float(os.getenv("TIMEOUT_RETRIEVAL_S", "10"))
+TIMEOUT_TOOL_S = float(os.getenv("TIMEOUT_TOOL_S", "15"))
+# Retry
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", "1"))
+MAX_TOOL_FAILURES_PER_TOOL = int(os.getenv("MAX_TOOL_FAILURES_PER_TOOL", "3"))

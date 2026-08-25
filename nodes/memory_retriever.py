@@ -21,18 +21,16 @@ logger = logging.getLogger(__name__)
 def memory_retriever_node(state: dict) -> dict:
     """
     Retrieve user's profile and semantic memory.
-
-    Args:
-        state: AgentState with 'retrieval_plan' and 'question' fields
-
-    Returns:
-        Updated state with 'profile_context' and 'semantic_context' fields
     """
+    import time
+    t0 = time.perf_counter()
     retrieval_plan = state.get("retrieval_plan", {})
     question = state.get("question", "")
 
     profile_context = ""
     semantic_context = ""
+    mem_read_meta = {"profile_requested": bool(retrieval_plan.get("profile", False)),
+                     "semantic_requested": bool(retrieval_plan.get("semantic", False))}
 
     # Retrieve profile memory
     if retrieval_plan.get("profile", False):
@@ -99,7 +97,25 @@ def memory_retriever_node(state: dict) -> dict:
             except Exception as e:
                 logger.warning("Error loading semantic memory FAISS index: %s", e)
 
+    dur = int((time.perf_counter() - t0) * 1000)
+    try:
+        from observability.trace import make_event, append_event, add_latency
+        add_latency(state, "memory_retriever", dur)
+        meta = dict(mem_read_meta)
+        meta.update({"profile_chars": len(profile_context), "semantic_chars": len(semantic_context),
+                     "duration_ms": dur, "operation": "read"})
+        ev = make_event(state, "MEMORY_READ", "memory_retriever", duration_ms=dur, status="success", metadata=meta)
+        append_event(state, ev)
+        # also emit generic RETRIEVAL event for the unified view
+        ev2 = make_event(state, "RETRIEVAL", "memory_retriever", duration_ms=dur, status="success",
+                         metadata={"type": "memory", "profile": bool(profile_context), "semantic": bool(semantic_context)})
+        append_event(state, ev2)
+    except Exception:
+        pass
     return {
         "profile_context": profile_context,
         "semantic_context": semantic_context,
+        "trace_events": state.get("trace_events"),
+        "trace_step": state.get("trace_step"),
+        "latency_breakdown": state.get("latency_breakdown"),
     }

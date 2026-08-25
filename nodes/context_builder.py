@@ -16,31 +16,20 @@ logger = logging.getLogger(__name__)
 def context_builder_node(state: dict) -> dict:
     """
     Build combined context from all retrieval sources.
-
-    This context will be injected into the agent prompt.
-
-    Args:
-        state: AgentState with context fields (profile_context, semantic_context, rag_context)
-
-    Returns:
-        Updated state (no combined_context field - used in messages instead)
     """
+    import time
+    t0 = time.perf_counter()
     profile_context = state.get("profile_context", "")
     semantic_context = state.get("semantic_context", "")
     rag_context = state.get("rag_context", "")
 
-    # Build context sections
     context_parts = []
-
     if profile_context:
         context_parts.append(profile_context)
-
     if semantic_context:
         context_parts.append(semantic_context)
-
     if rag_context:
         context_parts.append(rag_context)
-
     combined = "\n\n".join(context_parts) if context_parts else ""
 
     if combined:
@@ -48,5 +37,16 @@ def context_builder_node(state: dict) -> dict:
     else:
         logger.debug("No context to build")
 
-    # Store combined context in state for agent node to access
-    return {"_combined_context": combined}
+    dur = int((time.perf_counter() - t0) * 1000)
+    try:
+        from observability.trace import make_event, append_event, add_latency
+        add_latency(state, "context_builder", dur)
+        ev = make_event(state, "CONTEXT_BUILD", "context_builder", duration_ms=dur, status="success",
+                        metadata={"sources": len(context_parts), "combined_chars": len(combined),
+                                  "has_profile": bool(profile_context), "has_semantic": bool(semantic_context),
+                                  "has_rag": bool(rag_context)})
+        append_event(state, ev)
+    except Exception:
+        pass
+    return {"_combined_context": combined, "trace_events": state.get("trace_events"),
+            "trace_step": state.get("trace_step"), "latency_breakdown": state.get("latency_breakdown")}

@@ -79,3 +79,14 @@ class AgentState(TypedDict):
     last_action: Optional[str]
     tool_loop_detected: Optional[bool]
     execution_trace: Optional[list[dict]]
+
+    # Phase 5 — Observability (all optional so legacy callers still work)
+    request_id: Optional[str]
+    trace_id: Optional[str]
+    trace_events: Optional[list[dict]]
+    trace_step: Optional[int]
+    latency_breakdown: Optional[dict]
+    tool_failure_counts: Optional[dict]
+    llm_usage: Optional[list[dict]]
+    total_latency_ms: Optional[int]
+    trace_start_ms: Optional[float]

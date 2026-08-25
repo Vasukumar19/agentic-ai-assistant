@@ -28,8 +28,52 @@ from nodes import (
 )
 import json
 import logging
+import time
 
 logger = logging.getLogger(__name__)
+
+
+def trace_init_node(state: dict) -> dict:
+    """Phase 5: ensure request_id/trace_id, emit REQUEST event, init timers."""
+    from observability.ids import ensure_trace_ids
+    from observability.trace import make_event, append_event
+
+    ensure = ensure_trace_ids(state)
+    for k, v in ensure.items():
+        if k not in state or state.get(k) is None:
+            state[k] = v
+    # also ensure required lists
+    if state.get("trace_events") is None:
+        state["trace_events"] = []
+    if state.get("trace_step") is None:
+        state["trace_step"] = 0
+    if state.get("latency_breakdown") is None:
+        state["latency_breakdown"] = {}
+    if state.get("tool_failure_counts") is None:
+        state["tool_failure_counts"] = {}
+    if state.get("llm_usage") is None:
+        state["llm_usage"] = []
+    if not state.get("trace_start_ms"):
+        state["trace_start_ms"] = time.perf_counter() * 1000
+
+    q = state.get("question", "")
+    # emit REQUEST as first event (if not already emitted for this trace)
+    has_request = any(e.get("event_type") == "REQUEST" for e in (state.get("trace_events") or []))
+    if not has_request:
+        ev = make_event(state, "REQUEST", "trace_init", status="success",
+                        metadata={"question": q[:500], "question_chars": len(q)})
+        append_event(state, ev)
+    # return trace fields so LangGraph merges them
+    return {
+        "request_id": state["request_id"],
+        "trace_id": state["trace_id"],
+        "trace_events": state["trace_events"],
+        "trace_step": state["trace_step"],
+        "latency_breakdown": state["latency_breakdown"],
+        "tool_failure_counts": state["tool_failure_counts"],
+        "llm_usage": state["llm_usage"],
+        "trace_start_ms": state["trace_start_ms"],
+    }
 
 
 def save_history_node(state: dict) -> dict:
@@ -71,16 +115,80 @@ def save_history_node(state: dict) -> dict:
 
     logger.info("Saved Q&A pair (%d total entries)", len(history))
 
-    return {}
+    # Phase 5: emit FINAL_ANSWER trace event + persist to JSONL
+    try:
+        from observability.trace import make_event, append_event, add_latency
+        from observability.storage import persist_trace
+        t_start = state.get("trace_start_ms")
+        total_ms = int(time.perf_counter() * 1000 - t_start) if t_start else None
+        if total_ms is not None:
+            state["total_latency_ms"] = total_ms
+        ev = make_event(state, "FINAL_ANSWER", "save_history",
+                        duration_ms=total_ms,
+                        status="success" if state.get("execution_status") != "error" else "error",
+                        metadata={
+                            "answer_chars": len(answer),
+                            "answer_preview": answer[:400],
+                            "planner_steps": state.get("tool_call_count", 0),
+                            "tool_calls": len(state.get("tool_results") or []),
+                            "execution_status": state.get("execution_status", "completed"),
+                            "route": state.get("route", ""),
+                            "total_latency_ms": total_ms,
+                            "latency_breakdown": state.get("latency_breakdown", {}),
+                        })
+        append_event(state, ev)
+        # persist all events for this trace
+        persist_trace(state)
+    except Exception as e:
+        logger.warning(f"[Trace] persist failed: {e}")
+
+    return {
+        "trace_events": state.get("trace_events"),
+        "trace_step": state.get("trace_step"),
+        "total_latency_ms": state.get("total_latency_ms"),
+    }
 
 
 def should_continue(state: dict):
     """
     Determine if agent should continue to tool use or return final answer.
     """
+    from config import MAX_TOOL_FAILURES_PER_TOOL
     if state.get("tool_call_count", 0) >= MAX_TOOL_STEPS:
         logger.info("Max tool iterations (%d) reached", MAX_TOOL_STEPS)
+        # emit circuit-breaker event
+        try:
+            from observability.trace import make_event, append_event
+            from observability.errors import make_error_payload, ErrorType
+            err = make_error_payload(ErrorType.TOOL_EXECUTION_ERROR.value, "planner",
+                                     f"MAX_TOOL_STEPS ({MAX_TOOL_STEPS}) reached — circuit breaker",
+                                     retryable=False, trace_id=state.get("trace_id"))
+            ev = make_event(state, "ERROR", "planner", status="error",
+                            metadata={"circuit_breaker": "max_steps", "max_steps": MAX_TOOL_STEPS},
+                            error=err)
+            append_event(state, ev)
+        except Exception:
+            pass
         return "end"
+
+    # per-tool failure circuit breaker
+    counts = state.get("tool_failure_counts") or {}
+    for tool, cnt in counts.items():
+        if cnt >= MAX_TOOL_FAILURES_PER_TOOL:
+            logger.info("Per-tool failure limit reached for %s (%d)", tool, cnt)
+            try:
+                from observability.trace import make_event, append_event
+                from observability.errors import make_error_payload, ErrorType
+                err = make_error_payload(ErrorType.TOOL_EXECUTION_ERROR.value, "tools",
+                                         f"per-tool failure limit ({MAX_TOOL_FAILURES_PER_TOOL}) for {tool}",
+                                         retryable=False, trace_id=state.get("trace_id"))
+                ev = make_event(state, "ERROR", "tools", status="error",
+                                metadata={"circuit_breaker": "per_tool", "tool": tool, "failures": cnt},
+                                error=err)
+                append_event(state, ev)
+            except Exception:
+                pass
+            return "end"
 
     status = state.get("execution_status")
     if status == "running":
@@ -135,6 +243,7 @@ def build_graph() -> StateGraph:
 
     # ─── NODES ───────────────────────────────────────────────────────────
 
+    graph.add_node("trace_init", trace_init_node)
     graph.add_node("intent_router", intent_router)
 
     # Chat path
@@ -158,8 +267,9 @@ def build_graph() -> StateGraph:
 
     # ─── EDGES ───────────────────────────────────────────────────────────
 
-    # Start → router
-    graph.set_entry_point("intent_router")
+    # Start → trace_init → router
+    graph.set_entry_point("trace_init")
+    graph.add_edge("trace_init", "intent_router")
 
     # Router branches
     graph.add_conditional_edges(
