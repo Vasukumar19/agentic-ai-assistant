@@ -19,16 +19,30 @@ def _trace_file_for(date_str: Optional[str] = None) -> Path:
     return TRACE_DIR / f"{date_str}.jsonl"
 
 
+def _json_default(o):
+    # numpy types, float32 etc.
+    try:
+        import numpy as np
+        if isinstance(o, (np.floating, np.integer)):
+            return float(o)
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+    except Exception:
+        pass
+    # fallback
+    if isinstance(o, (bytes, bytearray)):
+        return o.decode("utf-8", errors="replace")
+    return str(o)
+
 def persist_trace(state: dict, date_str: Optional[str] = None) -> Optional[Path]:
     """Append all trace_events from state to the daily JSONL file. Returns file path."""
     events = state.get("trace_events") or []
     if not events:
         return None
-    # also persist latency_breakdown / llm_usage as synthetic FINAL meta if present
     fpath = _trace_file_for(date_str)
     with open(fpath, "a", encoding="utf-8") as f:
         for ev in events:
-            f.write(json.dumps(ev, ensure_ascii=False) + "\n")
+            f.write(json.dumps(ev, ensure_ascii=False, default=_json_default) + "\n")
     return fpath
 
 

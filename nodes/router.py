@@ -144,12 +144,13 @@ def intent_router(state: dict) -> dict:
     question = state.get("question", "")
     method = "heuristic"
     try:
-    if _is_greeting(question):
-        route = "chat"
-    elif _is_obvious_question(question):
-        route = "research_query"
-    else:
-        route = _classify_with_llm(question, state)
+        if _is_greeting(question):
+            route = "chat"
+        elif _is_obvious_question(question):
+            route = "research_query"
+        else:
+            method = "llm"
+            route = _classify_with_llm(question, state)
 
         logger.debug("Routed '%s...' -> %s", question[:50], route)
         dur = int((time.perf_counter() - t0) * 1000)
