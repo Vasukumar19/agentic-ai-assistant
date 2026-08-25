@@ -1,0 +1,160 @@
+{
+  "metrics": {
+    "n_completed": 7,
+    "tool_selection_acc": 0.42857142857142855,
+    "sequence_acc": 0.2857142857142857,
+    "multistep_completion": 0.0,
+    "missing_tool_rate": 0.2857142857142857,
+    "wrong_tool_rate": 0.14285714285714285,
+    "premature_stop_rate": 0.2857142857142857,
+    "unnecessary_tool_rate": 0.0,
+    "mean_latency_s": 3.0185714285714287,
+    "p50_latency_s": 2.59,
+    "p95_latency_s": 8.56,
+    "avg_llm_calls": 1.8571428571428572,
+    "avg_tool_calls": 1.1428571428571428
+  },
+  "rows": [
+    {
+      "id": "live_001",
+      "expected": [
+        "calculator"
+      ],
+      "actual": [
+        "calculator"
+      ],
+      "failure": null,
+      "selection_ok": true,
+      "sequence_ok": true,
+      "llm_calls": 2,
+      "tool_calls": 1,
+      "total_latency_s": 3.36,
+      "status": "completed",
+      "answer_snippet": "The result of 128 divided by 8 is **16**."
+    },
+    {
+      "id": "live_002",
+      "expected": [
+        "web_search"
+      ],
+      "actual": [],
+      "failure": "missing_tool",
+      "selection_ok": false,
+      "sequence_ok": false,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "total_latency_s": 0.78,
+      "status": "completed",
+      "answer_snippet": "The current CEO of Tesla is Elon Musk."
+    },
+    {
+      "id": "live_003",
+      "status": "error",
+      "error": "ConnectError: ConnectError('error sending request for url (https://wt.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=current%20population%20of%20Japan) > client error (Connect)",
+      "total_latency_s": 3.8
+    },
+    {
+      "id": "live_004",
+      "expected": [
+        "web_search",
+        "calculator"
+      ],
+      "actual": [
+        "calculator"
+      ],
+      "failure": "missing_tool",
+      "selection_ok": false,
+      "sequence_ok": false,
+      "llm_calls": 2,
+      "tool_calls": 1,
+      "total_latency_s": 2.59,
+      "status": "completed",
+      "answer_snippet": "The approximate speed of light is about 299,792 kilometers per second. When multiplied by 60, the distance light travels"
+    },
+    {
+      "id": "live_005",
+      "expected": [
+        "rag",
+        "calculator"
+      ],
+      "actual": [
+        "rag"
+      ],
+      "failure": "premature_stop",
+      "selection_ok": false,
+      "sequence_ok": false,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "total_latency_s": 2.01,
+      "status": "completed",
+      "answer_snippet": "According to the company policy, full-time employees accrue 20 days of Paid Time Off (PTO) per year. If you take 5 days "
+    },
+    {
+      "id": "live_006",
+      "expected": [
+        "rag",
+        "calculator"
+      ],
+      "actual": [
+        "rag",
+        "calculator",
+        "calculator",
+        "calculator",
+        "calculator",
+        "calculator"
+      ],
+      "failure": "wrong_tool",
+      "selection_ok": true,
+      "sequence_ok": false,
+      "llm_calls": 5,
+      "tool_calls": 5,
+      "total_latency_s": 8.56,
+      "status": "completed",
+      "answer_snippet": ""
+    },
+    {
+      "id": "live_007",
+      "status": "error",
+      "error": "ConnectError: ConnectError('error sending request for url (https://wt.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=population%20of%20Brazil%20and%20Argentina) > client error ",
+      "total_latency_s": 3.71
+    },
+    {
+      "id": "live_008",
+      "expected": [
+        "web_search",
+        "web_search",
+        "calculator"
+      ],
+      "actual": [
+        "web_search"
+      ],
+      "failure": "premature_stop",
+      "selection_ok": false,
+      "sequence_ok": false,
+      "llm_calls": 2,
+      "tool_calls": 1,
+      "total_latency_s": 3.58,
+      "status": "completed",
+      "answer_snippet": "The current price of gold per ounce is approximately $2,450, and the current price of silver per ounce is approximately "
+    },
+    {
+      "id": "live_009",
+      "expected": [],
+      "actual": [],
+      "failure": null,
+      "selection_ok": true,
+      "sequence_ok": true,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "total_latency_s": 0.25,
+      "status": "completed",
+      "answer_snippet": ""
+    },
+    {
+      "id": "live_010",
+      "status": "error",
+      "error": "ConnectError: ConnectError('error sending request for url (https://wt.wikipedia.org/w/api.php?action=opensearch&profile=fuzzy&limit=1&search=India%20GDP%202023%20Pakistan%20GDP%202023) > client error ",
+      "total_latency_s": 4.42
+    }
+  ]
+}

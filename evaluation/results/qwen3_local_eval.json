@@ -1,0 +1,264 @@
+{
+  "timestamp": "2026-08-25T15:41:33",
+  "tool_execution_bench": {
+    "calculator": {
+      "n": 10,
+      "success_rate": 1.0,
+      "mean_s": 0.0002591799995570909,
+      "p50_s": 0.00021599999854515772,
+      "p95_s": 0.0006252000021049753,
+      "max_s": 0.0006252000021049753
+    },
+    "web_search": {
+      "n": 6,
+      "success_rate": 0.3333333333333333,
+      "mean_s": 2.600777849999455,
+      "p50_s": 2.793500800000402,
+      "p95_s": 3.2235441000011633,
+      "max_s": 3.2235441000011633
+    }
+  },
+  "selection_probes": [
+    {
+      "id": "sel_calc",
+      "query": "What is 15% of 240?",
+      "expected": [
+        "calculator"
+      ],
+      "actual": [
+        "calculator"
+      ],
+      "status": "completed",
+      "answer": "15% of 240 is 36.",
+      "planner_calls": 2,
+      "planner_llm_time_s": 1.5,
+      "tool_calls": 1,
+      "total_s": 4.18,
+      "arg_trace": [
+        {
+          "tool": "calculator",
+          "args": {
+            "expression": "240 * 0.15"
+          }
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "sel_ws",
+      "query": "Who is the current CEO of Nvidia?",
+      "expected": [
+        "web_search"
+      ],
+      "actual": [
+        "web_search"
+      ],
+      "status": "completed",
+      "answer": "The current CEO of Nvidia is Jensen Huang. He founded the company in 1993 and has served as its president, chief executive officer, and a member of the board of directors since its inception.",
+      "planner_calls": 2,
+      "planner_llm_time_s": 2.07,
+      "tool_calls": 1,
+      "total_s": 4.97,
+      "arg_trace": [
+        {
+          "tool": "web_search",
+          "args": {
+            "query": "current CEO of Nvidia"
+          }
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "sel_rag",
+      "query": "What is our security protocol for password rotation according to company documents?",
+      "expected": [
+        "rag"
+      ],
+      "actual": [
+        "rag"
+      ],
+      "status": "completed",
+      "answer": "According to the company documents, the security protocol for password rotation requires employees to use a password manager (1Password). Passwords must be at least 16 characters long and rotated every 90 days. Multi-factor authentication (MFA) is mandatory for all internal systems.",
+      "planner_calls": 1,
+      "planner_llm_time_s": 6.41,
+      "tool_calls": 0,
+      "total_s": 6.48,
+      "arg_trace": [],
+      "pass": true
+    },
+    {
+      "id": "sel_direct",
+      "query": "Explain what a binary search algorithm is.",
+      "expected": [],
+      "actual": [],
+      "status": "completed",
+      "answer": "A binary search algorithm is a method used to efficiently find a specific element in a sorted list. It works by repeatedly dividing the search interval in half. The algorithm compares the target value to the middle element of the interval; if they are equal, the position is found. If the target is less than the middle element, the search continues in the lower half; otherwise, it continues in the upper half. This process repeats until the element is found or the interval is empty, resulting in a time complexity of O(log n), which makes it significantly faster than linear search for large datasets.",
+      "planner_calls": 1,
+      "planner_llm_time_s": 2.88,
+      "tool_calls": 0,
+      "total_s": 3.57,
+      "arg_trace": [],
+      "pass": true
+    }
+  ],
+  "multistep_combos": [
+    {
+      "id": "combo_web_calc",
+      "query": "Search for the population of Germany and calculate 2% of it.",
+      "expected": [
+        "web_search",
+        "calculator"
+      ],
+      "actual": [
+        "web_search",
+        "calculator"
+      ],
+      "status": "completed",
+      "answer": "The population of Germany is 83,467,117. 2% of this population is 1,669,342.34.",
+      "planner_calls": 3,
+      "planner_llm_time_s": 3.36,
+      "tool_calls": 2,
+      "total_s": 7.35,
+      "arg_trace": [
+        {
+          "tool": "web_search",
+          "args": {
+            "query": "population of Germany"
+          }
+        },
+        {
+          "tool": "calculator",
+          "args": {
+            "expression": "83467117 * 0.02"
+          }
+        }
+      ],
+      "exact_match": true
+    },
+    {
+      "id": "combo_rag_calc",
+      "query": "According to our training budget policy document, what is the annual training budget per employee? Calculate the total for 4 employees.",
+      "expected": [
+        "rag",
+        "calculator"
+      ],
+      "actual": [
+        "rag",
+        "calculator"
+      ],
+      "status": "completed",
+      "answer": "According to the training budget policy document, each full-time employee has an annual training budget of $1,500. The total training budget for 4 employees is $6,000.",
+      "planner_calls": 2,
+      "planner_llm_time_s": 2.67,
+      "tool_calls": 1,
+      "total_s": 2.94,
+      "arg_trace": [
+        {
+          "tool": "calculator",
+          "args": {
+            "expression": "1500 * 4"
+          }
+        }
+      ],
+      "exact_match": true
+    },
+    {
+      "id": "combo_web_web",
+      "query": "Find the population of France and also the population of Spain.",
+      "expected": [
+        "web_search",
+        "web_search"
+      ],
+      "actual": [
+        "web_search",
+        "web_search"
+      ],
+      "status": "completed",
+      "answer": "As of 2026, the population of France is 66,746,401, and the population of Spain is 47,850,793.",
+      "planner_calls": 3,
+      "planner_llm_time_s": 3.16,
+      "tool_calls": 2,
+      "total_s": 7.43,
+      "arg_trace": [
+        {
+          "tool": "web_search",
+          "args": {
+            "query": "population of France"
+          }
+        },
+        {
+          "tool": "web_search",
+          "args": {
+            "query": "population of Spain"
+          }
+        }
+      ],
+      "exact_match": true
+    },
+    {
+      "id": "combo_rag_web",
+      "query": "Which frontend framework does our internal tech stack doc say we use, and what is its latest major version according to the web?",
+      "expected": [
+        "rag",
+        "web_search"
+      ],
+      "actual": [
+        "rag",
+        "web_search"
+      ],
+      "status": "repeated_tool_call",
+      "answer": "Task terminated to prevent repeated execution of the same tool without new information.",
+      "planner_calls": 2,
+      "planner_llm_time_s": 3.21,
+      "tool_calls": 1,
+      "total_s": 6.17,
+      "arg_trace": [
+        {
+          "tool": "web_search",
+          "args": {
+            "query": "latest major version of React"
+          }
+        }
+      ],
+      "exact_match": true
+    },
+    {
+      "id": "combo_mem_calc",
+      "query": "My monthly salary is 4000 dollars according to what I told you before. Calculate my yearly salary by multiplying by 12.",
+      "expected": [
+        "memory_search",
+        "calculator"
+      ],
+      "actual": [],
+      "status": null,
+      "answer": "Got it! I'll remember that, your name is , your goal is to become an .",
+      "planner_calls": 0,
+      "planner_llm_time_s": 0,
+      "tool_calls": 0,
+      "total_s": 1.56,
+      "arg_trace": [],
+      "exact_match": false
+    }
+  ],
+  "tokens_per_sec": {
+    "wall_s": 14.92,
+    "eval_tokens": 433,
+    "model_tok_s": 49.5,
+    "effective_wall_tok_s": 29.0,
+    "load_duration_s": 3.978,
+    "prompt_eval_count": 24
+  },
+  "hardware_snapshot": {
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "vram_used_mb": 5624,
+      "vram_total_mb": 8151,
+      "util_pct": 94
+    },
+    "ram_gb": {
+      "used": 14.7,
+      "total": 24.8
+    }
+  }
+}
