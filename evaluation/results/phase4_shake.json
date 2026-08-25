@@ -1,0 +1,600 @@
+{
+  "run_id": "1cf511",
+  "dataset": "evaluation\\datasets\\phase4_quality_100.json",
+  "retried_cases": [],
+  "aggregate": {
+    "n_total": 6,
+    "n_completed": 6,
+    "tool_selection_acc": 1.0,
+    "exact_sequence_acc": 1.0,
+    "acceptable_sequence_acc": 1.0,
+    "task_completion_rate": 1.0,
+    "answer_correctness": 1,
+    "mean_correctness_score": 1.0,
+    "tool_grounded_acc": 1.0,
+    "faithfulness_acc": 1.0,
+    "utilization_rate": 1.0,
+    "premature_orchestration_fail": 0.0,
+    "unnecessary_tool_fail": 0.0,
+    "infrastructure_failures": 0,
+    "failure_taxonomy": {},
+    "mean_composite": 1.0,
+    "mean_latency_s": 2.14,
+    "p50_latency_s": 1.89,
+    "p95_latency_s": 3.55,
+    "avg_llm_calls": 2,
+    "avg_tool_calls": 1
+  },
+  "results": [
+    {
+      "id": "p4_calc_01",
+      "category": "single_tool",
+      "query": "What is 128 divided by 8?",
+      "latency_s": 3.55,
+      "timestamp": "2026-08-25T11:52:47.378238+00:00",
+      "actual_sequence": [
+        "calculator"
+      ],
+      "expected_sequence": [
+        "calculator"
+      ],
+      "acceptable_sequences": [
+        [
+          "calculator"
+        ]
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "calc"
+        ],
+        "details": {
+          "calc": true
+        }
+      },
+      "final_answer": "128 divided by 8 is 16.",
+      "expected_answer": "16",
+      "answer_correct": true,
+      "correctness_score": 1.0,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": true,
+        "pass": true,
+        "score": 1.0,
+        "ungrounded": []
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "calc"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 2,
+      "llm_calls": 2,
+      "tool_call_count": 1,
+      "execution_status": "completed",
+      "rag_context_chars": 0,
+      "tool_results": [
+        {
+          "tool": "calculator",
+          "arguments": {
+            "expression": "128 / 8"
+          },
+          "result": "16.0"
+        }
+      ],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "correctness": 1.0,
+          "task_completion": 1.0,
+          "groundedness": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_calc_02",
+      "category": "single_tool",
+      "query": "Calculate 25 * 40.",
+      "latency_s": 1.82,
+      "timestamp": "2026-08-25T11:52:49.198800+00:00",
+      "actual_sequence": [
+        "calculator"
+      ],
+      "expected_sequence": [
+        "calculator"
+      ],
+      "acceptable_sequences": [
+        [
+          "calculator"
+        ]
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "calc"
+        ],
+        "details": {
+          "calc": true
+        }
+      },
+      "final_answer": "The result of 25 multiplied by 40 is 1000.",
+      "expected_answer": "1000",
+      "answer_correct": true,
+      "correctness_score": 1.0,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": true,
+        "pass": true,
+        "score": 1.0,
+        "ungrounded": []
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "calc"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 2,
+      "llm_calls": 2,
+      "tool_call_count": 1,
+      "execution_status": "completed",
+      "rag_context_chars": 0,
+      "tool_results": [
+        {
+          "tool": "calculator",
+          "arguments": {
+            "expression": "25 * 40"
+          },
+          "result": "1000"
+        }
+      ],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "correctness": 1.0,
+          "task_completion": 1.0,
+          "groundedness": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_calc_03",
+      "category": "single_tool",
+      "query": "What is 15% of 850?",
+      "latency_s": 1.96,
+      "timestamp": "2026-08-25T11:52:51.159370+00:00",
+      "actual_sequence": [
+        "calculator"
+      ],
+      "expected_sequence": [
+        "calculator"
+      ],
+      "acceptable_sequences": [
+        [
+          "calculator"
+        ]
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "calc"
+        ],
+        "details": {
+          "calc": true
+        }
+      },
+      "final_answer": "15% of 850 is 127.5.",
+      "expected_answer": "127.5",
+      "answer_correct": true,
+      "correctness_score": 1.0,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": true,
+        "pass": true,
+        "score": 1.0,
+        "ungrounded": []
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "calc"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 2,
+      "llm_calls": 2,
+      "tool_call_count": 1,
+      "execution_status": "completed",
+      "rag_context_chars": 0,
+      "tool_results": [
+        {
+          "tool": "calculator",
+          "arguments": {
+            "expression": "850 * 0.15"
+          },
+          "result": "127.5"
+        }
+      ],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "correctness": 1.0,
+          "task_completion": 1.0,
+          "groundedness": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_calc_04",
+      "category": "single_tool",
+      "query": "Find the square root of 144.",
+      "latency_s": 1.76,
+      "timestamp": "2026-08-25T11:52:52.917959+00:00",
+      "actual_sequence": [
+        "calculator"
+      ],
+      "expected_sequence": [
+        "calculator"
+      ],
+      "acceptable_sequences": [
+        [
+          "calculator"
+        ]
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "calc"
+        ],
+        "details": {
+          "calc": true
+        }
+      },
+      "final_answer": "The square root of 144 is 12.",
+      "expected_answer": "12",
+      "answer_correct": true,
+      "correctness_score": 1.0,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": true,
+        "pass": true,
+        "score": 1.0,
+        "ungrounded": []
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "calc"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 2,
+      "llm_calls": 2,
+      "tool_call_count": 1,
+      "execution_status": "completed",
+      "rag_context_chars": 0,
+      "tool_results": [
+        {
+          "tool": "calculator",
+          "arguments": {
+            "expression": "sqrt(144)"
+          },
+          "result": "12.0"
+        }
+      ],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "correctness": 1.0,
+          "task_completion": 1.0,
+          "groundedness": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_calc_05",
+      "category": "single_tool",
+      "query": "What is 1024 divided by 8?",
+      "latency_s": 1.79,
+      "timestamp": "2026-08-25T11:52:54.705680+00:00",
+      "actual_sequence": [
+        "calculator"
+      ],
+      "expected_sequence": [
+        "calculator"
+      ],
+      "acceptable_sequences": [
+        [
+          "calculator"
+        ]
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "calc"
+        ],
+        "details": {
+          "calc": true
+        }
+      },
+      "final_answer": "1024 divided by 8 is 128.",
+      "expected_answer": "128",
+      "answer_correct": true,
+      "correctness_score": 1.0,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": true,
+        "pass": true,
+        "score": 1.0,
+        "ungrounded": []
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "calc"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 2,
+      "llm_calls": 2,
+      "tool_call_count": 1,
+      "execution_status": "completed",
+      "rag_context_chars": 0,
+      "tool_results": [
+        {
+          "tool": "calculator",
+          "arguments": {
+            "expression": "1024 / 8"
+          },
+          "result": "128.0"
+        }
+      ],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "correctness": 1.0,
+          "task_completion": 1.0,
+          "groundedness": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_calc_06",
+      "category": "single_tool",
+      "query": "Subtract 450 from 3000.",
+      "latency_s": 1.98,
+      "timestamp": "2026-08-25T11:52:56.686071+00:00",
+      "actual_sequence": [
+        "calculator"
+      ],
+      "expected_sequence": [
+        "calculator"
+      ],
+      "acceptable_sequences": [
+        [
+          "calculator"
+        ]
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "calc"
+        ],
+        "details": {
+          "calc": true
+        }
+      },
+      "final_answer": "The result of subtracting 450 from 3000 is 2550.",
+      "expected_answer": "2550",
+      "answer_correct": true,
+      "correctness_score": 1.0,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": true,
+        "pass": true,
+        "score": 1.0,
+        "ungrounded": []
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "calc"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 2,
+      "llm_calls": 2,
+      "tool_call_count": 1,
+      "execution_status": "completed",
+      "rag_context_chars": 0,
+      "tool_results": [
+        {
+          "tool": "calculator",
+          "arguments": {
+            "expression": "3000 - 450"
+          },
+          "result": "2550"
+        }
+      ],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "correctness": 1.0,
+          "task_completion": 1.0,
+          "groundedness": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    }
+  ]
+}

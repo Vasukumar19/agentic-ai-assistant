@@ -82,7 +82,12 @@ def normalize_case(case: dict) -> dict:
     - required_tools defaults to the set(expected_sequence)
     - operations are derived from legacy required_operations strings when absent
     """
-    seq = case.get("expected_sequence", [])
+    seq = case.get("expected_sequence")
+    if seq is None:
+        # No canonical path declared: treat the first acceptable sequence as
+        # the reference for exact-sequence tracking (explicit [] stays []).
+        acceptable_declared = case.get("acceptable_tool_sequences") or []
+        seq = list(acceptable_declared[0]) if acceptable_declared else []
     ops = case.get("operations")
     if ops is None:
         ops = []
@@ -213,13 +218,15 @@ def evaluate_task_completion(case_norm: dict, actual_seq: list,
 # ---------------------------------------------------------------------------
 
 def evaluate_tool_grounded(final_answer: str, tool_results: list,
-                           context: str, tools_required: bool) -> dict:
+                           context: str, tools_required: bool,
+                           query: str | None = None) -> dict:
     """Do the load-bearing VALUES in the final answer trace back to evidence?
 
     Evidence = tool result texts + retrieved context. A number in the answer
-    is grounded if it appears (normalized) in evidence. Text claims are left
-    to the judge; this layer catches the classic failure: calculator says
-    625000, answer says 6,250,000.
+    is grounded if it appears (normalized) in evidence. Values already present
+    in the user's own query are given inputs, not claims, so they are exempt.
+    Text claims are left to the judge; this layer catches the classic
+    failure: calculator says 625000, answer says 6,250,000.
     """
     if not tools_required:
         return {"applicable": False}
@@ -233,9 +240,12 @@ def evaluate_tool_grounded(final_answer: str, tool_results: list,
         [str(r.get("result", "")) + " " + str(r.get("arguments", ""))
          for r in (tool_results or [])] + [context or ""])
     evidence_nums = extract_numbers(evidence_blob)
+    query_nums = set(extract_numbers(query)) if query else set()
 
     ungrounded = []
     for v in answer_nums:
+        if any(numbers_equal(v, q) for q in query_nums):
+            continue  # echoed user-provided value: exempt
         if not any(numbers_equal(v, e) for e in evidence_nums):
             ungrounded.append(v)
 
