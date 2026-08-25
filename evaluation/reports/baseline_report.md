@@ -3,10 +3,10 @@ AGENT BASELINE EVALUATION
 ==================================================
 
 Dataset:
-  50 test cases
+  10 test cases
 
 Routing Accuracy:
-  14.0%
+  50.0%
 
 Tool Selection Accuracy:
   0.0%
@@ -39,13 +39,13 @@ Reranker Latency:
   0.00 s
 
 Average Total Latency:
-  2.15 s
+  0.02 s
 
 Median Total Latency:
-  0.03 s
+  0.02 s
 
 P95 Total Latency:
-  1.31 s
+  0.03 s
 
 Average LLM Calls:
   0.0
@@ -58,12 +58,11 @@ Estimated Cost / Query:
 ==================================================
 
 ## Failure Analysis
-- routing_failure: 1 (2.0%)
-- exception: 42 (84.0%)
+- routing_failure: 5 (50.0%)
 
 ## Slowest Cases
-- chat_010: 61.55s
-- chat_007: 39.08s
-- chat_002: 1.31s
-- chat_006: 1.05s
-- chat_004: 0.75s
+- chat_002: 0.03s
+- chat_010: 0.02s
+- chat_006: 0.02s
+- chat_008: 0.02s
+- chat_004: 0.02s

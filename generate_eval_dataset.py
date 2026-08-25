@@ -1,27 +1,27 @@
 import json
 
 mapping = {
-  "benefits_overview": 0,
-  "company_values": 1,
-  "customer_support": 2,
-  "data_retention": 3,
-  "engineering_stack": 4,
-  "hr_policy": 5,
-  "incident_management": 6,
-  "it_hardware": 7,
-  "marketing_guidelines": 8,
-  "office_facilities": 9,
-  "onboarding_checklist": 10,
-  "performance_reviews": 11,
-  "product_roadmap": 12,
-  "qa_testing": 13,
-  "sales_playbook": 14,
-  "security_protocol": 15,
-  "social_events": 16,
-  "tech_stack": 18,
-  "training_budget": 19,
-  "travel_policy": 20,
-  "vendor_management": 21
+  "benefits_overview": "benefits_overview_chunk_000",
+  "company_values": "company_values_chunk_000",
+  "customer_support": "customer_support_chunk_000",
+  "data_retention": "data_retention_chunk_000",
+  "engineering_stack": "engineering_stack_chunk_000",
+  "hr_policy": "hr_policy_chunk_000",
+  "incident_management": "incident_management_chunk_000",
+  "it_hardware": "it_hardware_chunk_000",
+  "marketing_guidelines": "marketing_guidelines_chunk_000",
+  "office_facilities": "office_facilities_chunk_000",
+  "onboarding_checklist": "onboarding_checklist_chunk_000",
+  "performance_reviews": "performance_reviews_chunk_000",
+  "product_roadmap": "product_roadmap_chunk_000",
+  "qa_testing": "qa_testing_chunk_000",
+  "sales_playbook": "sales_playbook_chunk_000",
+  "security_protocol": "security_protocol_chunk_000",
+  "social_events": "social_events_chunk_000",
+  "tech_stack": "tech_stack_chunk_001",
+  "training_budget": "training_budget_chunk_000",
+  "travel_policy": "travel_policy_chunk_000",
+  "vendor_management": "vendor_management_chunk_000"
 }
 
 queries = [

@@ -47,3 +47,22 @@ def categorize_failure(expected: list[str], actual: list[str]) -> str | None:
         return "wrong_order"
     else:
         return "wrong_tool"
+
+def evaluate_completion_guard_accuracy(expected: list[str], actual: list[str], last_action: str | None = None) -> bool:
+    """
+    Did the system correctly allow FINAL only when all required operations were completed?
+    True if the system correctly finished all expected operations before returning final,
+    or did not prematurely terminate.
+    """
+    if not expected:
+        return True # No tools required, final is correct
+    return expected == actual
+
+def evaluate_final_before_required_tool(expected: list[str], actual: list[str]) -> bool:
+    """
+    True if the planner returned final before completing the required tool sequence.
+    """
+    if not expected:
+        return False
+    return len(actual) < len(expected)
+

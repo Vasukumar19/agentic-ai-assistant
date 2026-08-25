@@ -76,7 +76,7 @@ def ingest_documents():
                 {
                     "document_id": file_path.stem,
                     "source": str(file_path),
-                    "chunk_id": len(all_chunks),        # global id
+                    "chunk_id": f"{file_path.stem}_chunk_{idx:03d}", # deterministic id
                     "chunk_number": idx,                # within document
                     "total_chunks": total_chunks,
                     "prev_chunk": idx - 1 if idx > 0 else None,

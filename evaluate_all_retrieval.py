@@ -4,8 +4,8 @@ from evaluation.metrics.retrieval import evaluate_retrieval
 import config
 
 def run_retrieval_benchmark():
-    dataset = json.load(open("evaluation/datasets/baseline.json"))
-    rag_cases = [c for c in dataset if c["category"] == "rag"]
+    dataset = json.load(open("evaluation/datasets/retrieval_extended.json"))
+    rag_cases = dataset
     
     modes = ["faiss", "hybrid", "rrf", "reranker"]
     

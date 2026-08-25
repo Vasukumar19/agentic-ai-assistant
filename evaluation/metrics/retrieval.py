@@ -10,27 +10,28 @@ def evaluate_retrieval(expected_sources, retrieved_chunks):
         "mrr": 0.0
     }
     
-    # We check if *any* expected source is in the top K
-    # (Since there's usually just 1 expected source chunk in our simple dataset)
-    
-    expected_set = set(expected_sources)
-    
-    top_1 = retrieved_chunks[:1]
-    top_3 = retrieved_chunks[:3]
-    top_5 = retrieved_chunks[:5]
-    top_10 = retrieved_chunks[:10]
-    
-    if expected_set.intersection(top_1):
-        metrics["recall_at_1"] = 1.0
-    if expected_set.intersection(top_3):
-        metrics["recall_at_3"] = 1.0
-    if expected_set.intersection(top_5):
-        metrics["recall_at_5"] = 1.0
-    if expected_set.intersection(top_10):
-        metrics["recall_at_10"] = 1.0
+
+    # Since chunk_ids are in format 'docname_chunk_XXX', we can match the prefix
+    # or just match the exact document name if expected_sources stores document names.
+    # Let's extract the document name from the retrieved chunk IDs.
+    retrieved_docs = []
+    for c in retrieved_chunks:
+        if isinstance(c, str) and "_chunk_" in c:
+            retrieved_docs.append(c.split("_chunk_")[0])
+        else:
+            retrieved_docs.append(str(c))
+            
+    # expected_sources contains the expected document names (e.g. 'hr_policy')
+    expected_docs = [str(e).split("_chunk_")[0] if isinstance(e, str) and "_chunk_" in e else str(e) for e in expected_sources]
+
+    # Calculate Recalls
+    for k in [1, 3, 5, 10]:
+        k_docs = retrieved_docs[:k]
+        if any(d in k_docs for d in expected_docs):
+            metrics[f"recall_at_{k}"] = 1.0
         
-    for idx, chunk_id in enumerate(retrieved_chunks):
-        if chunk_id in expected_set:
+    for idx, doc_id in enumerate(retrieved_docs):
+        if doc_id in expected_docs:
             metrics["mrr"] = 1.0 / (idx + 1)
             break
             

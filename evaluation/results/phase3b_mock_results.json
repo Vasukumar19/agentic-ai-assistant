@@ -1,0 +1,1019 @@
+[
+  {
+    "id": "p3b_nec_001",
+    "category": "tool_necessity",
+    "query": "What is 128 divided by 8?",
+    "expected_tools": [
+      "calculator"
+    ],
+    "expected_sequence": [
+      "calculator"
+    ],
+    "actual_sequence": [
+      "calculator"
+    ],
+    "final_answer": "16.0",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.041,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_002",
+    "category": "tool_necessity",
+    "query": "Calculate 15% of 850.",
+    "expected_tools": [
+      "calculator"
+    ],
+    "expected_sequence": [
+      "calculator"
+    ],
+    "actual_sequence": [
+      "calculator"
+    ],
+    "final_answer": "127.5",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.027,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_003",
+    "category": "tool_necessity",
+    "query": "Find the square root of 144.",
+    "expected_tools": [
+      "calculator"
+    ],
+    "expected_sequence": [
+      "calculator"
+    ],
+    "actual_sequence": [
+      "calculator"
+    ],
+    "final_answer": "12",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.027,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_004",
+    "category": "tool_necessity",
+    "query": "Who is the current CEO of Microsoft?",
+    "expected_tools": [
+      "web_search"
+    ],
+    "expected_sequence": [
+      "web_search"
+    ],
+    "actual_sequence": [
+      "web_search"
+    ],
+    "final_answer": "Satya Nadella is the CEO of Microsoft.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.435,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_005",
+    "category": "tool_necessity",
+    "query": "What is the current stock price of Apple?",
+    "expected_tools": [
+      "web_search"
+    ],
+    "expected_sequence": [
+      "web_search"
+    ],
+    "actual_sequence": [
+      "web_search"
+    ],
+    "final_answer": "Apple stock price is $220.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 1.986,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_006",
+    "category": "tool_necessity",
+    "query": "According to the company policy document, what is our remote work policy?",
+    "expected_tools": [
+      "rag"
+    ],
+    "expected_sequence": [
+      "rag"
+    ],
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "Based on the documents, the requested policy info is confirmed.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.128,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_007",
+    "category": "tool_necessity",
+    "query": "What is the health insurance provider listed in our employee benefits document?",
+    "expected_tools": [
+      "rag"
+    ],
+    "expected_sequence": [
+      "rag"
+    ],
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "Based on the documents, the requested policy info is confirmed.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.032,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_008",
+    "category": "tool_necessity",
+    "query": "What database technology does our engineering stack use according to our internal doc?",
+    "expected_tools": [
+      "rag"
+    ],
+    "expected_sequence": [
+      "rag"
+    ],
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "Based on the documents, the requested policy info is confirmed.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.028,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_009",
+    "category": "tool_necessity",
+    "query": "What is the capital of France?",
+    "expected_tools": [
+      "web_search"
+    ],
+    "expected_sequence": [
+      "web_search"
+    ],
+    "actual_sequence": [
+      "web_search"
+    ],
+    "final_answer": "The capital of France is Paris.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 1.34,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_nec_010",
+    "category": "tool_necessity",
+    "query": "According to our documents, what is the annual hardware reimbursement limit?",
+    "expected_tools": [
+      "rag"
+    ],
+    "expected_sequence": [
+      "rag"
+    ],
+    "actual_sequence": [
+      "rag"
+    ],
+    "final_answer": "Based on the documents, the requested policy info is confirmed.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 1,
+    "total_llm_calls": 2,
+    "total_tool_calls": 0,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.116,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_001",
+    "category": "premature_termination",
+    "query": "Find the current population of Japan and calculate what 0.5% of it would be.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "0.5% of Japan's population is 625,000.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.212,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_002",
+    "category": "premature_termination",
+    "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "You will have 15 PTO days left.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.099,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_003",
+    "category": "premature_termination",
+    "query": "Based on our internal document, what is the training budget per employee? Multiply it by 5 for a team of 5.",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "Total budget for 5 employees is $7,500.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.071,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_004",
+    "category": "premature_termination",
+    "query": "Find the GDP of Germany and calculate 1% of it.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "1% of Germany's GDP is $45 billion.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.534,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_005",
+    "category": "premature_termination",
+    "query": "Search for the price of 1 Bitcoin in USD and multiply it by 3.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The price for 3 Bitcoin is $195,000.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 6.242,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_006",
+    "category": "premature_termination",
+    "query": "According to the policy, what is the hardware reimbursement limit and what would 3 employees receive in total?",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "Total reimbursement is $3,000.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.075,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_007",
+    "category": "premature_termination",
+    "query": "Find the population of Tokyo and divide it by 10.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "1,400,000.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 4.533,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_008",
+    "category": "premature_termination",
+    "query": "What is the wellness stipend in our policy? Calculate what 25% of that stipend is.",
+    "expected_tools": [
+      "rag",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "final_answer": "25% of the wellness stipend is $125.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 0.1,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_009",
+    "category": "premature_termination",
+    "query": "Search for the speed of light in km/s and multiply it by 60.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "Light travels 18,000,000 km in one minute.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 4.203,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_prem_010",
+    "category": "premature_termination",
+    "query": "Find the height of Mount Everest in meters and divide it by 2.",
+    "expected_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "4424.43 meters.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 5.297,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_001",
+    "category": "multistep_dependency",
+    "query": "Find the population of Brazil and the population of Argentina. Which one is larger and by how much?",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "Brazil is larger by 168 million people.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.644,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_002",
+    "category": "multistep_dependency",
+    "query": "What is the price of gold per ounce and the price of silver per ounce? What is the gold-to-silver price ratio?",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The gold-to-silver price ratio is 80:1.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 3.892,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_003",
+    "category": "multistep_dependency",
+    "query": "Find the GDP of India and the GDP of Pakistan. Calculate the ratio of India's GDP to Pakistan's GDP.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "India's economy is approximately 10 times larger.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.969,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_004",
+    "category": "multistep_dependency",
+    "query": "Find the populations of India and China, subtract them, and find 10% of the difference.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator",
+      "calculator"
+    ],
+    "final_answer": "10% of the difference is 300,000.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 5,
+    "total_llm_calls": 6,
+    "total_tool_calls": 4,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 7.106,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_005",
+    "category": "multistep_dependency",
+    "query": "Find the tallest building in New York and the tallest building in Dubai, and tell me the difference in height.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "Burj Khalifa is taller by 287 meters.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 4.441,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_006",
+    "category": "multistep_dependency",
+    "query": "Check our hardware policy for the laptop budget, search for a MacBook Pro retail price, and calculate if it is within budget.",
+    "expected_tools": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The MacBook Pro is $299 over budget.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 3.626,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_007",
+    "category": "multistep_dependency",
+    "query": "What is our training budget according to policy? Find the cost of an AWS Solutions Architect exam online, and calculate remaining budget.",
+    "expected_tools": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "Remaining budget is $1350.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 3,
+    "total_llm_calls": 4,
+    "total_tool_calls": 2,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.914,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_008",
+    "category": "multistep_dependency",
+    "query": "According to our internal docs, what frontend framework do we use, and what is its latest release version on the web?",
+    "expected_tools": [
+      "rag",
+      "web_search"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "final_answer": "The latest release is React 19.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 1.333,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_009",
+    "category": "multistep_dependency",
+    "query": "Find the CEO of our company in internal docs, and search the web for their latest news.",
+    "expected_tools": [
+      "rag",
+      "web_search"
+    ],
+    "expected_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "actual_sequence": [
+      "rag",
+      "web_search"
+    ],
+    "final_answer": "The CEO recently announced new initiatives.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 2,
+    "total_llm_calls": 3,
+    "total_tool_calls": 1,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 2.306,
+    "status": "completed"
+  },
+  {
+    "id": "p3b_dep_010",
+    "category": "multistep_dependency",
+    "query": "Find the distance from Earth to Mars in km, and from Earth to Venus in km, and compute the difference.",
+    "expected_tools": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "expected_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "web_search",
+      "calculator"
+    ],
+    "final_answer": "The difference is 184,000,000 km.",
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "multistep_correct": true,
+    "guard_correct": true,
+    "final_before_required_tool": false,
+    "arg_accuracy": 1.0,
+    "tool_success_rate": 1.0,
+    "tool_loop_detected": false,
+    "planner_calls": 4,
+    "total_llm_calls": 5,
+    "total_tool_calls": 3,
+    "planner_llm_time_s": 0.0,
+    "total_latency_s": 3.504,
+    "status": "completed"
+  }
+]

@@ -79,7 +79,8 @@ def rag_retriever_node(state: dict) -> dict:
         return {"rag_context": "", "retrieved_chunks": [], "retrieval_metrics": {}}
 
     question = state.get("question", "")
-    search_query = chain.invoke({"question": question}).content.strip()
+    search_query = question.strip()
+    # search_query = chain.invoke({"question": question}).content.strip()
 
     rag_context = ""
     candidate_items = []

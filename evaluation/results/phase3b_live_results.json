@@ -1,0 +1,92 @@
+[
+  {
+    "id": "p3b_nec_001",
+    "category": "tool_necessity",
+    "query": "What is 128 divided by 8?",
+    "expected_sequence": [
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_002",
+    "category": "tool_necessity",
+    "query": "Calculate 15% of 850.",
+    "expected_sequence": [
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_003",
+    "category": "tool_necessity",
+    "query": "Find the square root of 144.",
+    "expected_sequence": [
+      "calculator"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_004",
+    "category": "tool_necessity",
+    "query": "Who is the current CEO of Microsoft?",
+    "expected_sequence": [
+      "web_search"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_005",
+    "category": "tool_necessity",
+    "query": "What is the current stock price of Apple?",
+    "expected_sequence": [
+      "web_search"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_006",
+    "category": "tool_necessity",
+    "query": "According to the company policy document, what is our remote work policy?",
+    "expected_sequence": [
+      "rag"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_007",
+    "category": "tool_necessity",
+    "query": "What is the health insurance provider listed in our employee benefits document?",
+    "expected_sequence": [
+      "rag"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_008",
+    "category": "tool_necessity",
+    "query": "What database technology does our engineering stack use according to our internal doc?",
+    "expected_sequence": [
+      "rag"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_009",
+    "category": "tool_necessity",
+    "query": "What is the capital of France?",
+    "expected_sequence": [
+      "web_search"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  },
+  {
+    "id": "p3b_nec_010",
+    "category": "tool_necessity",
+    "query": "According to our documents, what is the annual hardware reimbursement limit?",
+    "expected_sequence": [
+      "rag"
+    ],
+    "status": "NOT_RUN_RATE_LIMITED"
+  }
+]

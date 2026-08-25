@@ -1,0 +1,304 @@
+[
+  {
+    "id": "p3b_nec_001",
+    "category": "tool_necessity",
+    "query": "What is 128 divided by 8?",
+    "expected_tools": ["calculator"],
+    "expected_sequence": ["calculator"],
+    "required_operations": ["arithmetic_division"],
+    "requires_multi_step": false,
+    "description": "Direct arithmetic - must use calculator"
+  },
+  {
+    "id": "p3b_nec_002",
+    "category": "tool_necessity",
+    "query": "Calculate 15% of 850.",
+    "expected_tools": ["calculator"],
+    "expected_sequence": ["calculator"],
+    "required_operations": ["percentage_calculation"],
+    "requires_multi_step": false,
+    "description": "Percentage calculation - must use calculator"
+  },
+  {
+    "id": "p3b_nec_003",
+    "category": "tool_necessity",
+    "query": "Find the square root of 144.",
+    "expected_tools": ["calculator"],
+    "expected_sequence": ["calculator"],
+    "required_operations": ["math_sqrt"],
+    "requires_multi_step": false,
+    "description": "Math power/sqrt - must use calculator"
+  },
+  {
+    "id": "p3b_nec_004",
+    "category": "tool_necessity",
+    "query": "Who is the current CEO of Microsoft?",
+    "expected_tools": ["web_search"],
+    "expected_sequence": ["web_search"],
+    "required_operations": ["factual_search"],
+    "requires_multi_step": false,
+    "description": "Factual entity search - must use web_search"
+  },
+  {
+    "id": "p3b_nec_005",
+    "category": "tool_necessity",
+    "query": "What is the current stock price of Apple?",
+    "expected_tools": ["web_search"],
+    "expected_sequence": ["web_search"],
+    "required_operations": ["live_financial_lookup"],
+    "requires_multi_step": false,
+    "description": "Live financial lookup - must use web_search"
+  },
+  {
+    "id": "p3b_nec_006",
+    "category": "tool_necessity",
+    "query": "According to the company policy document, what is our remote work policy?",
+    "expected_tools": ["rag"],
+    "expected_sequence": ["rag"],
+    "required_operations": ["rag_policy_lookup"],
+    "requires_multi_step": false,
+    "description": "Pure RAG retrieval - no additional tool after RAG"
+  },
+  {
+    "id": "p3b_nec_007",
+    "category": "tool_necessity",
+    "query": "What is the health insurance provider listed in our employee benefits document?",
+    "expected_tools": ["rag"],
+    "expected_sequence": ["rag"],
+    "required_operations": ["rag_benefits_lookup"],
+    "requires_multi_step": false,
+    "description": "Pure RAG retrieval - no additional tool after RAG"
+  },
+  {
+    "id": "p3b_nec_008",
+    "category": "tool_necessity",
+    "query": "What database technology does our engineering stack use according to our internal doc?",
+    "expected_tools": ["rag"],
+    "expected_sequence": ["rag"],
+    "required_operations": ["rag_tech_stack_lookup"],
+    "requires_multi_step": false,
+    "description": "Pure RAG retrieval - no additional tool after RAG"
+  },
+  {
+    "id": "p3b_nec_009",
+    "category": "tool_necessity",
+    "query": "What is the capital of France?",
+    "expected_tools": ["web_search"],
+    "expected_sequence": ["web_search"],
+    "required_operations": ["factual_search"],
+    "requires_multi_step": false,
+    "description": "Factual query - must use web_search"
+  },
+  {
+    "id": "p3b_nec_010",
+    "category": "tool_necessity",
+    "query": "According to our documents, what is the annual hardware reimbursement limit?",
+    "expected_tools": ["rag"],
+    "expected_sequence": ["rag"],
+    "required_operations": ["rag_reimbursement_lookup"],
+    "requires_multi_step": false,
+    "description": "Pure RAG lookup without calculation - no additional tool after RAG"
+  },
+
+  {
+    "id": "p3b_prem_001",
+    "category": "premature_termination",
+    "query": "Find the current population of Japan and calculate what 0.5% of it would be.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "required_operations": ["population_lookup", "percentage_calculation"],
+    "requires_multi_step": true,
+    "description": "Search then calculate - must not terminate after search"
+  },
+  {
+    "id": "p3b_prem_002",
+    "category": "premature_termination",
+    "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
+    "expected_tools": ["rag", "calculator"],
+    "expected_sequence": ["rag", "calculator"],
+    "required_operations": ["rag_pto_lookup", "subtraction_calculation"],
+    "requires_multi_step": true,
+    "description": "RAG then calculate - must not terminate after RAG"
+  },
+  {
+    "id": "p3b_prem_003",
+    "category": "premature_termination",
+    "query": "Based on our internal document, what is the training budget per employee? Multiply it by 5 for a team of 5.",
+    "expected_tools": ["rag", "calculator"],
+    "expected_sequence": ["rag", "calculator"],
+    "required_operations": ["rag_budget_lookup", "multiplication_calculation"],
+    "requires_multi_step": true,
+    "description": "RAG then calculate - must not terminate after RAG"
+  },
+  {
+    "id": "p3b_prem_004",
+    "category": "premature_termination",
+    "query": "Find the GDP of Germany and calculate 1% of it.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "required_operations": ["gdp_lookup", "percentage_calculation"],
+    "requires_multi_step": true,
+    "description": "Search then calculate - must not terminate after search"
+  },
+  {
+    "id": "p3b_prem_005",
+    "category": "premature_termination",
+    "query": "Search for the price of 1 Bitcoin in USD and multiply it by 3.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "required_operations": ["price_lookup", "multiplication_calculation"],
+    "requires_multi_step": true,
+    "description": "Search then calculate - must not terminate after search"
+  },
+  {
+    "id": "p3b_prem_006",
+    "category": "premature_termination",
+    "query": "According to the policy, what is the hardware reimbursement limit and what would 3 employees receive in total?",
+    "expected_tools": ["rag", "calculator"],
+    "expected_sequence": ["rag", "calculator"],
+    "required_operations": ["rag_limit_lookup", "multiplication_calculation"],
+    "requires_multi_step": true,
+    "description": "RAG then calculate - must not terminate after RAG"
+  },
+  {
+    "id": "p3b_prem_007",
+    "category": "premature_termination",
+    "query": "Find the population of Tokyo and divide it by 10.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "required_operations": ["population_lookup", "division_calculation"],
+    "requires_multi_step": true,
+    "description": "Search then calculate - must not terminate after search"
+  },
+  {
+    "id": "p3b_prem_008",
+    "category": "premature_termination",
+    "query": "What is the wellness stipend in our policy? Calculate what 25% of that stipend is.",
+    "expected_tools": ["rag", "calculator"],
+    "expected_sequence": ["rag", "calculator"],
+    "required_operations": ["rag_stipend_lookup", "percentage_calculation"],
+    "requires_multi_step": true,
+    "description": "RAG then calculate - must not terminate after RAG"
+  },
+  {
+    "id": "p3b_prem_009",
+    "category": "premature_termination",
+    "query": "Search for the speed of light in km/s and multiply it by 60.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "required_operations": ["speed_lookup", "multiplication_calculation"],
+    "requires_multi_step": true,
+    "description": "Search then calculate - must not terminate after search"
+  },
+  {
+    "id": "p3b_prem_010",
+    "category": "premature_termination",
+    "query": "Find the height of Mount Everest in meters and divide it by 2.",
+    "expected_tools": ["web_search", "calculator"],
+    "expected_sequence": ["web_search", "calculator"],
+    "required_operations": ["height_lookup", "division_calculation"],
+    "requires_multi_step": true,
+    "description": "Search then calculate - must not terminate after search"
+  },
+
+  {
+    "id": "p3b_dep_001",
+    "category": "multistep_dependency",
+    "query": "Find the population of Brazil and the population of Argentina. Which one is larger and by how much?",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "required_operations": ["search_brazil_pop", "search_argentina_pop", "diff_calculation"],
+    "requires_multi_step": true,
+    "description": "Search two entities and calculate difference"
+  },
+  {
+    "id": "p3b_dep_002",
+    "category": "multistep_dependency",
+    "query": "What is the price of gold per ounce and the price of silver per ounce? What is the gold-to-silver price ratio?",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "required_operations": ["search_gold_price", "search_silver_price", "ratio_calculation"],
+    "requires_multi_step": true,
+    "description": "Search two prices and calculate ratio"
+  },
+  {
+    "id": "p3b_dep_003",
+    "category": "multistep_dependency",
+    "query": "Find the GDP of India and the GDP of Pakistan. Calculate the ratio of India's GDP to Pakistan's GDP.",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "required_operations": ["search_india_gdp", "search_pakistan_gdp", "ratio_calculation"],
+    "requires_multi_step": true,
+    "description": "Search two GDPs and calculate ratio"
+  },
+  {
+    "id": "p3b_dep_004",
+    "category": "multistep_dependency",
+    "query": "Find the populations of India and China, subtract them, and find 10% of the difference.",
+    "expected_tools": ["web_search", "web_search", "calculator", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator", "calculator"],
+    "required_operations": ["search_india_pop", "search_china_pop", "diff_calculation", "percent_calculation"],
+    "requires_multi_step": true,
+    "description": "Multi-search with multi-step arithmetic chaining"
+  },
+  {
+    "id": "p3b_dep_005",
+    "category": "multistep_dependency",
+    "query": "Find the tallest building in New York and the tallest building in Dubai, and tell me the difference in height.",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "required_operations": ["search_ny_building", "search_dubai_building", "diff_calculation"],
+    "requires_multi_step": true,
+    "description": "Search two heights and compute difference"
+  },
+  {
+    "id": "p3b_dep_006",
+    "category": "multistep_dependency",
+    "query": "Check our hardware policy for the laptop budget, search for a MacBook Pro retail price, and calculate if it is within budget.",
+    "expected_tools": ["rag", "web_search", "calculator"],
+    "expected_sequence": ["rag", "web_search", "calculator"],
+    "required_operations": ["rag_budget_lookup", "search_laptop_price", "comparison_calculation"],
+    "requires_multi_step": true,
+    "description": "RAG + Web Search + Calculator chaining"
+  },
+  {
+    "id": "p3b_dep_007",
+    "category": "multistep_dependency",
+    "query": "What is our training budget according to policy? Find the cost of an AWS Solutions Architect exam online, and calculate remaining budget.",
+    "expected_tools": ["rag", "web_search", "calculator"],
+    "expected_sequence": ["rag", "web_search", "calculator"],
+    "required_operations": ["rag_budget_lookup", "search_exam_cost", "subtraction_calculation"],
+    "requires_multi_step": true,
+    "description": "RAG + Web Search + Calculator chaining"
+  },
+  {
+    "id": "p3b_dep_008",
+    "category": "multistep_dependency",
+    "query": "According to our internal docs, what frontend framework do we use, and what is its latest release version on the web?",
+    "expected_tools": ["rag", "web_search"],
+    "expected_sequence": ["rag", "web_search"],
+    "required_operations": ["rag_framework_lookup", "search_latest_version"],
+    "requires_multi_step": true,
+    "description": "RAG entity lookup + external web search dependency"
+  },
+  {
+    "id": "p3b_dep_009",
+    "category": "multistep_dependency",
+    "query": "Find the CEO of our company in internal docs, and search the web for their latest news.",
+    "expected_tools": ["rag", "web_search"],
+    "expected_sequence": ["rag", "web_search"],
+    "required_operations": ["rag_ceo_lookup", "search_ceo_news"],
+    "requires_multi_step": true,
+    "description": "RAG person lookup + external web search dependency"
+  },
+  {
+    "id": "p3b_dep_010",
+    "category": "multistep_dependency",
+    "query": "Find the distance from Earth to Mars in km, and from Earth to Venus in km, and compute the difference.",
+    "expected_tools": ["web_search", "web_search", "calculator"],
+    "expected_sequence": ["web_search", "web_search", "calculator"],
+    "required_operations": ["search_mars_distance", "search_venus_distance", "diff_calculation"],
+    "requires_multi_step": true,
+    "description": "Search two astronomical distances and compute difference"
+  }
+]

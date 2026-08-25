@@ -4,7 +4,7 @@
     "category": "rag",
     "query": "What days are we expected in the office?",
     "expected_sources": [
-      5
+      "hr_policy_chunk_000"
     ]
   },
   {
@@ -12,7 +12,7 @@
     "category": "rag",
     "query": "How many days of remote work from another country?",
     "expected_sources": [
-      5
+      "hr_policy_chunk_000"
     ]
   },
   {
@@ -20,7 +20,7 @@
     "category": "rag",
     "query": "How many PTO days do we get?",
     "expected_sources": [
-      5
+      "hr_policy_chunk_000"
     ]
   },
   {
@@ -28,7 +28,7 @@
     "category": "rag",
     "query": "Does sick leave roll over?",
     "expected_sources": [
-      5
+      "hr_policy_chunk_000"
     ]
   },
   {
@@ -36,7 +36,7 @@
     "category": "rag",
     "query": "What laptop do engineers get?",
     "expected_sources": [
-      7
+      "it_hardware_chunk_000"
     ]
   },
   {
@@ -44,7 +44,7 @@
     "category": "rag",
     "query": "How much is the home office hardware stipend?",
     "expected_sources": [
-      7
+      "it_hardware_chunk_000"
     ]
   },
   {
@@ -52,7 +52,7 @@
     "category": "rag",
     "query": "When must expense claims for hardware be submitted?",
     "expected_sources": [
-      7
+      "it_hardware_chunk_000"
     ]
   },
   {
@@ -60,7 +60,7 @@
     "category": "rag",
     "query": "Do non-engineers get a MacBook Pro?",
     "expected_sources": [
-      7
+      "it_hardware_chunk_000"
     ]
   },
   {
@@ -68,7 +68,7 @@
     "category": "rag",
     "query": "What frontend framework do we use?",
     "expected_sources": [
-      4
+      "engineering_stack_chunk_000"
     ]
   },
   {
@@ -76,7 +76,7 @@
     "category": "rag",
     "query": "Is Next.js approved?",
     "expected_sources": [
-      4
+      "engineering_stack_chunk_000"
     ]
   },
   {
@@ -84,7 +84,7 @@
     "category": "rag",
     "query": "What database does Celery use?",
     "expected_sources": [
-      4
+      "engineering_stack_chunk_000"
     ]
   },
   {
@@ -92,7 +92,7 @@
     "category": "rag",
     "query": "Do we use Kubernetes?",
     "expected_sources": [
-      4
+      "engineering_stack_chunk_000"
     ]
   },
   {
@@ -100,7 +100,7 @@
     "category": "rag",
     "query": "What to do in a Sev-1 incident?",
     "expected_sources": [
-      6
+      "incident_management_chunk_000"
     ]
   },
   {
@@ -108,7 +108,7 @@
     "category": "rag",
     "query": "How many approvals for a PR?",
     "expected_sources": [
-      6
+      "incident_management_chunk_000"
     ]
   },
   {
@@ -116,7 +116,7 @@
     "category": "rag",
     "query": "What is the minimum test coverage?",
     "expected_sources": [
-      6
+      "incident_management_chunk_000"
     ]
   },
   {
@@ -124,7 +124,7 @@
     "category": "rag",
     "query": "Who is the target audience for sales?",
     "expected_sources": [
-      14
+      "sales_playbook_chunk_000"
     ]
   },
   {
@@ -132,7 +132,7 @@
     "category": "rag",
     "query": "How much does the enterprise tier cost?",
     "expected_sources": [
-      14
+      "sales_playbook_chunk_000"
     ]
   },
   {
@@ -140,7 +140,7 @@
     "category": "rag",
     "query": "Who can approve a 15% discount?",
     "expected_sources": [
-      14
+      "sales_playbook_chunk_000"
     ]
   },
   {
@@ -148,7 +148,7 @@
     "category": "rag",
     "query": "What is the primary brand color hex code?",
     "expected_sources": [
-      8
+      "marketing_guidelines_chunk_000"
     ]
   },
   {
@@ -156,7 +156,7 @@
     "category": "rag",
     "query": "Who reviews social media posts?",
     "expected_sources": [
-      8
+      "marketing_guidelines_chunk_000"
     ]
   },
   {
@@ -164,7 +164,7 @@
     "category": "rag",
     "query": "When do we publish blog posts on Medium?",
     "expected_sources": [
-      8
+      "marketing_guidelines_chunk_000"
     ]
   },
   {
@@ -172,7 +172,7 @@
     "category": "rag",
     "query": "When can I book Premium Economy?",
     "expected_sources": [
-      20
+      "travel_policy_chunk_000"
     ]
   },
   {
@@ -180,7 +180,7 @@
     "category": "rag",
     "query": "Who approves Business class flights?",
     "expected_sources": [
-      20
+      "travel_policy_chunk_000"
     ]
   },
   {
@@ -188,7 +188,7 @@
     "category": "rag",
     "query": "What is the hotel per diem?",
     "expected_sources": [
-      20
+      "travel_policy_chunk_000"
     ]
   },
   {
@@ -196,7 +196,7 @@
     "category": "rag",
     "query": "Which password manager do we use?",
     "expected_sources": [
-      15
+      "security_protocol_chunk_000"
     ]
   },
   {
@@ -204,7 +204,7 @@
     "category": "rag",
     "query": "How often must passwords be rotated?",
     "expected_sources": [
-      15
+      "security_protocol_chunk_000"
     ]
   },
   {
@@ -212,7 +212,7 @@
     "category": "rag",
     "query": "What encryption is used for databases at rest?",
     "expected_sources": [
-      15
+      "security_protocol_chunk_000"
     ]
   },
   {
@@ -220,7 +220,7 @@
     "category": "rag",
     "query": "What time is the IT orientation on day 1?",
     "expected_sources": [
-      10
+      "onboarding_checklist_chunk_000"
     ]
   },
   {
@@ -228,7 +228,7 @@
     "category": "rag",
     "query": "When is the security compliance training due?",
     "expected_sources": [
-      10
+      "onboarding_checklist_chunk_000"
     ]
   },
   {
@@ -236,7 +236,7 @@
     "category": "rag",
     "query": "Does the company pay 100% of dependent health insurance?",
     "expected_sources": [
-      0
+      "benefits_overview_chunk_000"
     ]
   },
   {
@@ -244,7 +244,7 @@
     "category": "rag",
     "query": "What is the 401k match limit?",
     "expected_sources": [
-      0
+      "benefits_overview_chunk_000"
     ]
   },
   {
@@ -252,7 +252,7 @@
     "category": "rag",
     "query": "What is the Q3 focus for the core platform?",
     "expected_sources": [
-      12
+      "product_roadmap_chunk_000"
     ]
   },
   {
@@ -260,7 +260,7 @@
     "category": "rag",
     "query": "When is the iOS app version 2 launching?",
     "expected_sources": [
-      12
+      "product_roadmap_chunk_000"
     ]
   },
   {
@@ -268,7 +268,7 @@
     "category": "rag",
     "query": "Does the new app have Dark Mode?",
     "expected_sources": [
-      12
+      "product_roadmap_chunk_000"
     ]
   },
   {
@@ -276,7 +276,7 @@
     "category": "rag",
     "query": "When are performance reviews?",
     "expected_sources": [
-      11
+      "performance_reviews_chunk_000"
     ]
   },
   {
@@ -284,7 +284,7 @@
     "category": "rag",
     "query": "What is the minimum rating for a bonus?",
     "expected_sources": [
-      11
+      "performance_reviews_chunk_000"
     ]
   },
   {
@@ -292,7 +292,7 @@
     "category": "rag",
     "query": "Where is the Austin office located?",
     "expected_sources": [
-      9
+      "office_facilities_chunk_000"
     ]
   },
   {
@@ -300,7 +300,7 @@
     "category": "rag",
     "query": "Is the HVAC on at night?",
     "expected_sources": [
-      9
+      "office_facilities_chunk_000"
     ]
   },
   {
@@ -308,7 +308,7 @@
     "category": "rag",
     "query": "Who approves software purchases over 5000?",
     "expected_sources": [
-      21
+      "vendor_management_chunk_000"
     ]
   },
   {
@@ -316,7 +316,7 @@
     "category": "rag",
     "query": "Do external contractors need an NDA?",
     "expected_sources": [
-      21
+      "vendor_management_chunk_000"
     ]
   },
   {
@@ -324,7 +324,7 @@
     "category": "rag",
     "query": "What is the SLA for enterprise high-priority tickets?",
     "expected_sources": [
-      2
+      "customer_support_chunk_000"
     ]
   },
   {
@@ -332,7 +332,7 @@
     "category": "rag",
     "query": "Where are tickets escalated after 48 hours?",
     "expected_sources": [
-      2
+      "customer_support_chunk_000"
     ]
   },
   {
@@ -340,7 +340,7 @@
     "category": "rag",
     "query": "What tool is used for UI automation?",
     "expected_sources": [
-      13
+      "qa_testing_chunk_000"
     ]
   },
   {
@@ -348,7 +348,7 @@
     "category": "rag",
     "query": "What blocks a release?",
     "expected_sources": [
-      13
+      "qa_testing_chunk_000"
     ]
   },
   {
@@ -356,7 +356,7 @@
     "category": "rag",
     "query": "How long are access logs kept in Elasticsearch?",
     "expected_sources": [
-      3
+      "data_retention_chunk_000"
     ]
   },
   {
@@ -364,7 +364,7 @@
     "category": "rag",
     "query": "What happens to logs after 90 days?",
     "expected_sources": [
-      3
+      "data_retention_chunk_000"
     ]
   },
   {
@@ -372,7 +372,7 @@
     "category": "rag",
     "query": "How long do we have for GDPR account deletion?",
     "expected_sources": [
-      3
+      "data_retention_chunk_000"
     ]
   },
   {
@@ -380,7 +380,7 @@
     "category": "rag",
     "query": "What is the training budget per year?",
     "expected_sources": [
-      19
+      "training_budget_chunk_000"
     ]
   },
   {
@@ -388,7 +388,7 @@
     "category": "rag",
     "query": "Are board meeting minutes available to employees?",
     "expected_sources": [
-      1
+      "company_values_chunk_000"
     ]
   },
   {
@@ -396,7 +396,7 @@
     "category": "rag",
     "query": "Where is the annual retreat this year?",
     "expected_sources": [
-      16
+      "social_events_chunk_000"
     ]
   },
   {
@@ -404,7 +404,7 @@
     "category": "rag",
     "query": "What is the monthly team lunch budget?",
     "expected_sources": [
-      16
+      "social_events_chunk_000"
     ]
   }
 ]

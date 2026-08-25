@@ -76,3 +76,6 @@ class AgentState(TypedDict):
     execution_status: str
     tool_call_count: int
     max_steps: int
+    last_action: Optional[str]
+    tool_loop_detected: Optional[bool]
+    execution_trace: Optional[list[dict]]
