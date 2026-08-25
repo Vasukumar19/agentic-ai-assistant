@@ -12,6 +12,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 results_path = sys.argv[1] if len(sys.argv) > 1 else "evaluation/results/phase4_final.json"
+# Legacy runners parse CLI args at module import; hide ours.
+_sargv = sys.argv
+sys.argv = [sys.argv[0]]
 data = json.loads(Path(results_path).read_text(encoding="utf-8"))
 m = data["aggregate"]
 results = data["results"]
@@ -19,9 +22,8 @@ done = [r for r in results if r.get("status") == "completed"]
 
 p3b = json.loads(Path("evaluation/results/phase3b_live_results.json").read_text(encoding="utf-8"))
 from evaluate_phase3b import compute_metrics as p3b_metrics  # noqa: E402
-import sys as _s
-_s.argv = [_s.argv[0]]
 m3b = p3b_metrics(p3b)
+sys.argv = _sargv
 
 
 def pct(v):
