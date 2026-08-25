@@ -1,0 +1,412 @@
+{
+  "cases": [
+    {
+      "id": "obs_01_chat",
+      "category": "direct_answer",
+      "question": "hello",
+      "answer_preview": "Hello! 😊 How can I assist you today? I'm here to help with any questions or tasks you might have. What would you like to",
+      "trace_id": "trace_06ebc170c5b749e49cce19d96ba11864",
+      "latency_ms": 2745,
+      "events": 4,
+      "latency_breakdown": {
+        "router": 0,
+        "chat": 2717
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_02_calc",
+      "category": "calculator",
+      "question": "What is 12 * 7?",
+      "answer_preview": "The result of 12 * 7 is 84.",
+      "trace_id": "trace_d812f590cad743b6a70571fb0851fe4d",
+      "latency_ms": 1679,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 384,
+        "context_builder": 0,
+        "planner": 1271,
+        "tool:calculator": 1,
+        "tools": 1
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_03_calc2",
+      "category": "calculator",
+      "question": "calculate 128 / 8",
+      "answer_preview": "The result of 128 divided by 8 is 16.",
+      "trace_id": "trace_2f77fe87cf7d4e07bb5290baef3381f1",
+      "latency_ms": 2035,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 210,
+        "retrieval_planner": 447,
+        "context_builder": 0,
+        "planner": 1352,
+        "tool:calculator": 1,
+        "tools": 1
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_04_web",
+      "category": "web_search",
+      "question": "What is the population of Japan?",
+      "answer_preview": "The current population of Japan is 125,677,224 as of August 25, 2026.",
+      "trace_id": "trace_501e32960473400b879050c114504863",
+      "latency_ms": 5076,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 362,
+        "context_builder": 0,
+        "planner": 1978,
+        "tool:web_search": 2709,
+        "tools": 2709
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_05_web2",
+      "category": "web_search",
+      "question": "What is the height of Mount Everest in meters?",
+      "answer_preview": "The height of Mount Everest is approximately 8,848.86 meters.",
+      "trace_id": "trace_0ea26ff066264551baabb31d7f4ffad0",
+      "latency_ms": 1441,
+      "events": 6,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 591,
+        "context_builder": 0,
+        "planner": 823
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_06_rag",
+      "category": "RAG",
+      "question": "What is GlobalTech's PTO policy?",
+      "answer_preview": "GlobalTech's PTO policy states that all full-time employees accrue 20 days of vacation time per year. Sick leave is capp",
+      "trace_id": "trace_6e9a7a29877c4ff1bddce2402036019d",
+      "latency_ms": 2124,
+      "events": 8,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 0,
+        "rag_retriever": 93,
+        "context_builder": 0,
+        "planner": 2004
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_07_rag2",
+      "category": "RAG",
+      "question": "What database does GlobalTech use as primary?",
+      "answer_preview": "GlobalTech uses PostgreSQL 15 as its primary relational database.",
+      "trace_id": "trace_aee573cd74194e5591884d41825d4f6b",
+      "latency_ms": 1855,
+      "events": 8,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 540,
+        "rag_retriever": 27,
+        "context_builder": 0,
+        "planner": 1263
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_08_mem_write",
+      "category": "memory_write",
+      "question": "Remember that my name is Ada.",
+      "answer_preview": "Got it! I'll remember that, your name is Ada.",
+      "trace_id": "trace_627be5bc2f7f4b47a322ee217e197626",
+      "latency_ms": 1890,
+      "events": 6,
+      "latency_breakdown": {
+        "router": 289,
+        "memory_extractor": 1573,
+        "memory_saver": 1,
+        "memory_response": 0
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_09_mem_read",
+      "category": "memory_read",
+      "question": "What is my name?",
+      "answer_preview": "Your name is Ada.",
+      "trace_id": "trace_a2b02a7855eb4b54a0b12ea48562c1aa",
+      "latency_ms": 603,
+      "events": 8,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 0,
+        "memory_retriever": 1,
+        "context_builder": 0,
+        "planner": 572
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_10_mem_update",
+      "category": "memory_update",
+      "question": "Remember that my favorite programming language is Rust.",
+      "answer_preview": "Got it! I'll remember that.",
+      "trace_id": "trace_cd7931170dfa448789ad7e4200884b7e",
+      "latency_ms": 1760,
+      "events": 6,
+      "latency_breakdown": {
+        "router": 260,
+        "memory_extractor": 1475,
+        "memory_saver": 2,
+        "memory_response": 0
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_11_web_calc",
+      "category": "web_search_calc",
+      "question": "Find the population of Japan and calculate 0.5% of it.",
+      "answer_preview": "The population of Japan is approximately 122,427,731. 0.5% of this population is 612,138.655.",
+      "trace_id": "trace_7f70f839d828421aa98330bb0a61e593",
+      "latency_ms": 5860,
+      "events": 12,
+      "latency_breakdown": {
+        "router": 244,
+        "retrieval_planner": 514,
+        "context_builder": 0,
+        "planner": 3718,
+        "tool:web_search": 1347,
+        "tools": 1348,
+        "tool:calculator": 1
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_12_rag_calc",
+      "category": "rag_calc",
+      "question": "Our policy grants 20 PTO days per year. If I take 5 days off, how many are left?",
+      "answer_preview": "If you take 5 days off, you will have 15 PTO days remaining.",
+      "trace_id": "trace_00fb5459379d4f63b1bda4fddbf99f0f",
+      "latency_ms": 2571,
+      "events": 11,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 0,
+        "rag_retriever": 29,
+        "context_builder": 0,
+        "planner": 2508,
+        "tool:calculator": 1,
+        "tools": 1
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_13_multi2",
+      "category": "multi_step",
+      "question": "Find the populations of Norway and Sweden and tell me their total combined population.",
+      "answer_preview": "The population of Norway is approximately 5,648,774, and the population of Sweden is approximately 10,663,864. Their tot",
+      "trace_id": "trace_71653ceb8f584c89a7fd2350b7a4e824",
+      "latency_ms": 4827,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 269,
+        "retrieval_planner": 497,
+        "context_builder": 0,
+        "planner": 2962,
+        "tool:web_search": 1078,
+        "tools": 1078
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_14_invalid_args",
+      "category": "invalid_args",
+      "question": "calculate 5% of 100000000",
+      "answer_preview": "5% of 100000000 is 5000000.",
+      "trace_id": "trace_598c73d187db49fdbfceafec052c8b11",
+      "latency_ms": 3798,
+      "events": 12,
+      "latency_breakdown": {
+        "router": 233,
+        "retrieval_planner": 478,
+        "context_builder": 0,
+        "planner": 3058,
+        "tool:calculator": 3,
+        "tools": 3
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_15_premature",
+      "category": "premature",
+      "question": "How tall is Mount Everest? Don't search, just answer.",
+      "answer_preview": "Mount Everest is approximately 8,848.86 meters (29,032 feet) tall.",
+      "trace_id": "trace_ac8bc0178d9c49808312a1c6994c2e0b",
+      "latency_ms": 1188,
+      "events": 6,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 368,
+        "context_builder": 0,
+        "planner": 801
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_16_retry",
+      "category": "web_search",
+      "question": "What is the current price of Bitcoin?",
+      "answer_preview": "The current price of Bitcoin is $78,971.36 USD.",
+      "trace_id": "trace_47454ec2898946bf8fc7748a9a42e95c",
+      "latency_ms": 3143,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 348,
+        "context_builder": 0,
+        "planner": 1794,
+        "tool:web_search": 976,
+        "tools": 976
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_17_repeated_tool",
+      "category": "repeated",
+      "question": "calculate 2+2 and then calculate 2+2 again with same args",
+      "answer_preview": "Task terminated to prevent repeated execution of the same tool without new information.",
+      "trace_id": "trace_1218dfb1a4ea48ae8a8fec402f31f134",
+      "latency_ms": 2016,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 226,
+        "retrieval_planner": 424,
+        "context_builder": 0,
+        "planner": 1341,
+        "tool:calculator": 1,
+        "tools": 1
+      },
+      "status": "repeated_tool_call"
+    },
+    {
+      "id": "obs_18_rag_grounded",
+      "category": "RAG",
+      "question": "What percentage of health insurance premiums does GlobalTech cover?",
+      "answer_preview": "GlobalTech covers 100% of the health insurance premiums.",
+      "trace_id": "trace_ec81abaa348d45518e876614d42277a8",
+      "latency_ms": 3598,
+      "events": 12,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 452,
+        "rag_retriever": 16,
+        "context_builder": 0,
+        "planner": 3493,
+        "tool:calculator": 0,
+        "tools": 0
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_19_adversarial",
+      "category": "adversarial",
+      "question": "Per our sales playbook, who approves discounts up to 15%?",
+      "answer_preview": "According to the sales playbook, discounts up to 15% can be approved by the Regional Sales Director.",
+      "trace_id": "trace_251a0fd07f33401c90355e7681ac9ea6",
+      "latency_ms": 2410,
+      "events": 9,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 533,
+        "rag_retriever": 15,
+        "context_builder": 0,
+        "planner": 2122
+      },
+      "status": "completed"
+    },
+    {
+      "id": "obs_20_complex",
+      "category": "rag_calc",
+      "question": "What is the annual professional development budget per employee? What would it be for a team of 5?",
+      "answer_preview": "The annual professional development budget per employee is $1,500. For a team of 5, the total budget would be $7,500.",
+      "trace_id": "trace_468e564a7d3740af90393dc42eee7474",
+      "latency_ms": 4386,
+      "events": 12,
+      "latency_breakdown": {
+        "router": 0,
+        "retrieval_planner": 485,
+        "rag_retriever": 18,
+        "context_builder": 0,
+        "planner": 4725,
+        "tool:calculator": 0,
+        "tools": 0
+      },
+      "status": "completed"
+    }
+  ],
+  "summary": {
+    "total_latency_ms": {
+      "mean": 2750.2,
+      "p50": 2267.0,
+      "p95": 5115.2,
+      "p99": 5711.0,
+      "max": 5860,
+      "min": 603,
+      "n": 20
+    },
+    "planner_latency_ms": {
+      "mean": 2105,
+      "p50": 1978.0,
+      "p95": 3919.4,
+      "p99": 4563.9,
+      "max": 4725,
+      "min": 572,
+      "n": 17
+    },
+    "tool_latency_ms": {
+      "mean": 679.8,
+      "p50": 3.0,
+      "p95": 2164.6,
+      "p99": 2709,
+      "max": 2709,
+      "min": 1,
+      "n": 9
+    },
+    "retrieval_latency_ms": {
+      "mean": 389.5,
+      "p50": 447.0,
+      "p95": 571.8,
+      "p99": 587.2,
+      "max": 591,
+      "min": 1,
+      "n": 17
+    }
+  },
+  "traces": [
+    "trace_06ebc170c5b749e49cce19d96ba11864",
+    "trace_d812f590cad743b6a70571fb0851fe4d",
+    "trace_2f77fe87cf7d4e07bb5290baef3381f1",
+    "trace_501e32960473400b879050c114504863",
+    "trace_0ea26ff066264551baabb31d7f4ffad0",
+    "trace_6e9a7a29877c4ff1bddce2402036019d",
+    "trace_aee573cd74194e5591884d41825d4f6b",
+    "trace_627be5bc2f7f4b47a322ee217e197626",
+    "trace_a2b02a7855eb4b54a0b12ea48562c1aa",
+    "trace_cd7931170dfa448789ad7e4200884b7e",
+    "trace_7f70f839d828421aa98330bb0a61e593",
+    "trace_00fb5459379d4f63b1bda4fddbf99f0f",
+    "trace_71653ceb8f584c89a7fd2350b7a4e824",
+    "trace_598c73d187db49fdbfceafec052c8b11",
+    "trace_ac8bc0178d9c49808312a1c6994c2e0b",
+    "trace_47454ec2898946bf8fc7748a9a42e95c",
+    "trace_1218dfb1a4ea48ae8a8fec402f31f134",
+    "trace_ec81abaa348d45518e876614d42277a8",
+    "trace_251a0fd07f33401c90355e7681ac9ea6",
+    "trace_468e564a7d3740af90393dc42eee7474"
+  ]
+}

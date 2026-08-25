@@ -1,0 +1,125 @@
+[
+  {
+    "id": "fail_01_tool_arg",
+    "question": "calculate 5% of 100000000",
+    "trace_id": "trace_cd2da944cb4f44ec89e411c728d31441",
+    "answer_preview": "5% of 100,000,000 is 5,000,000.",
+    "checks": {
+      "routing_correct": true,
+      "retrieval_correct": true,
+      "planner_decided": true,
+      "tool_selected": true,
+      "tool_args": true,
+      "tool_succeeded": true,
+      "planner_used_result": true,
+      "why_terminated": "completed",
+      "latencies": {
+        "router": 2287,
+        "retrieval_planner": 419,
+        "context_builder": 0,
+        "planner": 2895,
+        "tool:calculator": 2,
+        "tools": 2
+      }
+    },
+    "error_events": 2
+  },
+  {
+    "id": "fail_02_network",
+    "question": "What is the population of Atlantis?",
+    "trace_id": "trace_d8ffda8f151b4d03bca61d11c67ac53a",
+    "answer_preview": "The population of Atlantis is not known for certain, as Atlantis is a mythical island from ancient legends. However, some sources suggest that it was ",
+    "checks": {
+      "routing_correct": true,
+      "retrieval_correct": true,
+      "planner_decided": true,
+      "tool_selected": true,
+      "tool_args": true,
+      "tool_succeeded": true,
+      "planner_used_result": true,
+      "why_terminated": "completed",
+      "latencies": {
+        "router": 0,
+        "retrieval_planner": 457,
+        "context_builder": 0,
+        "planner": 2333,
+        "tool:web_search": 2519,
+        "tools": 2519
+      }
+    },
+    "error_events": 0
+  },
+  {
+    "id": "fail_03_retrieval",
+    "question": "What is the secret launch code?",
+    "trace_id": "trace_712ab50bf064446199b2ca0d30838a6b",
+    "answer_preview": "The concept of a 'secret launch code' is typically associated with military or space operations, but there is no publicly known or officially disclose",
+    "checks": {
+      "routing_correct": true,
+      "retrieval_correct": true,
+      "planner_decided": true,
+      "tool_selected": false,
+      "tool_args": false,
+      "tool_succeeded": false,
+      "planner_used_result": false,
+      "why_terminated": "completed",
+      "latencies": {
+        "router": 0,
+        "retrieval_planner": 500,
+        "context_builder": 0,
+        "planner": 1295
+      }
+    },
+    "error_events": 0
+  },
+  {
+    "id": "fail_04_memory_empty",
+    "question": "What is my favorite color?",
+    "trace_id": "trace_8a5e143a153f490393bd5cf9bf671d4d",
+    "answer_preview": "The information about your favorite color is not provided in the retrieved context.",
+    "checks": {
+      "routing_correct": true,
+      "retrieval_correct": true,
+      "planner_decided": true,
+      "tool_selected": false,
+      "tool_args": false,
+      "tool_succeeded": false,
+      "planner_used_result": false,
+      "why_terminated": "completed",
+      "latencies": {
+        "router": 0,
+        "retrieval_planner": 377,
+        "memory_retriever": 6,
+        "context_builder": 0,
+        "planner": 622
+      }
+    },
+    "error_events": 0
+  },
+  {
+    "id": "fail_05_max_steps",
+    "question": "Find population of Japan, China, India, USA and calculate their total",
+    "trace_id": "trace_cd59b746e32d42e0a5b97d2652649115",
+    "answer_preview": "Task terminated to prevent repeated execution of the same tool without new information.",
+    "checks": {
+      "routing_correct": true,
+      "retrieval_correct": true,
+      "planner_decided": true,
+      "tool_selected": true,
+      "tool_args": true,
+      "tool_succeeded": true,
+      "planner_used_result": true,
+      "why_terminated": "repeated_tool_call",
+      "latencies": {
+        "router": 210,
+        "retrieval_planner": 429,
+        "context_builder": 0,
+        "planner": 4085,
+        "tool:web_search": 1087,
+        "tools": 1088,
+        "tool:calculator": 1
+      }
+    },
+    "error_events": 2
+  }
+]
