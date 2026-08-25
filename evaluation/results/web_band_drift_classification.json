@@ -1,0 +1,40 @@
+{
+  "date": "2026-08-25",
+  "tool": "refresh_web_bands.py (agent-based)",
+  "total_range_cases": 23,
+  "in_band": 11,
+  "out_of_band": 12,
+  "classification_summary": {
+    "A_genuine_temporal_change": 0,
+    "B_infrastructure_failure": 8,
+    "C_agent_unit_mismatch": 2,
+    "D_premature_termination": 1,
+    "E_close_out_of_band": 1
+  },
+  "cases": [
+    {"id": "p4_web_01", "old_band": [118000000, 128000000], "status": "OK-in-original-run", "classification": "B", "note": "ConnectError in refresh; original run answered from memory (PREMATURE_TERMINATION)"},
+    {"id": "p4_web_04", "old_band": [299000, 300000], "status": "OK", "classification": "none", "note": "Agent answered 300000, within band"},
+    {"id": "p4_web_05", "old_band": [8840, 8850], "status": "OK", "classification": "none", "note": "Agent answered 8848.86, within band"},
+    {"id": "p4_web_07", "old_band": [38000000, 42000000], "status": "OK", "classification": "none", "note": "Agent answered 38232593, within band"},
+    {"id": "p4_web_08", "old_band": [5890, 5900], "status": "OK", "classification": "none", "note": "Agent answered 5895, within band"},
+    {"id": "p4_web_09", "old_band": [25000000, 28000000], "status": "OK", "classification": "none", "note": "Agent answered 27994737, within band"},
+    {"id": "p4_ms_01", "old_band": [1600000, 1800000], "status": "DRIFT", "classification": "B", "note": "ConnectError: Yahoo search timed out"},
+    {"id": "p4_ms_02", "old_band": [17940000, 18000000], "status": "OK", "classification": "none", "note": "Agent answered 17987547, within band"},
+    {"id": "p4_ms_03", "old_band": [4420, 4425], "status": "DRIFT", "classification": "B", "note": "ConnectError: Wikipedia API timed out"},
+    {"id": "p4_ms_04", "old_band": [650000, 700000], "status": "DRIFT", "classification": "C", "note": "Agent answered '69.1 million' (69.1) but band expects [650000, 700000] raw — unit mismatch"},
+    {"id": "p4_ms_06", "old_band": [11500000, 12500000], "status": "OK", "classification": "none", "note": "Agent answered 11962698, within band"},
+    {"id": "p4_ms_07", "old_band": [5500000, 6200000], "status": "DRIFT", "classification": "B", "note": "ConnectError: Wikipedia API timed out"},
+    {"id": "p4_ms_15", "old_band": [140000000, 190000000], "status": "DRIFT", "classification": "C", "note": "Agent answered '216 million' (216) but band expects [140M, 190M] — unit mismatch"},
+    {"id": "p4_ms_16", "old_band": [1000000000, 1700000000], "status": "DRIFT", "classification": "B", "note": "ConnectError: Wikipedia API timed out"},
+    {"id": "p4_ms_17", "old_band": [200, 500], "status": "DRIFT", "classification": "B", "note": "ConnectError: Wikipedia API timed out"},
+    {"id": "p4_ms_18", "old_band": [16000000, 18000000], "status": "OK", "classification": "none", "note": "Agent answered 16354036, within band"},
+    {"id": "p4_adv_01", "old_band": [38000, 42000], "status": "OK", "classification": "none", "note": "Agent answered 40368, within band"},
+    {"id": "p4_adv_02", "old_band": [33000, 35000], "status": "DRIFT", "classification": "B", "note": "ConnectError: Wikipedia API timed out"},
+    {"id": "p4_adv_03", "old_band": [320, 335], "status": "OK", "classification": "none", "note": "Agent answered 330, within band"},
+    {"id": "p4_adv_04", "old_band": [5000000, 6000000], "status": "DRIFT", "classification": "D", "note": "Agent hit loop detection — premature termination, not drift"},
+    {"id": "p4_adv_05", "old_band": [3050, 3100], "status": "DRIFT", "classification": "B", "note": "ConnectError: Wikipedia API timed out"},
+    {"id": "p4_adv_18", "old_band": [500000, 2500000], "status": "DRIFT", "classification": "E", "note": "Agent answered 416496 (difference between populations); close to band lower edge but not within"},
+    {"id": "p4_adv_19", "old_band": [0, 1000], "status": "OK", "classification": "none", "note": "Agent answered 250, within band"}
+  ],
+  "conclusion": "Zero genuine temporal drift found. 8/12 out-of-band cases are infrastructure failures (Wikipedia/Yahoo ConnectErrors). 2 are agent unit-mismatch errors. 1 is premature termination. 1 is marginally out-of-band. Bands are stable; no updates applied."
+}

@@ -1,0 +1,551 @@
+{
+  "run_id": "239649",
+  "dataset": "evaluation\\datasets\\phase4_quality_100.json",
+  "retried_cases": [],
+  "aggregate": {
+    "n_total": 6,
+    "n_completed": 6,
+    "tool_selection_acc": 1.0,
+    "exact_sequence_acc": 1.0,
+    "acceptable_sequence_acc": 1.0,
+    "task_completion_rate": 1.0,
+    "answer_correctness": null,
+    "mean_correctness_score": null,
+    "tool_grounded_acc": 1.0,
+    "faithfulness_acc": 1.0,
+    "utilization_rate": 1.0,
+    "premature_orchestration_fail": 0.0,
+    "unnecessary_tool_fail": 0.0,
+    "infrastructure_failures": 0,
+    "failure_taxonomy": {},
+    "mean_composite": 1.0,
+    "mean_latency_s": 2.1,
+    "p50_latency_s": 2.03,
+    "p95_latency_s": 3.64,
+    "avg_llm_calls": 0.5,
+    "avg_tool_calls": 0
+  },
+  "results": [
+    {
+      "id": "p4_mem_01",
+      "category": "rag_memory",
+      "query": "Remember that my name is Phase4User239649.",
+      "latency_s": 3.64,
+      "timestamp": "2026-08-25T15:18:45.741960+00:00",
+      "actual_sequence": [],
+      "expected_sequence": [],
+      "acceptable_sequences": [
+        []
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "mem_write"
+        ],
+        "details": {
+          "mem_write": true
+        }
+      },
+      "final_answer": "Got it! I'll remember that, your name is Phase4User239649.",
+      "expected_answer": "Phase4User239649",
+      "answer_correct": null,
+      "correctness_score": null,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": false
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": null,
+        "used": [],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 0,
+      "llm_calls": 0,
+      "tool_call_count": 0,
+      "execution_status": null,
+      "rag_context_chars": 0,
+      "rag_context_excerpt": "",
+      "tool_results": [],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "task_completion": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_mem_02",
+      "category": "rag_memory",
+      "query": "Remember that my goal is to become an AI engineer.",
+      "latency_s": 1.5,
+      "timestamp": "2026-08-25T15:18:47.240472+00:00",
+      "actual_sequence": [],
+      "expected_sequence": [],
+      "acceptable_sequences": [
+        []
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "mem_write"
+        ],
+        "details": {
+          "mem_write": true
+        }
+      },
+      "final_answer": "Got it! I'll remember that, your goal is to become an AI engineer.",
+      "expected_answer": "AI engineer",
+      "answer_correct": null,
+      "correctness_score": null,
+      "correctness_details": {
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": false
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": null,
+        "used": [],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 0,
+      "llm_calls": 0,
+      "tool_call_count": 0,
+      "execution_status": null,
+      "rag_context_chars": 0,
+      "rag_context_excerpt": "",
+      "tool_results": [],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "task_completion": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_mem_03",
+      "category": "rag_memory",
+      "query": "What is my name?",
+      "latency_s": 0.57,
+      "timestamp": "2026-08-25T15:18:47.812823+00:00",
+      "actual_sequence": [
+        "memory_search"
+      ],
+      "expected_sequence": [
+        "memory_search"
+      ],
+      "acceptable_sequences": [
+        [
+          "memory_search"
+        ],
+        []
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "mem_read"
+        ],
+        "details": {
+          "mem_read": true
+        }
+      },
+      "final_answer": "Your name is Phase4User239649.",
+      "expected_answer": "Phase4User239649",
+      "answer_correct": null,
+      "correctness_score": null,
+      "correctness_details": {
+        "numeric": "match=True",
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": false
+      },
+      "faithfulness_deterministic": {
+        "claims_total": 1,
+        "supported": [
+          "Your name is Phase4User239649"
+        ],
+        "unsupported": [],
+        "score": 1.0
+      },
+      "faithfulness_judge": {
+        "faithfulness_score": 1.0,
+        "supported_claims": [
+          "Your name is Phase4User239649."
+        ],
+        "unsupported_claims": [],
+        "contradictions": []
+      },
+      "faithfulness_pass": true,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "mem_read"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 1,
+      "llm_calls": 1,
+      "tool_call_count": 0,
+      "execution_status": "completed",
+      "rag_context_chars": 134,
+      "rag_context_excerpt": "=== PROFILE INFORMATION ===\nName: Phase4User239649\nGoal: to become an AI engineer\nProfession: \nEducation: \nFavorite Technologies: Rust",
+      "tool_results": [],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "task_completion": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": {
+        "judge_model": "qwen3:8b",
+        "judge_prompt_version": "phase4-v1"
+      },
+      "status": "completed"
+    },
+    {
+      "id": "p4_mem_04",
+      "category": "rag_memory",
+      "query": "What is my goal?",
+      "latency_s": 2.56,
+      "timestamp": "2026-08-25T15:18:58.272077+00:00",
+      "actual_sequence": [
+        "memory_search"
+      ],
+      "expected_sequence": [
+        "memory_search"
+      ],
+      "acceptable_sequences": [
+        [
+          "memory_search"
+        ],
+        []
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "mem_read"
+        ],
+        "details": {
+          "mem_read": true
+        }
+      },
+      "final_answer": "Your goal is to become an AI engineer.",
+      "expected_answer": "AI engineer",
+      "answer_correct": null,
+      "correctness_score": null,
+      "correctness_details": {
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": false
+      },
+      "faithfulness_deterministic": {
+        "claims_total": 1,
+        "supported": [
+          "Your goal is to become an AI engineer"
+        ],
+        "unsupported": [],
+        "score": 1.0
+      },
+      "faithfulness_judge": {
+        "faithfulness_score": 1.0,
+        "supported_claims": [
+          "Your goal is to become an AI engineer."
+        ],
+        "unsupported_claims": [],
+        "contradictions": []
+      },
+      "faithfulness_pass": true,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "mem_read"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 1,
+      "llm_calls": 1,
+      "tool_call_count": 0,
+      "execution_status": "completed",
+      "rag_context_chars": 134,
+      "rag_context_excerpt": "=== PROFILE INFORMATION ===\nName: Phase4User239649\nGoal: to become an AI engineer\nProfession: \nEducation: \nFavorite Technologies: Rust",
+      "tool_results": [],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "task_completion": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": {
+        "judge_model": "qwen3:8b",
+        "judge_prompt_version": "phase4-v1"
+      },
+      "status": "completed"
+    },
+    {
+      "id": "p4_mem_05",
+      "category": "rag_memory",
+      "query": "Remember that my favorite programming language is Rust.",
+      "latency_s": 3.48,
+      "timestamp": "2026-08-25T15:19:07.625174+00:00",
+      "actual_sequence": [],
+      "expected_sequence": [],
+      "acceptable_sequences": [
+        []
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "mem_write"
+        ],
+        "details": {
+          "mem_write": true
+        }
+      },
+      "final_answer": "Got it! I'll remember that.",
+      "expected_answer": "Rust",
+      "answer_correct": null,
+      "correctness_score": null,
+      "correctness_details": {
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": false
+      },
+      "faithfulness_deterministic": null,
+      "faithfulness_judge": null,
+      "faithfulness_pass": null,
+      "utilization": {
+        "applicable": true,
+        "rate": null,
+        "used": [],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 0,
+      "llm_calls": 0,
+      "tool_call_count": 0,
+      "execution_status": null,
+      "rag_context_chars": 0,
+      "rag_context_excerpt": "",
+      "tool_results": [],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "task_completion": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": null,
+      "status": "completed"
+    },
+    {
+      "id": "p4_mem_06",
+      "category": "rag_memory",
+      "query": "What is my favorite programming language?",
+      "latency_s": 0.86,
+      "timestamp": "2026-08-25T15:19:08.480516+00:00",
+      "actual_sequence": [
+        "memory_search"
+      ],
+      "expected_sequence": [
+        "memory_search"
+      ],
+      "acceptable_sequences": [
+        [
+          "memory_search"
+        ],
+        []
+      ],
+      "selection_ok": true,
+      "sequence_exact": true,
+      "sequence_acceptable": true,
+      "task_completion": {
+        "applicable": true,
+        "complete": true,
+        "missing": [],
+        "satisfied": [
+          "mem_read"
+        ],
+        "details": {
+          "mem_read": true
+        }
+      },
+      "final_answer": "Your favorite programming language is Rust.",
+      "expected_answer": "Rust",
+      "answer_correct": null,
+      "correctness_score": null,
+      "correctness_details": {
+        "info_missing": [],
+        "judge": null,
+        "forbidden_violation": false
+      },
+      "grounding": {
+        "applicable": false
+      },
+      "faithfulness_deterministic": {
+        "claims_total": 1,
+        "supported": [],
+        "unsupported": [
+          "Your favorite programming language is Rust"
+        ],
+        "score": 0.0
+      },
+      "faithfulness_judge": {
+        "faithfulness_score": 1.0,
+        "supported_claims": [
+          "Your favorite programming language is Rust."
+        ],
+        "unsupported_claims": [],
+        "contradictions": []
+      },
+      "faithfulness_pass": true,
+      "utilization": {
+        "applicable": true,
+        "rate": 1.0,
+        "used": [
+          "mem_read"
+        ],
+        "unused": []
+      },
+      "arg_problems": [],
+      "forbidden_tools_used": [],
+      "planner_calls_actual": 1,
+      "llm_calls": 1,
+      "tool_call_count": 0,
+      "execution_status": "completed",
+      "rag_context_chars": 134,
+      "rag_context_excerpt": "=== PROFILE INFORMATION ===\nName: Phase4User239649\nGoal: to become an AI engineer\nProfession: \nEducation: \nFavorite Technologies: Rust",
+      "tool_results": [],
+      "composite": {
+        "score": 1.0,
+        "components": {
+          "task_completion": 1.0,
+          "utilization": 1.0
+        },
+        "weights_effective": {
+          "correctness": 0.4,
+          "task_completion": 0.3,
+          "groundedness": 0.2,
+          "utilization": 0.1
+        },
+        "label": "project-defined composite score"
+      },
+      "primary_failure": null,
+      "secondary_failures": [],
+      "judge_meta": {
+        "judge_model": "qwen3:8b",
+        "judge_prompt_version": "phase4-v1"
+      },
+      "status": "completed"
+    }
+  ]
+}

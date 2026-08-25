@@ -1,0 +1,19 @@
+{
+  "version": "v1",
+  "description": "Phase 4 evaluation dataset — original snapshot before web-band refresh",
+  "file": "phase4_quality_100.json",
+  "backup": "phase4_quality_100_v1.json",
+  "git_commit": "7dd919b",
+  "git_date": "2026-08-25",
+  "sha256": "2ac4fe262b70",
+  "total_cases": 100,
+  "range_carrying_cases": 23,
+  "buckets": {
+    "single_tool": 20,
+    "rag_memory": 20,
+    "multi_step": 20,
+    "answer_grounded": 20,
+    "adversarial": 20
+  },
+  "notes": "Created from _generate_phase4.py. Memory cases use {rid} templating on name only; goal/language cases use plain values (no {rid}). Memory fixes applied in this commit."
+}
