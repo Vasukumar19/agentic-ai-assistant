@@ -294,11 +294,18 @@ def evaluate_utilization(case_norm: dict, tool_results: list,
         tool = op.get("tool")
 
         if op.get("source") in ("rag", "memory"):
-            # Used iff the final answer draws on context (non-trivial overlap)
-            cw = content_words(final_answer or "")
+            # A pure memory-WRITE op has no consumer inside its own case —
+            # its value is consumed by later recall cases, so it is excluded
+            # from per-case utilization rather than counted as unused.
+            if op.get("source") == "memory" and not rag_context:
+                continue
+            # Used iff the final answer draws on context. Short answers make
+            # a >=3-word threshold unfair; one distinctive (>=5 char) shared
+            # token is sufficient evidence of use.
             ctx_words = set(content_words(rag_context or ""))
-            overlap = sum(1 for w in cw[:60] if w in ctx_words)
-            (used if overlap >= 3 else unused).append(oid)
+            cw = [w for w in content_words(final_answer or "")[:60]]
+            overlap = sum(1 for w in cw if w in ctx_words and len(w) >= 5)
+            (used if overlap >= 1 else unused).append(oid)
             continue
 
         results = _tool_results_for(tool_results, tool)

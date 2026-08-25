@@ -1,5 +1,5 @@
 {
-  "n_cases": 12,
+  "answer_cases": 12,
   "answer_verdict_agreement": 12,
   "answer_score_deltas": [
     0.0,
@@ -15,9 +15,21 @@
     0.0,
     0.0
   ],
-  "faithfulness_agreement": [
-    0,
-    0
+  "faith_cases": 12,
+  "faith_agreement": 12,
+  "faith_score_deltas": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
   ],
   "judge_model": "qwen3:8b"
 }

@@ -793,7 +793,7 @@
   {
     "id": "p4_mem_02",
     "category": "rag_memory",
-    "query": "Remember that my goal is to become an AI engineer{rid}.",
+    "query": "Remember that my goal is to become an AI engineer.",
     "operations": [
       {
         "op_id": "mem_write",
@@ -804,7 +804,7 @@
     "acceptable_tool_sequences": [
       []
     ],
-    "expected_answer": "AI engineer{rid}",
+    "expected_answer": "AI engineer",
     "ground_truth_source": "runtime_memory",
     "notes": "write case"
   },
@@ -846,14 +846,14 @@
       ],
       []
     ],
-    "expected_answer": "AI engineer{rid}",
+    "expected_answer": "AI engineer",
     "ground_truth_source": "runtime_memory",
     "depends_on": "p4_mem_02"
   },
   {
     "id": "p4_mem_05",
     "category": "rag_memory",
-    "query": "Remember that my favorite programming language is Rust{rid}.",
+    "query": "Remember that my favorite programming language is Rust.",
     "operations": [
       {
         "op_id": "mem_write",

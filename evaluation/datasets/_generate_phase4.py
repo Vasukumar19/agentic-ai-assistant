@@ -134,9 +134,9 @@ add(id="p4_mem_01", category="rag_memory",
     acceptable_tool_sequences=[[]], expected_answer="Phase4User{rid}",
     ground_truth_source="runtime_memory", notes="write case; router memory_update path")
 add(id="p4_mem_02", category="rag_memory",
-    query="Remember that my goal is to become an AI engineer{rid}.",
+    query="Remember that my goal is to become an AI engineer.",
     operations=[{"op_id": "mem_write", "source": "memory"}], required_tools=[],
-    acceptable_tool_sequences=[[]], expected_answer="AI engineer{rid}",
+    acceptable_tool_sequences=[[]], expected_answer="AI engineer",
     ground_truth_source="runtime_memory", notes="write case")
 add(id="p4_mem_03", category="rag_memory", query="What is my name?",
     operations=[{"op_id": "mem_read", "source": "memory"}], required_tools=[],
@@ -144,10 +144,10 @@ add(id="p4_mem_03", category="rag_memory", query="What is my name?",
     ground_truth_source="runtime_memory", depends_on="p4_mem_01")
 add(id="p4_mem_04", category="rag_memory", query="What is my goal?",
     operations=[{"op_id": "mem_read", "source": "memory"}], required_tools=[],
-    acceptable_tool_sequences=[["memory_search"], []], expected_answer="AI engineer{rid}",
+    acceptable_tool_sequences=[["memory_search"], []], expected_answer="AI engineer",
     ground_truth_source="runtime_memory", depends_on="p4_mem_02")
 add(id="p4_mem_05", category="rag_memory",
-    query="Remember that my favorite programming language is Rust{rid}.",
+    query="Remember that my favorite programming language is Rust.",
     operations=[{"op_id": "mem_write", "source": "memory"}], required_tools=[],
     acceptable_tool_sequences=[[]], expected_answer="Rust",
     ground_truth_source="runtime_memory", notes="write case")

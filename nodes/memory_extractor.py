@@ -94,8 +94,15 @@ def memory_saver_node(state: dict) -> dict:
     extracted_profile = state.get("extracted_profile", {})
     extracted_semantic = state.get("extracted_semantic", [])
 
+    # Drop empty extractions so a partial extraction cannot wipe
+    # previously stored facts (e.g. {"name": ""} erasing a known name).
+    clean_profile = {
+        k: v for k, v in extracted_profile.items()
+        if v not in (None, "", [], {})
+    }
+
     # Save profile memory
-    if extracted_profile:
+    if clean_profile:
         MEMORY_FILE.parent.mkdir(parents=True, exist_ok=True)
 
         # Load existing memory
@@ -110,7 +117,7 @@ def memory_saver_node(state: dict) -> dict:
             memory = {}
 
         # Update with extracted data
-        memory.update(extracted_profile)
+        memory.update(clean_profile)
 
         # Save back
         with open(MEMORY_FILE, "w", encoding="utf-8") as f:
@@ -167,14 +174,26 @@ def memory_response_node(state: dict) -> dict:
     extracted_profile = state.get("extracted_profile", {})
     extracted_semantic = state.get("extracted_semantic", [])
 
-    # Build confirmation message
+    # Build confirmation message — skip empty fields entirely instead of
+    # rendering blanks like "your name is ,".
     parts = ["Got it! I'll remember that"]
 
-    if "name" in extracted_profile:
-        parts.append(f"your name is {extracted_profile['name']}")
+    name = str(extracted_profile.get("name") or "").strip()
+    if name:
+        parts.append(f"your name is {name}")
 
-    if "goal" in extracted_profile:
-        parts.append(f"your goal is to become an {extracted_profile['goal']}")
+    goal = str(extracted_profile.get("goal") or "").strip()
+    if goal:
+        # Avoid doubled phrasing when the extraction already contains
+        # "to become ..." (e.g. "your goal is to become an to become an X").
+        if goal.lower().startswith("to "):
+            parts.append(f"your goal is {goal}")
+        else:
+            parts.append(f"your goal is to become an {goal}")
+
+    interests = extracted_profile.get("interests") or []
+    if interests:
+        parts.append(f"you are interested in {', '.join(map(str, interests))}")
 
     if extracted_semantic:
         parts.append(f"you {extracted_semantic[0].lower()}")

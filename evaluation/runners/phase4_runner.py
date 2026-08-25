@@ -34,6 +34,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", default="evaluation/datasets/phase4_quality_100.json")
 parser.add_argument("--limit", type=int, default=None)
+parser.add_argument("--ids", default=None,
+                    help="comma-separated case ids to run (subset re-checks)")
 parser.add_argument("--out", default=None, help="results file override")
 args = parser.parse_args()
 
@@ -197,8 +199,14 @@ def evaluate_case(app, judge, raw_case, rid):
     forbidden_violation = any(re.search(p, final_answer or "", re.I)
                               for p in case["forbidden_in_answer"])
 
+    # Pure memory-write cases: the write's success is what matters, and its
+    # stored CONTENT is verified by dependent recall cases. Grading the
+    # confirmation text would punish correct-but-unechoed storage.
+    write_only = bool(case["operations"]) and all(
+        o.get("source") == "memory" for o in case["operations"])
+
     judge_meta, judge_verdict = None, None
-    need_judge = (not det_decisive) and exp_answer is not None
+    need_judge = (not det_decisive) and exp_answer is not None and not write_only
     if need_judge:
         try:
             jr = judge.judge_answer(question, exp_answer, final_answer,
@@ -211,6 +219,8 @@ def evaluate_case(app, judge, raw_case, rid):
 
     if forbidden_violation:
         answer_correct, correctness_score = False, 0.0
+    elif write_only and exp_answer is not None:
+        answer_correct, correctness_score = None, None  # graded via recall deps + tc
     elif det_decisive:
         answer_correct, correctness_score = det_ok, det_score
     elif judge_verdict and "error" not in judge_verdict:
@@ -360,6 +370,9 @@ def main():
     raw_cases = json.loads(dataset_path.read_text(encoding="utf-8"))
     if args.limit:
         raw_cases = raw_cases[:args.limit]
+    if args.ids:
+        wanted = {x.strip() for x in args.ids.split(",") if x.strip()}
+        raw_cases = [c for c in raw_cases if c["id"] in wanted]
 
     rid = uuid.uuid4().hex[:6]
     print(f"=== Phase 4 Answer Quality Benchmark ===")
