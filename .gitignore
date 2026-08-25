@@ -25,3 +25,5 @@ memory/
 # Benchmark run logs
 evaluation/results/*.txt
 faiss_index/
+# Local trace artifacts (debug-only, regenerable)
+evaluation/traces/

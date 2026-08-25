@@ -5,8 +5,8 @@
       "category": "single_mcp_read",
       "question": "Use test.echo to echo the message 'hello world'",
       "answer_preview": "echo: hello world",
-      "trace_id": "trace_f90a8a8571014752b17eff788eb6ede8",
-      "latency_ms": 6797,
+      "trace_id": "trace_47460f28b9024c698a84e97d08791a78",
+      "latency_ms": 12444,
       "events": 9,
       "called_tools": [
         "test.echo"
@@ -21,13 +21,13 @@
       "category": "single_mcp_read",
       "question": "Use test.add to add 5 and 7",
       "answer_preview": "The result of adding 5 and 7 using test.add is 12.",
-      "trace_id": "trace_224153fbf073449f9c855be3e49c31fa",
-      "latency_ms": 3043,
+      "trace_id": "trace_aaeabadb33944a358a57d93f87710a57",
+      "latency_ms": 3120,
       "events": 9,
       "called_tools": [
-        "test.add"
+        "test_add"
       ],
-      "selection_ok": true,
+      "selection_ok": false,
       "arg_ok": true,
       "success": true,
       "status": "completed"
@@ -36,23 +36,25 @@
       "id": "mcp_03_lookup",
       "category": "single_mcp_read",
       "question": "Use test.lookup to look up query 'foo'",
-      "answer_preview": "I tried to use an invalid tool: test_lookup. I cannot complete the request.",
-      "trace_id": "trace_cb7fc21c8d074863b0ef18e9e2de207e",
-      "latency_ms": 1091,
-      "events": 6,
-      "called_tools": [],
+      "answer_preview": "Task terminated to prevent repeated execution of the same tool without new information.",
+      "trace_id": "trace_2fb772cfeceb4c5e9eedcfc03f3cb621",
+      "latency_ms": 3930,
+      "events": 11,
+      "called_tools": [
+        "test_lookup"
+      ],
       "selection_ok": false,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "repeated_tool_call"
     },
     {
       "id": "mcp_04_write",
       "category": "single_mcp_write",
       "question": "Use test.write to store key 'mykey' with value 'myvalue'",
       "answer_preview": "Got it! I'll remember that.",
-      "trace_id": "trace_a710b0722633482aa859ddc3d24cb2db",
-      "latency_ms": 1502,
+      "trace_id": "trace_0f6874a2dccb4c34b308b5a4f088ef8d",
+      "latency_ms": 1545,
       "events": 6,
       "called_tools": [],
       "selection_ok": false,
@@ -64,26 +66,29 @@
       "id": "mcp_05_lookup_calc",
       "category": "mcp_calc",
       "question": "Use test.lookup to look up 'foo' and then use calculator to multiply the returned value 42 by 2",
-      "answer_preview": "I tried to use an invalid tool: test_lookup. I cannot complete the request.",
-      "trace_id": "trace_fe33d1f877a343429c1b1387210954d0",
-      "latency_ms": 1379,
-      "events": 6,
-      "called_tools": [],
-      "selection_ok": false,
+      "answer_preview": "The value of 'foo' retrieved using test.lookup is 42. Multiplying this value by 2 using the calculator gives a result of 84.",
+      "trace_id": "trace_42de8114df1e4a96a8da99c18dd4a570",
+      "latency_ms": 4065,
+      "events": 12,
+      "called_tools": [
+        "test_lookup",
+        "calculator"
+      ],
+      "selection_ok": true,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "completed"
     },
     {
       "id": "mcp_06_add_calc",
       "category": "mcp_calc",
       "question": "Use test.add to add 10 and 20, then use calculator to multiply the result by 3",
       "answer_preview": "The result of adding 10 and 20 using test.add is 30. Then, multiplying this result by 3 using the calculator gives 90.",
-      "trace_id": "trace_36693c78649e4e718dde0e34265df711",
-      "latency_ms": 4334,
+      "trace_id": "trace_8948adeb9caa4bb8af4221159c893282",
+      "latency_ms": 4450,
       "events": 12,
       "called_tools": [
-        "test.add",
+        "test_add",
         "calculator"
       ],
       "selection_ok": true,
@@ -96,8 +101,8 @@
       "category": "calc_mcp",
       "question": "Calculate 5 + 7 using calculator, then use test.echo to echo the result",
       "answer_preview": "The result of 5 + 7 is 12, and the echoed result is 12.",
-      "trace_id": "trace_471e9d853a5d4a32b6d60c810ba40c9e",
-      "latency_ms": 3871,
+      "trace_id": "trace_cf5126ef149c4ed8a06f969744abf6e0",
+      "latency_ms": 3982,
       "events": 12,
       "called_tools": [
         "calculator",
@@ -112,41 +117,47 @@
       "id": "mcp_08_echo_lookup",
       "category": "mcp_mcp",
       "question": "Use test.echo to echo 'test' and then use test.lookup to look up 'bar'",
-      "answer_preview": "I tried to use an invalid tool: test_echo. I cannot complete the request.",
-      "trace_id": "trace_2c97ef3750164ee7bade28afb1f356fe",
-      "latency_ms": 1073,
-      "events": 6,
-      "called_tools": [],
+      "answer_preview": "test\n{\n  \"value\": 42,\n  \"query\": \"bar\",\n  \"items\": [\"alpha\", \"beta\"],\n  \"count\": 7\n}",
+      "trace_id": "trace_83cb4bc12f604f159cc58182aef1b25b",
+      "latency_ms": 5414,
+      "events": 12,
+      "called_tools": [
+        "test_echo",
+        "test_lookup"
+      ],
       "selection_ok": false,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "completed"
     },
     {
       "id": "mcp_09_add_echo",
       "category": "mcp_mcp",
       "question": "Use test.add to add 3 and 4, then use test.echo to echo the result",
-      "answer_preview": "I tried to use an invalid tool: test_add. I cannot complete the request.",
-      "trace_id": "trace_1c3cc4d2682e4195a46c69733a703cb7",
-      "latency_ms": 1175,
-      "events": 6,
-      "called_tools": [],
+      "answer_preview": "The result of adding 3 and 4 using test.add is 7. The echoed result is: echo: 7.",
+      "trace_id": "trace_eb6ae64768c34ab680a2bc664d0be90f",
+      "latency_ms": 5070,
+      "events": 12,
+      "called_tools": [
+        "test_add",
+        "test_echo"
+      ],
       "selection_ok": false,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "completed"
     },
     {
       "id": "mcp_10_web_mcp",
       "category": "native_mcp",
       "question": "Search the web for population of Japan, then use test.echo to echo the population",
-      "answer_preview": "The population of Japan, as of the latest data, is 125,677,224.",
-      "trace_id": "trace_39c6ad3adf834674a81e4bf74fcfdec2",
-      "latency_ms": 5951,
+      "answer_preview": "The population of Japan, as echoed, is 123.4 million.",
+      "trace_id": "trace_b36f9f9cb535403fae90226d00f451c6",
+      "latency_ms": 7501,
       "events": 12,
       "called_tools": [
         "web_search",
-        "test.echo"
+        "test_echo"
       ],
       "selection_ok": true,
       "arg_ok": true,
@@ -157,23 +168,26 @@
       "id": "mcp_11_mcp_web",
       "category": "mcp_native",
       "question": "Use test.lookup to look up 'test', then search the web for capital of Japan",
-      "answer_preview": "I tried to use an invalid tool: test_lookup. I cannot complete the request.",
-      "trace_id": "trace_b12342dc9c634592a8603d85a1318a44",
-      "latency_ms": 1461,
-      "events": 6,
-      "called_tools": [],
-      "selection_ok": false,
+      "answer_preview": "The lookup for 'test' returned a value of 42. The capital of Japan is Tokyo.",
+      "trace_id": "trace_760a5b00a17c42c497eae0d965c1b3ee",
+      "latency_ms": 6308,
+      "events": 12,
+      "called_tools": [
+        "test_lookup",
+        "web_search"
+      ],
+      "selection_ok": true,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "completed"
     },
     {
       "id": "mcp_12_confirm",
       "category": "confirmation",
       "question": "Use test.write to store key 'secret' with value 'data'",
       "answer_preview": "Got it! I'll remember that.",
-      "trace_id": "trace_3dc4b836ac534cd1a80b74b9be6683d6",
-      "latency_ms": 1408,
+      "trace_id": "trace_f3f782331fc7458dad11e0406eadd620",
+      "latency_ms": 1426,
       "events": 6,
       "called_tools": [],
       "selection_ok": false,
@@ -185,15 +199,15 @@
       "id": "mcp_13_fail_invalid",
       "category": "failure",
       "question": "Use test.add with invalid arguments (missing b)",
-      "answer_preview": "The test.add tool was called with invalid arguments (missing b), resulting in a validation error.",
-      "trace_id": "trace_05c890454e51430abf8e6aeda9d6dbeb",
-      "latency_ms": 3905,
+      "answer_preview": "The test.add tool was called with invalid arguments (missing 'b'). The correct call should include both 'a' and 'b' as required parameters.",
+      "trace_id": "trace_6173f7b6c743476397fd3f06912fd17c",
+      "latency_ms": 4422,
       "events": 12,
       "called_tools": [
-        "test.add",
-        "test.fail"
+        "test_add",
+        "test_add"
       ],
-      "selection_ok": true,
+      "selection_ok": false,
       "arg_ok": true,
       "success": true,
       "status": "completed"
@@ -202,30 +216,28 @@
       "id": "mcp_14_fail_notfound",
       "category": "failure",
       "question": "Use test.nonexistent to do something",
-      "answer_preview": "Task terminated to prevent repeated execution of the same tool without new information.",
-      "trace_id": "trace_201354e720414a0eb60cf89fc1721388",
-      "latency_ms": 3401,
-      "events": 9,
-      "called_tools": [
-        "test.fail"
-      ],
+      "answer_preview": "I tried to use an invalid tool: test_nonexistent. I cannot complete the request.",
+      "trace_id": "trace_f6fb82b8c78e42099e563df48a721853",
+      "latency_ms": 1151,
+      "events": 6,
+      "called_tools": [],
       "selection_ok": false,
       "arg_ok": true,
-      "success": true,
-      "status": "repeated_tool_call"
+      "success": false,
+      "status": "error"
     },
     {
       "id": "mcp_15_fail_timeout",
       "category": "failure",
       "question": "Use test.fail with mode timeout",
-      "answer_preview": "The 'test.fail' tool was called with mode 'timeout', which simulates a timeout failure mode.",
-      "trace_id": "trace_b502f84a8ec0450c878603c91d276e4b",
-      "latency_ms": 15413,
+      "answer_preview": "The 'test.fail' tool was called with mode 'timeout', and the result was that it should have timed out.",
+      "trace_id": "trace_d8c8d85273454b219cfc5dc59302a84a",
+      "latency_ms": 15737,
       "events": 9,
       "called_tools": [
-        "test.fail"
+        "test_fail"
       ],
-      "selection_ok": true,
+      "selection_ok": false,
       "arg_ok": true,
       "success": true,
       "status": "completed"
@@ -235,13 +247,13 @@
       "category": "recovery",
       "question": "Use test.add to add 2 and 3",
       "answer_preview": "The result of adding 2 and 3 using test.add is 5.",
-      "trace_id": "trace_6b48eed58ecf4bfdb476745c71a427cf",
-      "latency_ms": 3120,
+      "trace_id": "trace_71ea72ac7b2e442a8844eb5f71649d7e",
+      "latency_ms": 3131,
       "events": 9,
       "called_tools": [
-        "test.add"
+        "test_add"
       ],
-      "selection_ok": true,
+      "selection_ok": false,
       "arg_ok": true,
       "success": true,
       "status": "completed"
@@ -250,23 +262,25 @@
       "id": "mcp_17_mix_calc",
       "category": "mcp_calc",
       "question": "Use test.lookup to get value, then use calculator to add 10 to it",
-      "answer_preview": "I tried to use an invalid tool: test_lookup. I cannot complete the request.",
-      "trace_id": "trace_b28bbe3b615a4d038a741eb0728a33a2",
-      "latency_ms": 1290,
-      "events": 6,
-      "called_tools": [],
+      "answer_preview": "Task terminated to prevent repeated execution of the same tool without new information.",
+      "trace_id": "trace_94158b1d35e94f3b8c05e270fbdde1a8",
+      "latency_ms": 2978,
+      "events": 9,
+      "called_tools": [
+        "test_lookup"
+      ],
       "selection_ok": false,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "repeated_tool_call"
     },
     {
       "id": "mcp_18_echo_calc",
       "category": "mcp_calc",
       "question": "Use test.echo to echo 'hello' and then calculate length of hello (5) plus 10 using calculator",
       "answer_preview": "The echo of 'hello' is 'hello'. The length of 'hello' is 5, and adding 10 to it gives 15.",
-      "trace_id": "trace_39501f84f9b34144853b3385789233a5",
-      "latency_ms": 4958,
+      "trace_id": "trace_1475376aa57d49de97ca946cdecc3e98",
+      "latency_ms": 4729,
       "events": 15,
       "called_tools": [
         "test.echo",
@@ -282,26 +296,29 @@
       "id": "mcp_19_lookup_write",
       "category": "mcp_mcp",
       "question": "Use test.lookup to look up 'x' and then use test.write to store the value",
-      "answer_preview": "I tried to use an invalid tool: test_lookup. I cannot complete the request.",
-      "trace_id": "trace_56a9f099ac174344adc55eb310e20779",
-      "latency_ms": 1092,
-      "events": 6,
-      "called_tools": [],
+      "answer_preview": "The value of 'x' retrieved using test.lookup is 42. This value has been stored using test.write with the key 'x'.",
+      "trace_id": "trace_721b7226f35a4876bc3f7838f790e133",
+      "latency_ms": 5026,
+      "events": 12,
+      "called_tools": [
+        "test_lookup",
+        "test_write"
+      ],
       "selection_ok": false,
       "arg_ok": true,
-      "success": false,
-      "status": "error"
+      "success": true,
+      "status": "completed"
     },
     {
       "id": "mcp_20_complex",
       "category": "mcp_calc",
       "question": "Use test.add to add 8 and 12, then use calculator to divide the result by 4",
       "answer_preview": "The result of adding 8 and 12 is 20. When divided by 4, the result is 5.0.",
-      "trace_id": "trace_c6071ab4df8846b5a5422e095cf45512",
-      "latency_ms": 4445,
+      "trace_id": "trace_e0bf73d688c4438099111cce67f4be2e",
+      "latency_ms": 4192,
       "events": 12,
       "called_tools": [
-        "test.add",
+        "test_add",
         "calculator"
       ],
       "selection_ok": true,
@@ -312,46 +329,51 @@
   ],
   "summary": {
     "total_latency_ms": {
-      "mean": 3535.4,
-      "p50": 3081.5,
-      "p95": 7227.8,
-      "max": 15413,
+      "mean": 5031.1,
+      "p50": 4307.0,
+      "p95": 12608.7,
+      "max": 15737,
       "n": 20
     },
-    "mcp_selection_accuracy": 50.0,
+    "mcp_selection_accuracy": 40.0,
     "mcp_arg_accuracy": 100.0,
-    "mcp_success_rate": 65.0,
+    "mcp_success_rate": 95.0,
     "mcp_total": 20
   },
   "traces": [
-    "trace_f90a8a8571014752b17eff788eb6ede8",
-    "trace_224153fbf073449f9c855be3e49c31fa",
-    "trace_cb7fc21c8d074863b0ef18e9e2de207e",
-    "trace_a710b0722633482aa859ddc3d24cb2db",
-    "trace_fe33d1f877a343429c1b1387210954d0",
-    "trace_36693c78649e4e718dde0e34265df711",
-    "trace_471e9d853a5d4a32b6d60c810ba40c9e",
-    "trace_2c97ef3750164ee7bade28afb1f356fe",
-    "trace_1c3cc4d2682e4195a46c69733a703cb7",
-    "trace_39c6ad3adf834674a81e4bf74fcfdec2",
-    "trace_b12342dc9c634592a8603d85a1318a44",
-    "trace_3dc4b836ac534cd1a80b74b9be6683d6",
-    "trace_05c890454e51430abf8e6aeda9d6dbeb",
-    "trace_201354e720414a0eb60cf89fc1721388",
-    "trace_b502f84a8ec0450c878603c91d276e4b",
-    "trace_6b48eed58ecf4bfdb476745c71a427cf",
-    "trace_b28bbe3b615a4d038a741eb0728a33a2",
-    "trace_39501f84f9b34144853b3385789233a5",
-    "trace_56a9f099ac174344adc55eb310e20779",
-    "trace_c6071ab4df8846b5a5422e095cf45512"
+    "trace_47460f28b9024c698a84e97d08791a78",
+    "trace_aaeabadb33944a358a57d93f87710a57",
+    "trace_2fb772cfeceb4c5e9eedcfc03f3cb621",
+    "trace_0f6874a2dccb4c34b308b5a4f088ef8d",
+    "trace_42de8114df1e4a96a8da99c18dd4a570",
+    "trace_8948adeb9caa4bb8af4221159c893282",
+    "trace_cf5126ef149c4ed8a06f969744abf6e0",
+    "trace_83cb4bc12f604f159cc58182aef1b25b",
+    "trace_eb6ae64768c34ab680a2bc664d0be90f",
+    "trace_b36f9f9cb535403fae90226d00f451c6",
+    "trace_760a5b00a17c42c497eae0d965c1b3ee",
+    "trace_f3f782331fc7458dad11e0406eadd620",
+    "trace_6173f7b6c743476397fd3f06912fd17c",
+    "trace_f6fb82b8c78e42099e563df48a721853",
+    "trace_d8c8d85273454b219cfc5dc59302a84a",
+    "trace_71ea72ac7b2e442a8844eb5f71649d7e",
+    "trace_94158b1d35e94f3b8c05e270fbdde1a8",
+    "trace_1475376aa57d49de97ca946cdecc3e98",
+    "trace_721b7226f35a4876bc3f7838f790e133",
+    "trace_e0bf73d688c4438099111cce67f4be2e"
   ],
   "mcp_tools": [
     "web_search",
     "calculator",
     "test.echo",
+    "test_echo",
     "test.add",
+    "test_add",
     "test.lookup",
+    "test_lookup",
     "test.write",
-    "test.fail"
+    "test_write",
+    "test.fail",
+    "test_fail"
   ]
 }
