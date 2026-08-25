@@ -4,13 +4,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import Runnable
-from config import MODEL_NAME, TEMPERATURE
 
-logger = logging.getLogger(__name__)
-
-# Load .env
+# Load .env BEFORE importing config, which reads provider env vars at import time.
 env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
+
+from config import MODEL_NAME, TEMPERATURE, LLM_MODEL_OVERRIDE, OLLAMA_BASE_URL
+
+logger = logging.getLogger(__name__)
 
 def normalize_message(msg):
     if isinstance(msg, AIMessage) and isinstance(msg.content, list):
@@ -62,7 +63,19 @@ else:
     groq_key = os.getenv("GROQ_API_KEY") or os.getenv("groq_api_key")
     provider = os.getenv("LLM_PROVIDER", "").lower()
 
-    if (provider == "google" or not provider) and google_key:
+    if provider == "ollama":
+        # Local provider (e.g. Ollama + Qwen3) — no API key required.
+        # OLLAMA_REASONING=0 (default) disables the Qwen3 <think> block;
+        # set to 1 to enable native thinking mode.
+        from langchain_ollama import ChatOllama
+        llm = ChatOllama(
+            model=LLM_MODEL_OVERRIDE or MODEL_NAME,
+            base_url=OLLAMA_BASE_URL,
+            temperature=TEMPERATURE,
+            num_ctx=int(os.getenv("OLLAMA_NUM_CTX", "8192")),
+            reasoning=os.getenv("OLLAMA_REASONING", "0").lower() not in ("0", "false", "no"),
+        )
+    elif (provider == "google" or not provider) and google_key:
         from langchain_google_genai import ChatGoogleGenerativeAI
         raw_llm = ChatGoogleGenerativeAI(
             model=MODEL_NAME if "gemini" in MODEL_NAME else "gemini-3.6-flash",
