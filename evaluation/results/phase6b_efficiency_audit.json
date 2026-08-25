@@ -1,0 +1,795 @@
+[
+  {
+    "id": "real_01",
+    "expected_sequence": [
+      "filesystem.list_directory"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 5948
+  },
+  {
+    "id": "real_02",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 5110
+  },
+  {
+    "id": "real_03",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3467
+  },
+  {
+    "id": "real_04",
+    "expected_sequence": [
+      "filesystem.get_file_info"
+    ],
+    "raw_sequence": [
+      "filesystem_get_file_info"
+    ],
+    "canonical_sequence": [
+      "filesystem.get_file_info"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3312
+  },
+  {
+    "id": "real_05",
+    "expected_sequence": [
+      "filesystem.list_allowed_directories"
+    ],
+    "raw_sequence": [
+      "filesystem.list_allowed_directories",
+      "filesystem_list_allowed_directories",
+      "filesystem.list_allowed_directories"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_allowed_directories",
+      "filesystem.list_allowed_directories",
+      "filesystem.list_allowed_directories"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 2,
+    "extra_calls": 2,
+    "missing_calls": [],
+    "extra_tools": [
+      "filesystem.list_allowed_directories",
+      "filesystem.list_allowed_directories"
+    ],
+    "wrong_order": false,
+    "latency_ms": 6347
+  },
+  {
+    "id": "real_06",
+    "expected_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": true,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 4375
+  },
+  {
+    "id": "real_07",
+    "expected_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem_read_file",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3989
+  },
+  {
+    "id": "real_08",
+    "expected_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": true,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 4067
+  },
+  {
+    "id": "real_09",
+    "expected_sequence": [
+      "calculator",
+      "filesystem.write_file"
+    ],
+    "raw_sequence": [
+      "calculator",
+      "filesystem_write_file"
+    ],
+    "canonical_sequence": [
+      "calculator",
+      "filesystem.write_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 4336
+  },
+  {
+    "id": "real_10",
+    "expected_sequence": [
+      "filesystem.list_directory",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory",
+      "calculator",
+      "filesystem_list_directory"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory",
+      "calculator",
+      "filesystem.list_directory"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 1,
+    "extra_calls": 1,
+    "missing_calls": [],
+    "extra_tools": [
+      "filesystem.list_directory"
+    ],
+    "wrong_order": false,
+    "latency_ms": 5933
+  },
+  {
+    "id": "real_11",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory",
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 0,
+    "extra_calls": 1,
+    "missing_calls": [],
+    "extra_tools": [
+      "filesystem.list_directory"
+    ],
+    "wrong_order": false,
+    "latency_ms": 11754
+  },
+  {
+    "id": "real_12",
+    "expected_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory",
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 4985
+  },
+  {
+    "id": "real_13",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file",
+      "calculator",
+      "filesystem.read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file",
+      "calculator",
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 1,
+    "extra_calls": 2,
+    "missing_calls": [],
+    "extra_tools": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "wrong_order": false,
+    "latency_ms": 8149
+  },
+  {
+    "id": "real_14",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": true,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3258
+  },
+  {
+    "id": "real_15",
+    "expected_sequence": [
+      "filesystem.list_directory",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem.list_directory",
+      "calculator",
+      "filesystem.list_directory",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory",
+      "calculator",
+      "filesystem.list_directory",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 2,
+    "extra_calls": 2,
+    "missing_calls": [],
+    "extra_tools": [
+      "filesystem.list_directory",
+      "calculator"
+    ],
+    "wrong_order": false,
+    "latency_ms": 7466
+  },
+  {
+    "id": "real_16",
+    "expected_sequence": [
+      "filesystem.write_file"
+    ],
+    "raw_sequence": [
+      "filesystem_write_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.write_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3145
+  },
+  {
+    "id": "real_17",
+    "expected_sequence": [
+      "filesystem.write_file"
+    ],
+    "raw_sequence": [
+      "filesystem_write_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.write_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3167
+  },
+  {
+    "id": "real_18",
+    "expected_sequence": [
+      "filesystem.write_file",
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_write_file",
+      "filesystem.read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.write_file",
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 4875
+  },
+  {
+    "id": "real_19",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3032
+  },
+  {
+    "id": "real_20",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": true,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3365
+  },
+  {
+    "id": "real_21",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3386
+  },
+  {
+    "id": "real_22",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3995
+  },
+  {
+    "id": "real_23",
+    "expected_sequence": [
+      "filesystem.list_directory"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3316
+  },
+  {
+    "id": "real_24",
+    "expected_sequence": [
+      "filesystem.write_file"
+    ],
+    "raw_sequence": [
+      "filesystem_write_file",
+      "filesystem_write_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.write_file",
+      "filesystem.write_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 1,
+    "extra_calls": 1,
+    "missing_calls": [],
+    "extra_tools": [
+      "filesystem.write_file"
+    ],
+    "wrong_order": false,
+    "latency_ms": 3535
+  },
+  {
+    "id": "real_25",
+    "expected_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": true,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 4112
+  },
+  {
+    "id": "real_26",
+    "expected_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory",
+      "filesystem_read_file",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 6853
+  },
+  {
+    "id": "real_27",
+    "expected_sequence": [
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "canonical_sequence": [
+      "filesystem.read_file",
+      "calculator"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": false,
+    "canonical_exact": false,
+    "repeated_calls": 0,
+    "extra_calls": 1,
+    "missing_calls": [],
+    "extra_tools": [
+      "calculator"
+    ],
+    "wrong_order": false,
+    "latency_ms": 4612
+  },
+  {
+    "id": "real_28",
+    "expected_sequence": [
+      "filesystem.get_file_info"
+    ],
+    "raw_sequence": [
+      "filesystem_get_file_info"
+    ],
+    "canonical_sequence": [
+      "filesystem.get_file_info"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3525
+  },
+  {
+    "id": "real_29",
+    "expected_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file"
+    ],
+    "raw_sequence": [
+      "filesystem_list_directory",
+      "filesystem_read_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.list_directory",
+      "filesystem.read_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 5476
+  },
+  {
+    "id": "real_30",
+    "expected_sequence": [
+      "filesystem.write_file"
+    ],
+    "raw_sequence": [
+      "filesystem_write_file"
+    ],
+    "canonical_sequence": [
+      "filesystem.write_file"
+    ],
+    "selection_ok": true,
+    "argument_ok": true,
+    "success": true,
+    "exact_sequence": false,
+    "acceptable_sequence": true,
+    "canonical_exact": true,
+    "repeated_calls": 0,
+    "extra_calls": 0,
+    "missing_calls": [],
+    "extra_tools": [],
+    "wrong_order": false,
+    "latency_ms": 3672
+  }
+]
