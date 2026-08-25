@@ -1,5 +1,10 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env BEFORE reading any env vars below. config may be imported before
+# llm.py (e.g. via graph.py), so it must self-load rather than rely on import order.
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 MEMORY_DIR = PROJECT_ROOT / "memory"

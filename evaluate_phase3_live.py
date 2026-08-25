@@ -80,9 +80,15 @@ def extract_planner_trace(state: dict) -> dict:
         if retrieval_plan.get("profile") or retrieval_plan.get("semantic"):
             actual_sequence.append("memory_search")
 
-    # Planner tool calls captured in state
+    # Planner tool calls captured in state.
+    # Dedup against pre-retrieval steps: planner_node also records "rag"/
+    # "memory_search" into completed_steps, so appending blindly would
+    # double-count each pre-retrieval step.
     for step in completed_steps:
-        actual_sequence.append(step)
+        if step not in actual_sequence:
+            actual_sequence.append(step)
+        elif actual_sequence.count(step) < completed_steps.count(step):
+            actual_sequence.append(step)
 
     # Fallback: read tool calls from messages (covers ReAct / partial planner)
     if not completed_steps:
