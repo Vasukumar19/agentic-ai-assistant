@@ -6,18 +6,28 @@
     "expected_tools": [
       "calculator"
     ],
-    "actual_sequence": [],
-    "arg_trace": [],
-    "final_answer": "I'm sorry, I encountered an internal error while planning the next step.",
-    "llm_calls": 0,
-    "tool_call_count": 0,
-    "total_latency_s": 0.597,
-    "execution_status": "error",
-    "failure_type": "missing_tool",
-    "tool_selection_correct": false,
-    "sequence_correct": false,
-    "arg_accuracy": null,
-    "dep_accuracy": 0.0,
+    "actual_sequence": [
+      "calculator"
+    ],
+    "arg_trace": [
+      {
+        "tool": "calculator",
+        "args": {
+          "expression": "128 / 8"
+        },
+        "output": "16.0"
+      }
+    ],
+    "final_answer": "128 divided by 8 is 16.0. ",
+    "llm_calls": 2,
+    "tool_call_count": 1,
+    "total_latency_s": 8.455,
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "arg_accuracy": 1.0,
+    "dep_accuracy": 1.0,
     "status": "completed"
   },
   {
@@ -27,7 +37,19 @@
     "expected_tools": [
       "web_search"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [],
+    "arg_trace": [],
+    "final_answer": "The current CEO of Tesla is Elon Musk.",
+    "llm_calls": 1,
+    "tool_call_count": 0,
+    "total_latency_s": 15.019,
+    "execution_status": "completed",
+    "failure_type": "missing_tool",
+    "tool_selection_correct": false,
+    "sequence_correct": false,
+    "arg_accuracy": null,
+    "dep_accuracy": 0.0,
+    "status": "completed"
   },
   {
     "id": "live_003",
@@ -37,7 +59,37 @@
       "web_search",
       "calculator"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "arg_trace": [
+      {
+        "tool": "web_search",
+        "args": {
+          "query": "current population of Japan 2024"
+        },
+        "output": "It reached its current lowest point of 5.8 births per thousand people in 2023. With a falling birth rate and a large share of its inhabitants reaching old age, Japan's population is expected to continue declining, a trend that has been seen since 2010. Oct 1, 2024 \u00b7 Current Population Estimates as of October 1, 2024 is \"Portal Site of Official Statistics of Japan\" (external site) where you can browse statistics tables and database. The current population of Japan is 122,355,937 as of Sunday, August 23, 2026, based on Worldometer's elaboration of the latest United Nations data 1. Japan 2026 population is estimated at 122,427,731 people at mid-year. Japan population is equivalent to 1.5% of the total world population. Total population for Japan in 2025 was 121,960,408, a 0.55% decline from 2024. Total population for Japan in 2024 was 122,631,432, a 0.54% decline from 2023. Total population for Japan in 2023 was 123,294,513, a 0.53% decline from 2022. 4 days ago \u00b7 Japan By the Numbers As of 2026, Japan has a total population of 122,427,731, ranking as the 12th most populous nation in the world. Japan has a net population change of approximately -1,886 people per day, driven by 2,042 births, 4,280 deaths, and net immigration of 352 people."
+      },
+      {
+        "tool": "calculator",
+        "args": {
+          "expression": "122631432 * 0.005"
+        },
+        "output": "613157.16"
+      }
+    ],
+    "final_answer": "According to recent United Nations estimates, the population of Japan in 2024 is approximately **122,631,432**.\n\nCalculating **0.5%** of this figure:\n\n$$\n122,631,432 \\times 0.005 = 613,157.16\n$$\n\nTherefore, 0.5% of Japan's current population is approximately **613,157 people**.",
+    "llm_calls": 3,
+    "tool_call_count": 2,
+    "total_latency_s": 34.839,
+    "execution_status": "completed",
+    "failure_type": null,
+    "tool_selection_correct": true,
+    "sequence_correct": true,
+    "arg_accuracy": 1.0,
+    "dep_accuracy": 1.0,
+    "status": "completed"
   },
   {
     "id": "live_004",
@@ -47,22 +99,50 @@
       "web_search",
       "calculator"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [],
+    "arg_trace": [],
+    "final_answer": "I'm sorry, I encountered an internal error while planning the next step.",
+    "llm_calls": 0,
+    "tool_call_count": 0,
+    "total_latency_s": 41.426,
+    "execution_status": "error",
+    "failure_type": "missing_tool",
+    "tool_selection_correct": false,
+    "sequence_correct": false,
+    "arg_accuracy": null,
+    "dep_accuracy": 0.0,
+    "status": "completed"
   },
   {
     "id": "live_005",
     "category": "rag_then_calc",
     "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
     "expected_tools": [
+      "rag",
       "calculator"
     ],
-    "status": "NOT_RUN_RATE_LIMITED"
+    "actual_sequence": [
+      "rag"
+    ],
+    "arg_trace": [],
+    "final_answer": "I'm sorry, I encountered an internal error while planning the next step.",
+    "llm_calls": 0,
+    "tool_call_count": 0,
+    "total_latency_s": 36.164,
+    "execution_status": "error",
+    "failure_type": "premature_stop",
+    "tool_selection_correct": false,
+    "sequence_correct": false,
+    "arg_accuracy": null,
+    "dep_accuracy": 0.5,
+    "status": "completed"
   },
   {
     "id": "live_006",
     "category": "rag_then_calc",
     "query": "Based on the documents, what is the hardware reimbursement limit? Calculate the total amount if 3 employees claim it.",
     "expected_tools": [
+      "rag",
       "calculator"
     ],
     "status": "NOT_RUN_RATE_LIMITED"

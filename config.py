@@ -6,8 +6,8 @@ SEMANTIC_MEMORY_DIR = MEMORY_DIR / "semantic_memory"
 CHAT_HISTORY_PATH = MEMORY_DIR / "chat_history.json"
 MEMORY_FILE = MEMORY_DIR / "memory.json"
 FAISS_INDEX_DIR = PROJECT_ROOT / "faiss_index"
-# MODEL_NAME = "llama-3.1-8b-instant"
-MODEL_NAME = "openai/gpt-oss-120b"
+# Default Model Configuration
+MODEL_NAME = "gemini-3.6-flash"
 TEMPERATURE = 0.3
 MAX_TOOL_STEPS = 5
 

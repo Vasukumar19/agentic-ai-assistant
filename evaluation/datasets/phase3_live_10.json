@@ -39,8 +39,8 @@
     "id": "live_005",
     "category": "rag_then_calc",
     "query": "According to our company policy, how many PTO days do we get per year? If I take 5 days off, how many will I have left?",
-    "expected_tools": ["calculator"],
-    "expected_sequence": ["calculator"],
+    "expected_tools": ["rag", "calculator"],
+    "expected_sequence": ["rag", "calculator"],
     "requires_multi_step": true,
     "description": "RAG provides PTO days (from context), calculator computes remainder"
   },
@@ -48,8 +48,8 @@
     "id": "live_006",
     "category": "rag_then_calc",
     "query": "Based on the documents, what is the hardware reimbursement limit? Calculate the total amount if 3 employees claim it.",
-    "expected_tools": ["calculator"],
-    "expected_sequence": ["calculator"],
+    "expected_tools": ["rag", "calculator"],
+    "expected_sequence": ["rag", "calculator"],
     "requires_multi_step": true,
     "description": "RAG provides reimbursement limit, calculator multiplies by 3"
   },
