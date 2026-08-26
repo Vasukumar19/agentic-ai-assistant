@@ -1,0 +1,129 @@
+[
+  {
+    "case_id": "p6c_41",
+    "run": 1,
+    "latency_ms": 62547,
+    "status": "completed",
+    "tools": [
+      "calendar.create_event",
+      "notes.create",
+      "reminders_create"
+    ],
+    "answer_preview": "Task complete.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_41",
+    "run": 2,
+    "latency_ms": 38464,
+    "status": "completed",
+    "tools": [
+      "calendar.create_event",
+      "notes.create",
+      "reminders_create"
+    ],
+    "answer_preview": "Task complete.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_43",
+    "run": 1,
+    "latency_ms": 206895,
+    "status": "timeout",
+    "tools": [
+      "calendar.list_events",
+      "calendar.list_events"
+    ],
+    "answer_preview": "I'm sorry, the planner timed out while thinking. Please try again.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_43",
+    "run": 2,
+    "latency_ms": 58482,
+    "status": "timeout",
+    "tools": [
+      "calendar.list_events",
+      "calendar.list_events"
+    ],
+    "answer_preview": "I'm sorry, the planner timed out while thinking. Please try again.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_46",
+    "run": 1,
+    "latency_ms": 30213,
+    "status": "repeated_tool_call",
+    "tools": [
+      "calendar.list_events",
+      "calendar.list_events"
+    ],
+    "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_46",
+    "run": 2,
+    "latency_ms": 15282,
+    "status": "repeated_tool_call",
+    "tools": [
+      "calendar.list_events"
+    ],
+    "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_48",
+    "run": 1,
+    "latency_ms": 38482,
+    "status": "completed",
+    "tools": [
+      "calendar.create_event",
+      "calendar.create_event",
+      "notes.create",
+      "reminders_create"
+    ],
+    "answer_preview": "Task complete.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_48",
+    "run": 2,
+    "latency_ms": 39632,
+    "status": "completed",
+    "tools": [
+      "calendar.create_event",
+      "calendar.create_event",
+      "notes.create",
+      "reminders_create"
+    ],
+    "answer_preview": "Task complete.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_50",
+    "run": 1,
+    "latency_ms": 40961,
+    "status": "completed",
+    "tools": [
+      "calendar.list_events",
+      "calendar.list_events",
+      "calendar.list_events"
+    ],
+    "answer_preview": "Task complete.",
+    "error": null
+  },
+  {
+    "case_id": "p6c_50",
+    "run": 2,
+    "latency_ms": 38226,
+    "status": "completed",
+    "tools": [
+      "calendar.list_events",
+      "calendar.list_events",
+      "calendar.list_events"
+    ],
+    "answer_preview": "Task complete.",
+    "error": null
+  }
+]
