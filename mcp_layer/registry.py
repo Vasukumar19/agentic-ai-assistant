@@ -222,6 +222,20 @@ class ToolRegistry:
             lines.append(f"- {t.name}: {t.description}\n  Schema: {json.dumps(schema)[:500]}")
         return "\n".join(lines)
 
+    def filtered_tool_info(self, allowed_names: list[str] | set[str] | None = None) -> str:
+        if not allowed_names:
+            return self.tool_info()
+        allowed = set(allowed_names)
+        lines = []
+        for t in self.list_tools():
+            if t.name in allowed:
+                try:
+                    schema = t.args_schema.model_json_schema() if getattr(t, "args_schema", None) else {}
+                except Exception:
+                    schema = {}
+                lines.append(f"- {t.name}: {t.description}\n  Schema: {json.dumps(schema)[:500]}")
+        return "\n".join(lines) if lines else self.tool_info()
+
     def reset(self) -> None:
         """Clear MCP tools (for tests). Keeps native."""
         self._mcp.clear()

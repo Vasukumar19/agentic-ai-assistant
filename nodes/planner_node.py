@@ -39,31 +39,41 @@ def _ensure_mcp_discovery():
     except Exception:
         pass
 
-def _get_valid_names():
+def _get_valid_names(allowed_names: list[str] | set[str] | None = None):
     _ensure_mcp_discovery()
     reg = _get_registry()
     if reg is not None:
         try:
-            return reg.valid_names()
+            names = reg.valid_names()
+            if allowed_names:
+                allowed = set(allowed_names)
+                return [n for n in names if n in allowed]
+            return names
         except Exception:
             pass
     try:
         from .tools import tools as _tools
-        return [t.name for t in _tools]
+        names = [t.name for t in _tools]
+        if allowed_names:
+            allowed = set(allowed_names)
+            return [n for n in names if n in allowed]
+        return names
     except Exception:
         return ["web_search", "calculator"]
 
-def _get_tool_info():
+def _get_tool_info(allowed_names: list[str] | set[str] | None = None):
     _ensure_mcp_discovery()
     reg = _get_registry()
     if reg is not None:
         try:
-            return reg.tool_info()
+            return reg.filtered_tool_info(allowed_names)
         except Exception:
             pass
     try:
         from .tools import tools as _tools
-        return "\n".join([f"- {t.name}: {t.description}\n  Schema: {t.args_schema.model_json_schema() if t.args_schema else 'None'}" for t in _tools])
+        allowed = set(allowed_names) if allowed_names else None
+        tools_to_show = [t for t in _tools if t.name in allowed] if allowed else _tools
+        return "\n".join([f"- {t.name}: {t.description}\n  Schema: {t.args_schema.model_json_schema() if t.args_schema else 'None'}" for t in tools_to_show])
     except Exception:
         return "- web_search: Search the web\n- calculator: Evaluate expressions"
 
@@ -264,10 +274,18 @@ def _dependency_planner(state: dict, level_cap: int = 1, allow_replan: bool = Fa
                     tool_results.append({"tool": call["name"], "arguments": call["args"], "result": result_content})
                     _record_call_history(state, call["name"], call["args"], result_content)
 
-    # Ã¢â€â‚¬Ã¢â€â‚¬ no plan yet Ã¢â€ â€™ generate + validate Ã¢â€â‚¬Ã¢â€â‚¬
+    # Ã¢â€ â‚¬Ã¢â€ â‚¬ no plan yet Ã¢â€ â€™ generate + validate Ã¢â€ â‚¬Ã¢â€ â‚¬
     if not active_plan_data:
-        valid_names = _get_valid_names()
-        tool_info = _get_tool_info()
+        import os
+        from mcp_layer.discovery import discover_tools
+        disc_strategy = os.getenv("DISCOVERY_STRATEGY", "none").lower()
+        if disc_strategy != "none":
+            servers, filtered_tools, conf, fallback, disc_dur = discover_tools(state, question, strategy=disc_strategy)
+            valid_names = _get_valid_names(allowed_names=filtered_tools)
+            tool_info = _get_tool_info(allowed_names=filtered_tools)
+        else:
+            valid_names = _get_valid_names()
+            tool_info = _get_tool_info()
         plan_prompt = f"""You are a precise multi-step task planner.
 Decompose the user's goal into an ordered plan using ONLY the available tools.
 
@@ -614,8 +632,15 @@ Decide the SINGLE next action that makes progress on the Remaining Goal.
 
 {user_prompt}"""
 
-    # dynamic prompt per-request (registry may have new MCP tools)
-    _prompt = PLANNER_SYSTEM_PROMPT_TEMPLATE.format(tool_info=_get_tool_info())
+    # dynamic prompt per-request (registry may have new MCP tools, filtered by discovery)
+    import os
+    from mcp_layer.discovery import discover_tools
+    disc_strategy = os.getenv("DISCOVERY_STRATEGY", "none").lower()
+    if disc_strategy != "none":
+        servers, filtered_tools, conf, fallback, disc_dur = discover_tools(state, question, strategy=disc_strategy)
+        _prompt = PLANNER_SYSTEM_PROMPT_TEMPLATE.format(tool_info=_get_tool_info(allowed_names=filtered_tools))
+    else:
+        _prompt = PLANNER_SYSTEM_PROMPT_TEMPLATE.format(tool_info=_get_tool_info())
     structured_llm = llm.with_structured_output(PlannerDecision)
 
     t_llm_start = time.perf_counter()
