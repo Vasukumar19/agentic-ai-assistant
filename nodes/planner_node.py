@@ -11,7 +11,7 @@ from config import MAX_TOOL_STEPS, TIMEOUT_LLM_S, LLM_PROVIDER, LLM_MODEL_OVERRI
 
 logger = logging.getLogger(__name__)
 
-# Dynamic tool info via registry — keeps Planner agnostic to native vs MCP
+# Dynamic tool info via registry Ã¢â‚¬â€ keeps Planner agnostic to native vs MCP
 def _get_registry():
     try:
         from mcp_layer.registry import registry
@@ -166,13 +166,18 @@ def _emit_plan_event(state, ev_type, meta, status="success", error=None):
         pass
 
 
-def _dependency_planner(state: dict) -> dict | None:
-    """Strategy B — generate/validate a structured plan once, then execute
+def _dependency_planner(state: dict, level_cap: int = 1, allow_replan: bool = False,
+                        dedupe: bool = False, complexity: str = "") -> dict | None:
+    """Strategy B Ã¢â‚¬â€ generate/validate a structured plan once, then execute
     dependency-ready steps deterministically (no per-step LLM call).
-    Returns None to fall back to baseline behavior for non-research paths."""
-    from config import PLANNING_STRATEGY, MAX_PLAN_STEPS, TIMEOUT_LLM_S
-    if PLANNING_STRATEGY != "dependency":
+    Returns None to fall back to baseline behavior for non-research paths.
+    level_cap: 0=baseline-only, 1=dependency planning, 2=replan escalation allowed."""
+    from config import PLANNING_STRATEGY, MAX_PLAN_STEPS, TIMEOUT_LLM_S, MAX_REPLANS
+    if PLANNING_STRATEGY not in ("dependency", "hybrid"):
         return None
+    if PLANNING_STRATEGY == "dependency" and (level_cap < 1 or allow_replan or dedupe):
+        # pure Phase-7 dependency run must stay byte-for-byte behavior-compatible
+        level_cap, allow_replan, dedupe = 1, False, False
     route = state.get("route", "research_query")
     if route not in ("research_query", ""):
         return None
@@ -196,6 +201,7 @@ def _dependency_planner(state: dict) -> dict | None:
     done: set[str] = set(state.get("plan_completed_steps") or [])
     step_results: dict = dict(state.get("plan_step_results") or {})
     invalid_count = int(state.get("plan_invalid_count") or 0)
+    dup_guard: dict = dict(state.get("_dup_guard") or {})
     pending_step = state.get("pending_step_id")
 
     pending_step_result = None
@@ -203,6 +209,13 @@ def _dependency_planner(state: dict) -> dict | None:
         result_content = messages[-1].content
         if pending_step and active_plan_data:
             pending_step_result = (pending_step, str(result_content))
+            # record success signature for duplicate prevention
+            if not str(result_content).lower().startswith("error"):
+                prev = messages[-2]
+                if getattr(prev, "tool_calls", None):
+                    call = prev.tool_calls[0]
+                    import json as _sj
+                    dup_guard[_sj.dumps({"t": call["name"], "a": call["args"]}, sort_keys=True)] = pending_step
         else:
             # fallback: record into generic history
             prev = messages[-2]
@@ -212,7 +225,7 @@ def _dependency_planner(state: dict) -> dict | None:
                     completed_steps.append(call["name"])
                     tool_results.append({"tool": call["name"], "arguments": call["args"], "result": result_content})
 
-    # ── no plan yet → generate + validate ──
+    # Ã¢â€â‚¬Ã¢â€â‚¬ no plan yet Ã¢â€ â€™ generate + validate Ã¢â€â‚¬Ã¢â€â‚¬
     if not active_plan_data:
         valid_names = _get_valid_names()
         tool_info = _get_tool_info()
@@ -284,7 +297,7 @@ User Goal: {question}
                     pass
             if not validation.valid:
                 return {"answer": "I couldn't construct a valid plan: " + "; ".join(validation.errors[:3]),
-                        "execution_status": "error", "plan_invalid_count": invalid_count,
+                        "execution_status": "error", "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
                         "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
                         "latency_breakdown": state.get("latency_breakdown")}
 
@@ -292,7 +305,7 @@ User Goal: {question}
             "active_plan": plan.model_dump(),
             "plan_completed_steps": [],
             "plan_step_results": {},
-            "plan_invalid_count": invalid_count,
+            "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
             "execution_status": "running",
             "completed_steps": completed_steps,
             "tool_results": tool_results,
@@ -300,7 +313,7 @@ User Goal: {question}
             "latency_breakdown": state.get("latency_breakdown"), "llm_usage": state.get("llm_usage"),
         }
 
-    # ── plan exists → execute ──
+    # Ã¢â€â‚¬Ã¢â€â‚¬ plan exists Ã¢â€ â€™ execute Ã¢â€â‚¬Ã¢â€â‚¬
     plan = Plan(**active_plan_data)
     if pending_step_result:
         sid, res = pending_step_result
@@ -331,10 +344,49 @@ Compose a concise final answer for the user's goal using ONLY these results."""
                 answer = "Task steps executed but I couldn't compose the summary."
             return {"answer": answer, "last_action": "final", "execution_status": "completed",
                     "active_plan": state.get("active_plan"), "plan_completed_steps": sorted(done),
-                    "plan_step_results": step_results, "plan_invalid_count": invalid_count,
+                    "plan_step_results": step_results, "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
                     "completed_steps": completed_steps, "tool_results": tool_results,
                     "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
                     "latency_breakdown": state.get("latency_breakdown")}
+        # failure mid-plan: hybrid may escalate to a state-aware replan within budget
+        replans = int(state.get("plan_replans") or 0)
+        if allow_replan and failed and replans < MAX_REPLANS and ready is not None:
+            failed_sid = pending_step_result[0] if pending_step_result else None
+            remaining = [s for s in plan.steps if s.id not in done]
+            replan_prompt = f"""You are re-planning after a failure.
+
+Original Goal: {question}
+Completed Steps (do NOT repeat these): {[s for s in done]}
+Failed Step: {failed_sid} with result: {(pending_step_result[1] if pending_step_result else '')[:300] if pending_step_result else 'unknown'}
+Remaining Steps: {[{'id': s.id, 'tool': s.tool, 'purpose': s.purpose} for s in remaining]}
+
+Available Tools:
+{_get_tool_info()}
+
+Return a corrected plan for the REMAINING work only. Do not repeat completed steps."""
+            try:
+                new_plan = run_with_timeout(lambda: llm.with_structured_output(Plan).invoke(
+                    [HumanMessage(content=replan_prompt)]), TIMEOUT_LLM_S)
+                v2 = validate_plan(new_plan, _get_valid_names())
+                _emit_plan_event(state, "PLANNER", {"strategy": "hybrid", "phase": "replan",
+                                                    "replans": replans + 1, "valid": v2.valid,
+                                                    "errors": v2.errors[:3]},
+                                  status="success" if v2.valid else "error")
+                if v2.valid and len(new_plan.steps) <= MAX_PLAN_STEPS:
+                    return {
+                        "active_plan": new_plan.model_dump(),
+                        "plan_completed_steps": [],   # fresh DAG relative to remaining work
+                        "plan_step_results": {},
+                        "plan_replans": replans + 1,
+                        "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
+                        "execution_status": "running",
+                        "completed_steps": completed_steps,
+                        "tool_results": tool_results,
+                        "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+                        "latency_breakdown": state.get("latency_breakdown"),
+                    }
+            except Exception:
+                pass
         # failure mid-plan or stuck: fall back to baseline LLM decision with plan context
         _emit_plan_event(state, "PLANNER", {"strategy": "dependency", "phase": "fallback_to_baseline",
                                             "failed": failed, "ready": ready}, status="error")
@@ -351,7 +403,41 @@ Compose a concise final answer for the user's goal using ONLY these results."""
             elif ref.split(".")[0] in step_results:
                 base = step_results[ref.split(".")[0]]
                 args[k] = f"{base}"  # planner-level resolution; keep raw if field missing
-    _emit_plan_event(state, "PLANNER", {"strategy": "dependency", "phase": "step_ready",
+
+    # duplicate-call prevention: skip identical successful (tool,args) already executed
+    if dedupe:
+        import json as _json
+        sig = _json.dumps({"t": step.tool, "a": args}, sort_keys=True)
+        seen_ok = state.get("_dup_guard") or {}
+        if sig in seen_ok:
+            prev_sid = seen_ok[sig]
+            done.add(step.id)
+            step_results[step.id] = step_results.get(prev_sid, "")
+            _emit_plan_event(state, "PLANNER", {"strategy": "hybrid", "phase": "duplicate_prevented",
+                                                "step_id": step.id, "same_as": prev_sid})
+            nxt = next_ready_steps(plan, done)
+            if not nxt:
+                # everything done Ã¢â€ â€™ compose final
+                results_txt = "\n".join(f"- {sid}: {(step_results.get(sid,'') or '')[:300]}"
+                                        for sid in steps_by_id)
+                try:
+                    ans = run_with_timeout(lambda: llm.invoke([HumanMessage(
+                        content=f"User Goal: {question}\nResults:\n{results_txt}\nCompose a concise final answer.")]),
+                        TIMEOUT_LLM_S)
+                    answer = ans.content
+                except Exception:
+                    answer = "Task completed."
+                return {"answer": answer, "last_action": "final", "execution_status": "completed",
+                        "active_plan": state.get("active_plan"), "plan_completed_steps": sorted(done),
+                        "plan_step_results": step_results, "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
+                        "completed_steps": completed_steps, "tool_results": tool_results,
+                        "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+                        "latency_breakdown": state.get("latency_breakdown")}
+            step = steps_by_id[nxt[0]]
+            args = dict(step.arguments or {})
+
+    _emit_plan_event(state, "PLANNER", {"strategy": "dependency" if PLANNING_STRATEGY == "dependency" else "hybrid",
+                                        "phase": "step_ready",
                                         "step_id": step.id, "tool": step.tool, "depends_on": step.depends_on})
 
     tool_call_id = f"call_{tool_call_count}"
@@ -366,7 +452,7 @@ Compose a concise final answer for the user's goal using ONLY these results."""
         "active_plan": state.get("active_plan"),
         "plan_completed_steps": sorted(done),
         "plan_step_results": step_results,
-        "plan_invalid_count": invalid_count,
+        "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
         "completed_steps": completed_steps,
         "tool_results": tool_results,
         "execution_trace": list(state.get("execution_trace", [])),
@@ -375,9 +461,55 @@ Compose a concise final answer for the user's goal using ONLY these results."""
     }
 
 
+def _hybrid_route(state: dict) -> dict | None:
+    """Phase 7B adaptive hybrid — classify complexity, escalate planning depth only when justified."""
+    from config import PLANNING_STRATEGY, HYBRID_LEVEL_CAP, HYBRID_REPLAN
+    if PLANNING_STRATEGY != "hybrid":
+        return None
+    # mid-plan continuations route straight into the dependency executor
+    if state.get("active_plan") or state.get("pending_step_id"):
+        return _dependency_planner(state, level_cap=min(HYBRID_LEVEL_CAP, 2),
+                                   allow_replan=HYBRID_REPLAN, dedupe=True)
+    route = state.get("route", "research_query")
+    if route not in ("research_query", ""):
+        return None
+
+    from planning.classifier import classify_complexity
+    valid_names = _get_valid_names()
+    cls = classify_complexity(state.get("question", ""), valid_names)
+
+    if HYBRID_LEVEL_CAP == 0:
+        level = 0
+    elif cls == "MULTI_STEP":
+        level = min(HYBRID_LEVEL_CAP, 2)
+    elif cls in ("DEPENDENT", "UNCERTAIN"):
+        level = min(HYBRID_LEVEL_CAP, 1)
+    else:
+        level = 0
+
+    try:
+        _emit_plan_event(state, "PLANNER", {"strategy": "hybrid", "phase": "classified",
+                                            "complexity": cls, "planning_level": level,
+                                            "level_cap": HYBRID_LEVEL_CAP})
+    except Exception:
+        pass
+
+    if level >= 1:
+        return _dependency_planner(state, level_cap=level,
+                                   allow_replan=(HYBRID_REPLAN and level >= 2),
+                                   dedupe=True, complexity=cls)
+    return None  # SIMPLE → baseline path
+
+
 def planner_node(state: dict) -> dict:
-    # Phase 7: strategy routing — dependency strategy has its own execution path
-    dep = _dependency_planner(state)
+    # Phase 7/7B: strategy routing
+    if state.get("_strategy") is None:
+        from config import PLANNING_STRATEGY as _PS
+        state["_strategy"] = _PS
+    if state["_strategy"] == "hybrid":
+        dep = _hybrid_route(state)
+    else:
+        dep = _dependency_planner(state)
     if dep is not None:
         return dep
 
@@ -497,7 +629,7 @@ Decide the SINGLE next action that makes progress on the Remaining Goal.
         # decision is a Pydantic object; the raw response is not captured, but we estimate
         if state.get("llm_usage") is None:
             state["llm_usage"] = []
-        # try to capture from structured output — not always available, use placeholder
+        # try to capture from structured output Ã¢â‚¬â€ not always available, use placeholder
         state["llm_usage"].append({"node": "planner", "provider": LLM_PROVIDER or "unknown",
                                    "model": LLM_MODEL_OVERRIDE or MODEL_NAME,
                                    "latency_ms": int(llm_latency*1000), "step": tool_call_count+1})
@@ -581,3 +713,4 @@ Decide the SINGLE next action that makes progress on the Remaining Goal.
                      "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
                      "latency_breakdown": state.get("latency_breakdown"), "llm_usage": state.get("llm_usage")}
         return new_state
+

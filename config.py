@@ -45,6 +45,11 @@ MCP_CONFIG_FILE = os.getenv("MCP_CONFIG_FILE", "")
 # Example: '[{"name":"test","transport":"stdio","command":"python","args":["mcp_test_server.py"]}]'
 MCP_SERVERS_RAW = os.getenv("MCP_SERVERS", "")
 
-# Phase 7 — Planning strategy experiment (baseline | dependency | replan)
+# Phase 7 — Planning strategy experiment (baseline | dependency | replan | hybrid)
 PLANNING_STRATEGY = os.getenv("PLANNING_STRATEGY", "baseline").lower()
 MAX_PLAN_STEPS = int(os.getenv("MAX_PLAN_STEPS", "6"))
+
+# Phase 7B — Hybrid adaptive planner
+MAX_REPLANS = int(os.getenv("MAX_REPLANS", "1"))
+HYBRID_LEVEL_CAP = int(os.getenv("HYBRID_LEVEL_CAP", "2"))   # 0=baseline-only, 1=dependency, 2=replan allowed
+HYBRID_REPLAN = os.getenv("HYBRID_REPLAN", "1").lower() not in ("0", "false", "no")
