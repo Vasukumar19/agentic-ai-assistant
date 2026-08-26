@@ -115,21 +115,22 @@ def save_history_node(state: dict) -> dict:
 
     logger.info("Saved Q&A pair (%d total entries)", len(history))
 
+    # Phase 8: routers cannot persist state — recompute terminal status here
+    # and RETURN it so LangGraph persists the label.
+    from config import MAX_EXECUTION_STEPS as _P8_BUDGET
+    exec_status = state.get("execution_status") or "completed"
+    if exec_status == "running" and state.get("tool_call_count", 0) >= max(_P8_BUDGET, 1):
+        exec_status = "budget_exhausted"
+
     # Phase 5: emit FINAL_ANSWER trace event + persist to JSONL
     try:
         from observability.trace import make_event, append_event, add_latency
         from observability.storage import persist_trace
-        from config import MAX_EXECUTION_STEPS
         t_start = state.get("trace_start_ms")
         total_ms = int(time.perf_counter() * 1000 - t_start) if t_start else None
         if total_ms is not None:
             state["total_latency_ms"] = total_ms
-        # Phase 8: routers cannot persist state — recompute terminal status here.
-        exec_status = state.get("execution_status") or "completed"
-        budget = max(MAX_EXECUTION_STEPS, 1)
-        if exec_status == "running" and state.get("tool_call_count", 0) >= budget:
-            exec_status = "budget_exhausted"
-            state["execution_status"] = exec_status
+        budget = max(_P8_BUDGET, 1)
         ev = make_event(state, "FINAL_ANSWER", "save_history",
                         duration_ms=total_ms,
                         status="success" if exec_status not in ("error", "budget_exhausted") else "error",
@@ -158,6 +159,7 @@ def save_history_node(state: dict) -> dict:
         "trace_events": state.get("trace_events"),
         "trace_step": state.get("trace_step"),
         "total_latency_ms": state.get("total_latency_ms"),
+        "execution_status": exec_status,
     }
 
 

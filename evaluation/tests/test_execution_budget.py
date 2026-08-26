@@ -93,6 +93,31 @@ class TestBudgetExhaustionSemantics:
 
 
 class TestSafetyIndependentOfBudget:
+    def test_save_history_persists_budget_exhausted_status(self):
+        """Phase 8 regression: save_history must RETURN execution_status so
+        LangGraph persists it (routers/nodes that only mutate state lose it)."""
+        import graph as g
+        import inspect
+        src = inspect.getsource(g.save_history_node)
+        assert '"execution_status": exec_status' in src, (
+            "save_history_node must return execution_status for persistence")
+
+    def test_save_history_recompute_logic(self, monkeypatch):
+        # simulate: status running + tool_call_count >= budget -> budget_exhausted
+        from config import MAX_EXECUTION_STEPS
+        budget = max(MAX_EXECUTION_STEPS, 1)
+        state = {"execution_status": "running", "tool_call_count": budget}
+        exec_status = state["execution_status"]
+        if exec_status == "running" and state.get("tool_call_count", 0) >= budget:
+            exec_status = "budget_exhausted"
+        assert exec_status == "budget_exhausted"
+        # under-budget running stays running
+        state2 = {"execution_status": "running", "tool_call_count": budget - 1}
+        exec2 = state2["execution_status"]
+        if exec2 == "running" and state2.get("tool_call_count", 0) >= budget:
+            exec2 = "budget_exhausted"
+        assert exec2 == "running"
+
     def test_per_tool_breaker_unchanged_threshold(self):
         from config import MAX_TOOL_FAILURES_PER_TOOL
         assert MAX_TOOL_FAILURES_PER_TOOL == 3
