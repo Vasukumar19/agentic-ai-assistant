@@ -15,14 +15,36 @@ from pathlib import Path
 
 import pytest
 
-os.environ["MOCK_LLM"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from graph import create_runnable_graph  # noqa: E402
+# Isolation fix (Phase 8 regression finding): this module previously set
+# MOCK_LLM=1 at import time, which built llm.py's MockLLM singleton and cached
+# it in sys.modules for the whole pytest session — poisoning every later LLM
+# test with canned answers ("task complete."). We now patch each consumer
+# module's `llm` reference for the duration of this module only, then restore.
+import llm as _llm_mod  # noqa: E402
+from evaluation.mock_llm import MockLLM  # noqa: E402
+from importlib import import_module  # noqa: E402
+# nodes.planner_node is shadowed by a function attr on the package; use importlib
+_CONSUMER_MODS = ["nodes.planner_node", "nodes.router", "nodes.chat",
+                  "nodes.rag_retriever", "nodes.memory_extractor",
+                  "nodes.retrieval_planner"]
+_CONSUMERS = [import_module(name) for name in _CONSUMER_MODS]
 
-# Restore immediately: llm singleton is already built; leaving this set would
-# poison sys.modules' cached llm for other test modules in the same session.
-os.environ.pop("MOCK_LLM", None)
+
+@pytest.fixture(scope="module", autouse=True)
+def _mock_llm_only_here():
+    mock = MockLLM()
+    mods = [m for m in _CONSUMERS if hasattr(m, "llm")]
+    originals = [(m, m.llm) for m in mods]
+    for m in mods:
+        m.llm = mock
+    yield
+    for m, orig in originals:
+        m.llm = orig
+
+
+from graph import create_runnable_graph  # noqa: E402
 
 
 def _run(question: str) -> dict:
