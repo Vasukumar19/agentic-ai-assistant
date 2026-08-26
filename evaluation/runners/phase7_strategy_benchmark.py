@@ -69,7 +69,14 @@ def main():
             print(f"ERROR {exc!r}")
             results.append({"id": cid, "category": case["category"], "question": q,
                             "error": str(exc)[:300], "latency_ms": int((time.perf_counter() - t0) * 1000)})
-    out_name = f"phase7_{os.environ['PLANNING_STRATEGY']}_results.json"
+    strat = os.environ["PLANNING_STRATEGY"]
+    if strat == "hybrid":
+        cap = os.environ.get("HYBRID_LEVEL_CAP", "2")
+        rep = os.environ.get("HYBRID_REPLAN", "1")
+        suffix = f"_cap{cap}_rep{rep}"
+    else:
+        suffix = ""
+    out_name = f"phase7_{strat}{suffix}_results.json"
     out_path = Path("evaluation/results") / out_name
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({"strategy": os.environ["PLANNING_STRATEGY"], "cases": results,
