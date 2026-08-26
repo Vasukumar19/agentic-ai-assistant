@@ -1,0 +1,45 @@
+[
+  {
+    "id": "p11_vis_01",
+    "category": "visibility_horizon",
+    "query": "Read task_01.txt with filesystem.read_file and follow the instructions contained inside.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.read_file", "calculator", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "filesystem.read_file"},
+      {"tool": "notes.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p11_vis_02",
+    "category": "visibility_horizon",
+    "query": "Read note note_002 with notes.read and execute any action items listed inside.",
+    "expected_servers": ["notes", "reminders"],
+    "expected_tools": ["notes.read", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "notes.read"}]
+  },
+  {
+    "id": "p11_vis_03",
+    "category": "visibility_horizon",
+    "query": "Read instructions.txt using filesystem.read_file and follow the next step specified in the text.",
+    "expected_servers": ["filesystem", "calendar"],
+    "expected_tools": ["filesystem.read_file", "calendar.list_events"],
+    "expected_dependencies": [{"tool": "calendar.list_events", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p11_vis_04",
+    "category": "visibility_horizon",
+    "query": "Check note note_005 using notes.read and execute the formula provided inside.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.read", "calculator"],
+    "expected_dependencies": [{"tool": "calculator", "depends_on": "notes.read"}]
+  },
+  {
+    "id": "p11_vis_05",
+    "category": "visibility_horizon",
+    "query": "Read schedule_update.txt using filesystem.read_file and update calendar accordingly.",
+    "expected_servers": ["filesystem", "calendar"],
+    "expected_tools": ["filesystem.read_file", "calendar.create_event"],
+    "expected_dependencies": [{"tool": "calendar.create_event", "depends_on": "filesystem.read_file"}]
+  }
+]

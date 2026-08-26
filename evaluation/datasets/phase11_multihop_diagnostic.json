@@ -1,0 +1,94 @@
+[
+  {
+    "id": "p11_diag_01",
+    "category": "filesystem_calculator",
+    "query": "Read the number in test_num.txt using filesystem.read_file and calculate 15% of that number.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.read_file", "calculator"],
+    "expected_dependencies": [{"tool": "calculator", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p11_diag_02",
+    "category": "calendar_reminders",
+    "query": "List my calendar events on 2026-09-10 with calendar.list_events and create a reminder with reminders.create for the first event.",
+    "expected_servers": ["calendar", "reminders"],
+    "expected_tools": ["calendar.list_events", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "calendar.list_events"}]
+  },
+  {
+    "id": "p11_diag_03",
+    "category": "notes_calculator_reminders",
+    "query": "Read note note_001 using notes.read, calculate double the amount mentioned inside using calculator, and set a reminder with reminders.create for that total.",
+    "expected_servers": ["notes", "reminders"],
+    "expected_tools": ["notes.read", "calculator", "reminders.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "notes.read"},
+      {"tool": "reminders.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p11_diag_04",
+    "category": "filesystem_notes",
+    "query": "Read file report.txt with filesystem.read_file and save a summary note titled 'Report Summary' using notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p11_diag_05",
+    "category": "web_calculator_notes",
+    "query": "Search web for GDP of France, calculate 10% of that number, and create a note with notes.create titled 'France GDP Portion'.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["web_search", "calculator", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "web_search"},
+      {"tool": "notes.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p11_diag_06",
+    "category": "calendar_notes",
+    "query": "List calendar events for tomorrow using calendar.list_events and write a note titled 'Tomorrow Agenda' using notes.create.",
+    "expected_servers": ["calendar", "notes"],
+    "expected_tools": ["calendar.list_events", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "calendar.list_events"}]
+  },
+  {
+    "id": "p11_diag_07",
+    "category": "reminders_notes",
+    "query": "List all reminders using reminders.list and save them into a note titled 'All Reminders' using notes.create.",
+    "expected_servers": ["reminders", "notes"],
+    "expected_tools": ["reminders.list", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "reminders.list"}]
+  },
+  {
+    "id": "p11_diag_08",
+    "category": "filesystem_calculator_notes",
+    "query": "Read budget.txt with filesystem.read_file, calculate 20% tax using calculator, and create note 'Tax Note' using notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "calculator", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "filesystem.read_file"},
+      {"tool": "notes.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p11_diag_09",
+    "category": "calendar_reminders_notes",
+    "query": "Get event ev_100 with calendar.get_event, create a reminder for it with reminders.create, and write note 'Event Logged' with notes.create.",
+    "expected_servers": ["calendar", "reminders", "notes"],
+    "expected_tools": ["calendar.get_event", "reminders.create", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "reminders.create", "depends_on": "calendar.get_event"},
+      {"tool": "notes.create", "depends_on": "calendar.get_event"}
+    ]
+  },
+  {
+    "id": "p11_diag_10",
+    "category": "filesystem_reminders",
+    "query": "Read todo.txt with filesystem.read_file and create a reminder using reminders.create for the deadline inside.",
+    "expected_servers": ["filesystem", "reminders"],
+    "expected_tools": ["filesystem.read_file", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "filesystem.read_file"}]
+  }
+]
