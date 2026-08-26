@@ -119,19 +119,31 @@ def save_history_node(state: dict) -> dict:
     try:
         from observability.trace import make_event, append_event, add_latency
         from observability.storage import persist_trace
+        from config import MAX_EXECUTION_STEPS
         t_start = state.get("trace_start_ms")
         total_ms = int(time.perf_counter() * 1000 - t_start) if t_start else None
         if total_ms is not None:
             state["total_latency_ms"] = total_ms
+        # Phase 8: routers cannot persist state — recompute terminal status here.
+        exec_status = state.get("execution_status") or "completed"
+        budget = max(MAX_EXECUTION_STEPS, 1)
+        if exec_status == "running" and state.get("tool_call_count", 0) >= budget:
+            exec_status = "budget_exhausted"
+            state["execution_status"] = exec_status
         ev = make_event(state, "FINAL_ANSWER", "save_history",
                         duration_ms=total_ms,
-                        status="success" if state.get("execution_status") != "error" else "error",
+                        status="success" if exec_status not in ("error", "budget_exhausted") else "error",
                         metadata={
                             "answer_chars": len(answer),
                             "answer_preview": answer[:400],
                             "planner_steps": state.get("tool_call_count", 0),
                             "tool_calls": len(state.get("tool_results") or []),
-                            "execution_status": state.get("execution_status", "completed"),
+                            "execution_status": exec_status,
+                            "termination_reason": ("budget_exhausted" if exec_status == "budget_exhausted"
+                                                   else state.get("tool_loop_detected") and "loop_detected" or None),
+                            "execution_step": state.get("tool_call_count", 0),
+                            "execution_budget": budget,
+                            "remaining_budget": max(0, budget - state.get("tool_call_count", 0)),
                             "route": state.get("route", ""),
                             "total_latency_ms": total_ms,
                             "latency_breakdown": state.get("latency_breakdown", {}),
@@ -152,23 +164,32 @@ def save_history_node(state: dict) -> dict:
 def should_continue(state: dict):
     """
     Determine if agent should continue to tool use or return final answer.
+    Phase 8: MAX_EXECUTION_STEPS is the legitimate-workflow budget;
+    loop/repetition protection lives in planner_node + per-tool failure counts.
     """
-    from config import MAX_TOOL_FAILURES_PER_TOOL
-    if state.get("tool_call_count", 0) >= MAX_TOOL_STEPS:
-        logger.info("Max tool iterations (%d) reached", MAX_TOOL_STEPS)
-        # emit circuit-breaker event
+    from config import MAX_TOOL_FAILURES_PER_TOOL, MAX_EXECUTION_STEPS
+    budget = max(MAX_EXECUTION_STEPS, 1)
+    if state.get("tool_call_count", 0) >= budget:
+        logger.info("Execution budget (%d) reached", budget)
         try:
             from observability.trace import make_event, append_event
             from observability.errors import make_error_payload, ErrorType
             err = make_error_payload(ErrorType.TOOL_EXECUTION_ERROR.value, "planner",
-                                     f"MAX_TOOL_STEPS ({MAX_TOOL_STEPS}) reached — circuit breaker",
+                                     f"execution budget ({budget}) exhausted",
                                      retryable=False, trace_id=state.get("trace_id"))
             ev = make_event(state, "ERROR", "planner", status="error",
-                            metadata={"circuit_breaker": "max_steps", "max_steps": MAX_TOOL_STEPS},
+                            metadata={"termination_reason": "budget_exhausted",
+                                      "execution_step": state.get("tool_call_count", 0),
+                                      "execution_budget": budget,
+                                      "remaining_budget": 0,
+                                      "loop_detected": bool(state.get("tool_loop_detected")),
+                                      "circuit_breaker": "execution_budget"},
                             error=err)
             append_event(state, ev)
         except Exception:
             pass
+        # explicit terminal status so FINAL_ANSWER distinguishes completion vs budget stop
+        state["execution_status"] = "budget_exhausted"
         return "end"
 
     # per-tool failure circuit breaker
@@ -183,7 +204,13 @@ def should_continue(state: dict):
                                          f"per-tool failure limit ({MAX_TOOL_FAILURES_PER_TOOL}) for {tool}",
                                          retryable=False, trace_id=state.get("trace_id"))
                 ev = make_event(state, "ERROR", "tools", status="error",
-                                metadata={"circuit_breaker": "per_tool", "tool": tool, "failures": cnt},
+                                metadata={"circuit_breaker": "per_tool", "tool": tool,
+                                          "failures": cnt,
+                                          "execution_step": state.get("tool_call_count", 0),
+                                          "execution_budget": budget,
+                                          "remaining_budget": max(0, budget - state.get("tool_call_count", 0)),
+                                          "loop_detected": True,
+                                          "termination_reason": "loop_detected_per_tool_failures"},
                                 error=err)
                 append_event(state, ev)
             except Exception:

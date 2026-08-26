@@ -16,6 +16,10 @@ FAISS_INDEX_DIR = PROJECT_ROOT / "faiss_index"
 MODEL_NAME = "gemini-3.6-flash"
 TEMPERATURE = 0.3
 MAX_TOOL_STEPS = 5
+# Phase 8 — decoupled execution budget (loop protection is separate and unchanged).
+# MAX_TOOL_STEPS retained for backward compatibility; the graph enforces
+# MAX_EXECUTION_STEPS as the legitimate-workflow budget.
+MAX_EXECUTION_STEPS = int(os.getenv("MAX_EXECUTION_STEPS", str(MAX_TOOL_STEPS)))
 
 # LLM Provider Configuration (env-overridable)
 # LLM_PROVIDER: google | openrouter | groq | ollama

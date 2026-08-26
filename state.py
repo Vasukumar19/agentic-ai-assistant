@@ -97,3 +97,5 @@ class AgentState(TypedDict):
     plan_step_results: Optional[dict]    # step_id -> result string
     plan_invalid_count: Optional[int]    # invalid plan / revision counter
     pending_step_id: Optional[str]       # dependency strategy: step awaiting result
+    tool_call_history: Optional[list[dict]]  # Phase 8: sig+result history for loop detection
+    plan_replans: Optional[int]

@@ -142,6 +142,44 @@ def is_repeated_tool_call(tool_name: str, tool_args: dict, tool_results: list[di
         return True
     return False
 
+
+def _record_call_history(state: dict, tool_name: str, tool_args: dict, result) -> None:
+    """Phase 8 — maintain call-signature history for state-aware loop detection."""
+    import json as _json
+    try:
+        sig = _json.dumps({"t": tool_name, "a": tool_args}, sort_keys=True)
+        hist = state.get("tool_call_history")
+        if hist is None:
+            hist = []
+        hist.append({"sig": sig, "result": str(result or "")[:500]})
+        state["tool_call_history"] = hist[-20:]
+    except Exception:
+        pass
+
+
+def detect_loop(history: list[dict], tool_name: str, tool_args: dict, tool_results: list[dict]) -> str | None:
+    """State-aware loop detection over full call history.
+
+    Returns loop kind or None:
+      - 'alternating_identical': same (tool,args) executed >=2 times before with
+        unchanged results -> meaningful repetition absent.
+      - None otherwise. Repeated tool names with changed args/results are allowed.
+    """
+    import json as _json
+    try:
+        sig = _json.dumps({"t": tool_name, "a": tool_args}, sort_keys=True)
+    except Exception:
+        return None
+    prior = [h for h in history if h.get("sig") == sig]
+    if len(prior) < 2:
+        return None
+    # results unchanged across prior executions -> no new information possible
+    results = {str(h.get("result", ""))[:200] for h in prior}
+    ok_results = {r for r in results if not r.lower().startswith("error")}
+    if len(results) == 1 or len(ok_results) <= 1:
+        return "alternating_identical"
+    return None
+
 def _emit_planner_event(state: dict, dur_ms: int, decision: PlannerDecision | None, step: int, status: str = "success", extra: dict | None = None, error: dict | None = None):
     try:
         from observability.trace import make_event, append_event, add_latency, extract_llm_usage
@@ -224,6 +262,7 @@ def _dependency_planner(state: dict, level_cap: int = 1, allow_replan: bool = Fa
                 if len(tool_results) < tool_call_count:
                     completed_steps.append(call["name"])
                     tool_results.append({"tool": call["name"], "arguments": call["args"], "result": result_content})
+                    _record_call_history(state, call["name"], call["args"], result_content)
 
     # Ã¢â€â‚¬Ã¢â€â‚¬ no plan yet Ã¢â€ â€™ generate + validate Ã¢â€â‚¬Ã¢â€â‚¬
     if not active_plan_data:
@@ -546,6 +585,7 @@ def planner_node(state: dict) -> dict:
                     if tool_name not in completed_steps or completed_steps.count(tool_name) < tool_call_count:
                         completed_steps.append(tool_name)
                     tool_results.append({"tool": tool_name, "arguments": tool_args, "result": last_tool_msg.content})
+                    _record_call_history(state, tool_name, tool_args, last_tool_msg.content)
 
     if tool_results:
         history_str = "PREVIOUS TOOL EXECUTIONS:\n"
@@ -637,12 +677,20 @@ Decide the SINGLE next action that makes progress on the Remaining Goal.
         pass
 
     if decision.action == "tool":
-        if is_repeated_tool_call(decision.tool, decision.arguments or {}, tool_results):
-            logger.warning(f"Repeated tool call loop detected: {decision.tool} with {decision.arguments}")
-            execution_trace.append({"step": f"planner_{tool_call_count+1}", "decision": "repeated_tool_call_loop", "llm_latency_s": llm_latency})
+        # Phase 8: state-aware alternating-loop detection.
+        # A→A (identical sig) and A→B→A→B (same sigs recurring with unchanged
+        # results) terminate; a repeated tool whose inputs/results changed is allowed.
+        loop_kind = detect_loop(tool_call_history, decision.tool, decision.arguments or {}, tool_results)
+        if loop_kind is None and is_repeated_tool_call(decision.tool, decision.arguments or {}, tool_results):
+            loop_kind = "consecutive_identical"
+        if loop_kind:
+            logger.warning(f"Loop detected ({loop_kind}): {decision.tool} with {decision.arguments}")
+            execution_trace.append({"step": f"planner_{tool_call_count+1}", "decision": f"loop_detected_{loop_kind}", "llm_latency_s": llm_latency})
             _emit_planner_event(state, int(llm_latency*1000), decision, tool_call_count+1, status="error",
-                                extra={"validation_result": "repeated_tool_call_loop"})
-            return {"answer": "Task terminated to prevent repeated execution of the same tool without new information.",
+                                extra={"validation_result": f"loop_detected_{loop_kind}",
+                                       "termination_reason": "loop_detected",
+                                       "loop_detected": True, "loop_kind": loop_kind})
+            return {"answer": "Task terminated to prevent repeated execution of the same operation without new information.",
                     "execution_status": "repeated_tool_call", "tool_loop_detected": True,
                     "completed_steps": completed_steps, "tool_results": tool_results,
                     "execution_trace": execution_trace,
