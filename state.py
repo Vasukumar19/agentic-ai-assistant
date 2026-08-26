@@ -90,3 +90,10 @@ class AgentState(TypedDict):
     llm_usage: Optional[list[dict]]
     total_latency_ms: Optional[int]
     trace_start_ms: Optional[float]
+
+    # Phase 7 — Planning strategy experiment (all optional)
+    active_plan: Optional[dict]          # serialized Plan
+    plan_completed_steps: Optional[list[str]]
+    plan_step_results: Optional[dict]    # step_id -> result string
+    plan_invalid_count: Optional[int]    # invalid plan / revision counter
+    pending_step_id: Optional[str]       # dependency strategy: step awaiting result

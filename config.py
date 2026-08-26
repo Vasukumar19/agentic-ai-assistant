@@ -41,6 +41,10 @@ MAX_TOOL_FAILURES_PER_TOOL = int(os.getenv("MAX_TOOL_FAILURES_PER_TOOL", "3"))
 # Phase 6A — MCP
 TIMEOUT_MCP_S = float(os.getenv("TIMEOUT_MCP_S", "15"))
 MCP_CONFIG_FILE = os.getenv("MCP_CONFIG_FILE", "")
-# MCP_SERVERS is a JSON array string or a path; parsed by mcp/registry.py
+# MCP_SERVERS is a JSON array string or a path; parsed by mcp_layer/registry.py
 # Example: '[{"name":"test","transport":"stdio","command":"python","args":["mcp_test_server.py"]}]'
 MCP_SERVERS_RAW = os.getenv("MCP_SERVERS", "")
+
+# Phase 7 — Planning strategy experiment (baseline | dependency | replan)
+PLANNING_STRATEGY = os.getenv("PLANNING_STRATEGY", "baseline").lower()
+MAX_PLAN_STEPS = int(os.getenv("MAX_PLAN_STEPS", "6"))

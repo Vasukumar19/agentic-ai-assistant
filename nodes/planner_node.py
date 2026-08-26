@@ -157,7 +157,230 @@ def _emit_planner_event(state: dict, dur_ms: int, decision: PlannerDecision | No
     except Exception:
         pass
 
+def _emit_plan_event(state, ev_type, meta, status="success", error=None):
+    try:
+        from observability.trace import make_event, append_event
+        ev = make_event(state, ev_type, "planner", status=status, metadata=meta, error=error)
+        append_event(state, ev)
+    except Exception:
+        pass
+
+
+def _dependency_planner(state: dict) -> dict | None:
+    """Strategy B — generate/validate a structured plan once, then execute
+    dependency-ready steps deterministically (no per-step LLM call).
+    Returns None to fall back to baseline behavior for non-research paths."""
+    from config import PLANNING_STRATEGY, MAX_PLAN_STEPS, TIMEOUT_LLM_S
+    if PLANNING_STRATEGY != "dependency":
+        return None
+    route = state.get("route", "research_query")
+    if route not in ("research_query", ""):
+        return None
+
+    import time as _t
+    from pydantic import ValidationError as PydValidationError
+    from langchain_core.messages import AIMessage
+    from planning.schema import Plan
+    from planning.validation import validate_plan, next_ready_steps, plan_complete
+    from observability.timeout import run_with_timeout
+
+    question = state.get("question", "")
+    context = state.get("_combined_context", "")
+    messages = state.get("messages", [])
+    tool_call_count = state.get("tool_call_count", 0)
+    completed_steps = list(state.get("completed_steps", []))
+    tool_results = list(state.get("tool_results", []))
+
+    # sync last tool result into plan state
+    active_plan_data = state.get("active_plan")
+    done: set[str] = set(state.get("plan_completed_steps") or [])
+    step_results: dict = dict(state.get("plan_step_results") or {})
+    invalid_count = int(state.get("plan_invalid_count") or 0)
+    pending_step = state.get("pending_step_id")
+
+    pending_step_result = None
+    if messages and messages[-1].type == "tool" and len(messages) >= 2 and messages[-2].type == "ai":
+        result_content = messages[-1].content
+        if pending_step and active_plan_data:
+            pending_step_result = (pending_step, str(result_content))
+        else:
+            # fallback: record into generic history
+            prev = messages[-2]
+            if getattr(prev, "tool_calls", None):
+                call = prev.tool_calls[0]
+                if len(tool_results) < tool_call_count:
+                    completed_steps.append(call["name"])
+                    tool_results.append({"tool": call["name"], "arguments": call["args"], "result": result_content})
+
+    # ── no plan yet → generate + validate ──
+    if not active_plan_data:
+        valid_names = _get_valid_names()
+        tool_info = _get_tool_info()
+        plan_prompt = f"""You are a precise multi-step task planner.
+Decompose the user's goal into an ordered plan using ONLY the available tools.
+
+Available Tools:
+{tool_info}
+
+Rules:
+- Use only tools from Available Tools (exact names).
+- arguments must match each tool's schema. Do not invent values that must come from another step's output;
+  instead declare depends_on so the value can be resolved at execution time.
+- Keep it minimal: only steps required by the goal.
+- Max {MAX_PLAN_STEPS} steps.
+
+User Goal: {question}
+"""
+        if context:
+            plan_prompt += f"\nRetrieved Context:\n{context[:2000]}\n"
+
+        structured_llm = llm.with_structured_output(Plan)
+        t0 = _t.perf_counter()
+        try:
+            def _call():
+                return run_with_timeout(lambda: structured_llm.invoke([HumanMessage(content=plan_prompt)]), TIMEOUT_LLM_S)
+            plan = _call()
+        except Exception as e:
+            _emit_planner_event(state, int((_t.perf_counter() - t0) * 1000), None, 1, status="error",
+                                extra={"strategy": "dependency", "validation_result": f"plan_generation_failed: {str(e)[:200]}"})
+            return {"answer": "I couldn't construct a valid plan for this request.",
+                    "execution_status": "error",
+                    "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+                    "latency_breakdown": state.get("latency_breakdown")}
+
+        # cap steps
+        if len(plan.steps) > MAX_PLAN_STEPS:
+            plan.steps = plan.steps[:MAX_PLAN_STEPS]
+
+        def _confirm(tool, args):
+            try:
+                from mcp_layer.registry import registry
+                return registry.requires_confirmation(tool, args)
+            except Exception:
+                return False
+
+        validation = validate_plan(plan, valid_names, confirmation_required=_confirm)
+        _emit_plan_event(state, "PLANNER", {"strategy": "dependency", "phase": "plan_created",
+                                            "valid": validation.valid,
+                                            "steps": [{"id": s.id, "tool": s.tool, "depends_on": s.depends_on} for s in plan.steps],
+                                            "errors": validation.errors},
+                          status="success" if validation.valid else "error")
+        if not validation.valid:
+            invalid_count += 1
+            if invalid_count <= 2:
+                # one revision attempt with errors fed back
+                repair_prompt = plan_prompt + f"\n\nYour previous plan was INVALID:\n" + "\n".join(validation.errors) + \
+                    "\nReturn a corrected plan."
+                try:
+                    plan = run_with_timeout(lambda: llm.with_structured_output(Plan).invoke(
+                        [HumanMessage(content=repair_prompt)]), TIMEOUT_LLM_S)
+                    if len(plan.steps) > MAX_PLAN_STEPS:
+                        plan.steps = plan.steps[:MAX_PLAN_STEPS]
+                    validation = validate_plan(plan, valid_names, confirmation_required=_confirm)
+                    _emit_plan_event(state, "PLANNER", {"strategy": "dependency", "phase": "plan_repaired",
+                                                        "valid": validation.valid, "errors": validation.errors},
+                                      status="success" if validation.valid else "error")
+                except Exception:
+                    pass
+            if not validation.valid:
+                return {"answer": "I couldn't construct a valid plan: " + "; ".join(validation.errors[:3]),
+                        "execution_status": "error", "plan_invalid_count": invalid_count,
+                        "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+                        "latency_breakdown": state.get("latency_breakdown")}
+
+        return {
+            "active_plan": plan.model_dump(),
+            "plan_completed_steps": [],
+            "plan_step_results": {},
+            "plan_invalid_count": invalid_count,
+            "execution_status": "running",
+            "completed_steps": completed_steps,
+            "tool_results": tool_results,
+            "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+            "latency_breakdown": state.get("latency_breakdown"), "llm_usage": state.get("llm_usage"),
+        }
+
+    # ── plan exists → execute ──
+    plan = Plan(**active_plan_data)
+    if pending_step_result:
+        sid, res = pending_step_result
+        done.add(sid)
+        step_results[sid] = res
+        failed = isinstance(res, str) and res.lower().startswith("error")
+    else:
+        failed = False
+
+    steps_by_id = {s.id: s for s in plan.steps}
+    ready = next_ready_steps(plan, done)
+
+    if not ready or failed:
+        if plan_complete(plan, done) and not failed:
+            # compose final answer from step results
+            results_txt = "\n".join(f"- {sid} ({steps_by_id[sid].tool}): {(step_results.get(sid,'') or '')[:400]}"
+                                    for sid in (s.id for s in plan.steps))
+            final_prompt = f"""User Goal: {question}
+
+Executed plan step results:
+{results_txt}
+
+Compose a concise final answer for the user's goal using ONLY these results."""
+            try:
+                ans = run_with_timeout(lambda: llm.invoke([HumanMessage(content=final_prompt)]), TIMEOUT_LLM_S)
+                answer = ans.content
+            except Exception:
+                answer = "Task steps executed but I couldn't compose the summary."
+            return {"answer": answer, "last_action": "final", "execution_status": "completed",
+                    "active_plan": state.get("active_plan"), "plan_completed_steps": sorted(done),
+                    "plan_step_results": step_results, "plan_invalid_count": invalid_count,
+                    "completed_steps": completed_steps, "tool_results": tool_results,
+                    "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+                    "latency_breakdown": state.get("latency_breakdown")}
+        # failure mid-plan or stuck: fall back to baseline LLM decision with plan context
+        _emit_plan_event(state, "PLANNER", {"strategy": "dependency", "phase": "fallback_to_baseline",
+                                            "failed": failed, "ready": ready}, status="error")
+        return None
+
+    step = steps_by_id[ready[0]]
+    args = dict(step.arguments or {})
+    # dependency data propagation: substitute placeholders like "{s1}" with prior results
+    for k, v in list(args.items()):
+        if isinstance(v, str) and v.startswith("{") and v.endswith("}"):
+            ref = v[1:-1]
+            if ref in step_results:
+                args[k] = step_results[ref]
+            elif ref.split(".")[0] in step_results:
+                base = step_results[ref.split(".")[0]]
+                args[k] = f"{base}"  # planner-level resolution; keep raw if field missing
+    _emit_plan_event(state, "PLANNER", {"strategy": "dependency", "phase": "step_ready",
+                                        "step_id": step.id, "tool": step.tool, "depends_on": step.depends_on})
+
+    tool_call_id = f"call_{tool_call_count}"
+    ai_msg = AIMessage(content="", tool_calls=[{"name": step.tool, "args": args, "id": tool_call_id}])
+    return {
+        "messages": [ai_msg],
+        "current_step": step.tool,
+        "last_action": step.tool,
+        "tool_call_count": tool_call_count + 1,
+        "execution_status": "running",
+        "pending_step_id": step.id,
+        "active_plan": state.get("active_plan"),
+        "plan_completed_steps": sorted(done),
+        "plan_step_results": step_results,
+        "plan_invalid_count": invalid_count,
+        "completed_steps": completed_steps,
+        "tool_results": tool_results,
+        "execution_trace": list(state.get("execution_trace", [])),
+        "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+        "latency_breakdown": state.get("latency_breakdown"), "llm_usage": state.get("llm_usage"),
+    }
+
+
 def planner_node(state: dict) -> dict:
+    # Phase 7: strategy routing — dependency strategy has its own execution path
+    dep = _dependency_planner(state)
+    if dep is not None:
+        return dep
+
     t_start = time.perf_counter()
     question = state.get("question", "")
     context = state.get("_combined_context", "")
@@ -199,6 +422,25 @@ def planner_node(state: dict) -> dict:
             history_str += f"Arguments: {json.dumps(res.get('arguments', {}))}\n"
             history_str += f"Result: {res.get('result', 'Error/No Result')}\n"
         user_prompt = f"{history_str}\n\n{user_prompt}"
+
+    # Phase 7 Strategy C (replan): expose explicit planning state
+    from config import PLANNING_STRATEGY
+    if PLANNING_STRATEGY == "replan":
+        failed_results = [r for r in tool_results if str(r.get("result", "")).lower().startswith("error")]
+        state_txt = "\n".join(f"- {r.get('tool')}: {str(r.get('result',''))[:200]}" for r in tool_results)
+        failed_txt = "\n".join(f"- {r.get('tool')}: {str(r.get('result',''))[:150]}" for r in failed_results) or "(none)"
+        user_prompt = f"""[PLANNING STATE]
+Original Goal: {question}
+Completed Steps: {', '.join(completed_steps) or '(none)'}
+Available State (tool outputs so far):
+{state_txt or '(none)'}
+Failed Steps:
+{failed_txt}
+Remaining Goal: achieve the original goal using what is still missing.
+
+Decide the SINGLE next action that makes progress on the Remaining Goal.
+
+{user_prompt}"""
 
     # dynamic prompt per-request (registry may have new MCP tools)
     _prompt = PLANNER_SYSTEM_PROMPT_TEMPLATE.format(tool_info=_get_tool_info())
