@@ -27,3 +27,5 @@ evaluation/results/*.txt
 faiss_index/
 # Local trace artifacts (debug-only, regenerable)
 evaluation/traces/
+# MCP server runtime state (calendar/notes/reminders JSON stores)
+mcp_data/
