@@ -1,0 +1,161 @@
+[
+  {
+    "id": "smoke_1",
+    "name": "Calculator",
+    "query": "What is 128 / 8?",
+    "expected_sequence": [
+      "calculator"
+    ],
+    "actual_sequence": [
+      "calculator"
+    ],
+    "tool_results": [
+      {
+        "tool": "calculator",
+        "args": {
+          "expression": "128 / 8"
+        },
+        "output": "16.0"
+      }
+    ],
+    "final_answer": "128 divided by 8 is 16.",
+    "planner_calls_actual": 2,
+    "llm_calls": 2,
+    "tool_call_count": 1,
+    "execution_status": "completed",
+    "failure_reason": null,
+    "latency_s": 11.68,
+    "result": "PASS"
+  },
+  {
+    "id": "smoke_2",
+    "name": "Web Search",
+    "query": "What is the current population of Japan?",
+    "expected_sequence": [
+      "web_search"
+    ],
+    "actual_sequence": [
+      "web_search"
+    ],
+    "tool_results": [
+      {
+        "tool": "web_search",
+        "args": {
+          "query": "current population of Japan"
+        },
+        "output": "Japan represents 1.53% of the total global population and 2.45% of Asia's population. Japan has a population density of 335.8 people per km\u00b2 (approximately 869.8 per mi\u00b2), making it the 39th most densely populated country in the world. Currently, 85.61% of the population resides in urban areas, a figure that is increasing annually. The current population of Japan is 125,676,818 as of Wednesday, August 26, 2026. Population clock live, current, historical and projected population. Births, deaths and migration of population. The current population of Japan. Here are all Japan population data and the change per year, along with the growth rate. Population of Japan as of today The current population of Japan is 122,322,890 with an annual growth rate of -0.562%. Japan has a population of 1.485% of the world's population. The latest officially reported population of Japan was 123,366,734 in 2025 vs 341,784,857 people in the United States in 2025. In 2026, based on the UN estimation, the current Japan's population is 122,704,252 people compared to 344,434,632 in the United States."
+      }
+    ],
+    "final_answer": "The current population of Japan is 122,704,252 as of 2026.",
+    "planner_calls_actual": 2,
+    "llm_calls": 2,
+    "tool_call_count": 1,
+    "execution_status": "completed",
+    "failure_reason": null,
+    "latency_s": 3.0,
+    "result": "PASS"
+  },
+  {
+    "id": "smoke_3",
+    "name": "Search + Calculator",
+    "query": "Find the current population of Japan and calculate 0.5% of it.",
+    "expected_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "web_search",
+      "calculator"
+    ],
+    "tool_results": [
+      {
+        "tool": "web_search",
+        "args": {
+          "query": "current population of Japan"
+        },
+        "output": "Japan represents 1.53% of the total global population and 2.45% of Asia's population. Japan has a population density of 335.8 people per km\u00b2 (approximately 869.8 per mi\u00b2), making it the 39th most densely populated country in the world. Currently, 85.61% of the population resides in urban areas, a figure that is increasing annually. The current population of Japan is 125,676,818 as of Wednesday, August 26, 2026. Population clock live, current, historical and projected population. Births, deaths and migration of population. The current population of Japan. Here are all Japan population data and the change per year, along with the growth rate. Population of Japan as of today The current population of Japan is 122,322,890 with an annual growth rate of -0.562%. Japan has a population of 1.485% of the world's population. The latest officially reported population of Japan was 123,366,734 in 2025 vs 341,784,857 people in the United States in 2025. In 2026, based on the UN estimation, the current Japan's population is 122,704,252 people compared to 344,434,632 in the United States."
+      },
+      {
+        "tool": "calculator",
+        "args": {
+          "expression": "122704252 * 0.005"
+        },
+        "output": "613521.26"
+      }
+    ],
+    "final_answer": "The current population of Japan is 122,704,252. 0.5% of this population is 613,521.26.",
+    "planner_calls_actual": 3,
+    "llm_calls": 3,
+    "tool_call_count": 2,
+    "execution_status": "completed",
+    "failure_reason": null,
+    "latency_s": 5.78,
+    "result": "PASS"
+  },
+  {
+    "id": "smoke_4",
+    "name": "RAG + Calculator",
+    "query": "According to the document, what is the hardware stipend and calculate the amount for 3 employees.",
+    "expected_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "actual_sequence": [
+      "rag",
+      "calculator"
+    ],
+    "tool_results": [
+      {
+        "tool": "calculator",
+        "args": {
+          "expression": "1000 * 3"
+        },
+        "output": "3000"
+      }
+    ],
+    "final_answer": "According to the document, the hardware stipend is $1,000 for new employees. For 3 employees, the total amount would be $3,000.",
+    "planner_calls_actual": 2,
+    "llm_calls": 2,
+    "tool_call_count": 1,
+    "execution_status": "completed",
+    "failure_reason": null,
+    "latency_s": 3.3,
+    "result": "PASS"
+  },
+  {
+    "id": "smoke_5",
+    "name": "RAG only",
+    "query": "According to our company policy, what is our remote work policy?",
+    "expected_sequence": [
+      "rag"
+    ],
+    "actual_sequence": [
+      "rag"
+    ],
+    "tool_results": [],
+    "final_answer": "According to the company policy, GlobalTech offers a hybrid work environment. Employees are expected to be in the office 2 days a week (Tuesday and Thursday). Remote work from another country is allowed for up to 30 days per calendar year.",
+    "planner_calls_actual": 1,
+    "llm_calls": 1,
+    "tool_call_count": 0,
+    "execution_status": "completed",
+    "failure_reason": null,
+    "latency_s": 1.75,
+    "result": "PASS"
+  },
+  {
+    "id": "smoke_6",
+    "name": "Direct answer",
+    "query": "What does 'retrieval augmented generation' mean?",
+    "expected_sequence": [],
+    "actual_sequence": [],
+    "tool_results": [],
+    "final_answer": "'Retrieval Augmented Generation' (RAG) is a technique used in artificial intelligence, particularly in natural language processing, where a model generates responses by incorporating information retrieved from a large external knowledge source. This approach combines the strengths of retrieval systems (which fetch relevant information) with generative models (which create coherent and contextually",
+    "planner_calls_actual": 1,
+    "llm_calls": 1,
+    "tool_call_count": 0,
+    "execution_status": "completed",
+    "failure_reason": null,
+    "latency_s": 5.2,
+    "result": "PASS"
+  }
+]
