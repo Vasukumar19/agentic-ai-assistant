@@ -33,9 +33,10 @@ def main():
         {"name": "notes", "transport": "stdio", "command": "python", "args": ["mcp_notes_server.py"]},
         {"name": "reminders", "transport": "stdio", "command": "python", "args": ["mcp_reminders_server.py"]},
     ])
-    os.environ["LLM_PROVIDER"] = "ollama"
-    os.environ["LLM_MODEL"] = "qwen3:8b"
-    os.environ["OLLAMA_REASONING"] = "0"
+    os.environ["LLM_PROVIDER"] = os.environ.get("LLM_PROVIDER", "ollama")
+    # allow model override via env for Gemma comparison; default qwen3:8b preserves Phase 8 behavior
+    os.environ["LLM_MODEL"] = os.environ.get("LLM_MODEL", "qwen3:8b")
+    os.environ["OLLAMA_REASONING"] = os.environ.get("OLLAMA_REASONING", "0")
 
     from graph import create_runnable_graph
     from mcp_layer.registry import registry
