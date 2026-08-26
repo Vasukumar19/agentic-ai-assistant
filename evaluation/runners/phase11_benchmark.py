@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--variant", type=str, choices=["baseline", "replanning", "verifier"], default="baseline")
+    parser.add_argument("--variant", type=str, choices=["baseline", "replanning", "verifier", "context"], default="baseline")
     parser.add_argument("--dataset", type=str, default="evaluation/datasets/phase6c_multiserver.json")
     parser.add_argument("--budget", type=int, default=10)
     parser.add_argument("--resume", action="store_true")
@@ -37,12 +37,19 @@ def main():
     if variant == "baseline":
         os.environ["RESULT_AWARE_REPLANNING"] = "off"
         os.environ["COMPLETION_GUARD"] = "off"
+        os.environ["PLANNER_COMPLETION_CONTEXT"] = "off"
     elif variant == "replanning":
         os.environ["RESULT_AWARE_REPLANNING"] = "on"
         os.environ["COMPLETION_GUARD"] = "off"
+        os.environ["PLANNER_COMPLETION_CONTEXT"] = "off"
     elif variant == "verifier":
         os.environ["RESULT_AWARE_REPLANNING"] = "on"
         os.environ["COMPLETION_GUARD"] = "on"
+        os.environ["PLANNER_COMPLETION_CONTEXT"] = "off"
+    elif variant == "context":
+        os.environ["RESULT_AWARE_REPLANNING"] = "on"
+        os.environ["COMPLETION_GUARD"] = "off"
+        os.environ["PLANNER_COMPLETION_CONTEXT"] = "on"
 
     os.environ["MCP_SERVERS"] = json.dumps([
         {"name": "calendar", "transport": "stdio", "command": "python", "args": ["mcp_calendar_server.py"]},

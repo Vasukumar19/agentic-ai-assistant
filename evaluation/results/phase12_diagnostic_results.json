@@ -1,0 +1,179 @@
+{
+  "strategy": "hybrid",
+  "variant": "context",
+  "result_aware_replanning": "on",
+  "completion_guard": "off",
+  "budget": 10,
+  "cases": [
+    {
+      "id": "p12_diag_01",
+      "category": "filesystem_calculator",
+      "question": "Read the number in test_num.txt using filesystem.read_file and calculate 15% of that number with calculator.",
+      "expected_servers": [
+        "filesystem"
+      ],
+      "expected_tools": [
+        "filesystem.read_file",
+        "calculator"
+      ],
+      "expected_dependencies": [
+        {
+          "tool": "calculator",
+          "depends_on": "filesystem.read_file"
+        }
+      ],
+      "acceptable_variants": [],
+      "called_raw": [],
+      "awaiting_confirmation": false,
+      "execution_status": "error",
+      "had_errors": true,
+      "answer_preview": "I tried to use an invalid tool: filesystem.read_file. I cannot complete the request.",
+      "trace_id": "trace_9b4cbcc65772491695ec1245195a173a",
+      "latency_ms": 4464,
+      "replan_count": 0,
+      "llm_calls": 3,
+      "events": 7
+    },
+    {
+      "id": "p12_diag_02",
+      "category": "filesystem_notes",
+      "question": "Read report.txt with filesystem.read_file and save a summary note titled 'Report Summary' using notes.create.",
+      "expected_servers": [
+        "filesystem",
+        "notes"
+      ],
+      "expected_tools": [
+        "filesystem.read_file",
+        "notes.create"
+      ],
+      "expected_dependencies": [
+        {
+          "tool": "notes.create",
+          "depends_on": "filesystem.read_file"
+        }
+      ],
+      "acceptable_variants": [],
+      "called_raw": [],
+      "awaiting_confirmation": false,
+      "execution_status": "error",
+      "had_errors": true,
+      "answer_preview": "I tried to use an invalid tool: filesystem.read_file. I cannot complete the request.",
+      "trace_id": "trace_82745294d629483ca5323ace282f6218",
+      "latency_ms": 2204,
+      "replan_count": 0,
+      "llm_calls": 3,
+      "events": 7
+    },
+    {
+      "id": "p12_diag_03",
+      "category": "calendar_reminders",
+      "question": "List my calendar events on 2026-09-10 with calendar.list_events and create a reminder with reminders.create for the first event.",
+      "expected_servers": [
+        "calendar",
+        "reminders"
+      ],
+      "expected_tools": [
+        "calendar.list_events",
+        "reminders.create"
+      ],
+      "expected_dependencies": [
+        {
+          "tool": "reminders.create",
+          "depends_on": "calendar.list_events"
+        }
+      ],
+      "acceptable_variants": [],
+      "called_raw": [
+        "calendar_list_events",
+        "reminders_create",
+        "calendar.list_events",
+        "reminders.create"
+      ],
+      "awaiting_confirmation": false,
+      "execution_status": "completed",
+      "had_errors": true,
+      "answer_preview": "The calendar events for 2026-09-10 have been listed, and a reminder has been created for the first event.",
+      "trace_id": "trace_4c68a0439b6a462f8310d33ae06ece3e",
+      "latency_ms": 33958,
+      "replan_count": 0,
+      "llm_calls": 2,
+      "events": 20
+    },
+    {
+      "id": "p12_diag_04",
+      "category": "notes_calculator_reminders",
+      "question": "Read note note_001 using notes.read, calculate double the amount mentioned inside using calculator, and set a reminder with reminders.create for that total.",
+      "expected_servers": [
+        "notes",
+        "reminders"
+      ],
+      "expected_tools": [
+        "notes.read",
+        "calculator",
+        "reminders.create"
+      ],
+      "expected_dependencies": [
+        {
+          "tool": "calculator",
+          "depends_on": "notes.read"
+        },
+        {
+          "tool": "reminders.create",
+          "depends_on": "calculator"
+        }
+      ],
+      "acceptable_variants": [],
+      "called_raw": [
+        "notes.read",
+        "calculator",
+        "notes.read",
+        "calculator",
+        "calculator"
+      ],
+      "awaiting_confirmation": false,
+      "execution_status": "running",
+      "had_errors": true,
+      "answer_preview": "",
+      "trace_id": "trace_33a493851268489d9cf9276e24f9feab",
+      "latency_ms": 89602,
+      "replan_count": 0,
+      "llm_calls": 2,
+      "events": 28
+    },
+    {
+      "id": "p12_diag_05",
+      "category": "filesystem_calculator_notes",
+      "question": "Read budget.txt with filesystem.read_file, calculate 20% tax using calculator, and create note 'Tax Note' using notes.create.",
+      "expected_servers": [
+        "filesystem",
+        "notes"
+      ],
+      "expected_tools": [
+        "filesystem.read_file",
+        "calculator",
+        "notes.create"
+      ],
+      "expected_dependencies": [
+        {
+          "tool": "calculator",
+          "depends_on": "filesystem.read_file"
+        },
+        {
+          "tool": "notes.create",
+          "depends_on": "calculator"
+        }
+      ],
+      "acceptable_variants": [],
+      "called_raw": [],
+      "awaiting_confirmation": false,
+      "execution_status": "error",
+      "had_errors": false,
+      "answer_preview": "I couldn't construct a valid plan: unknown tool 'filesystem.read_file' in step step3",
+      "trace_id": "trace_d6f0a8269e764ca89c756ba9035b9234",
+      "latency_ms": 16803,
+      "replan_count": 0,
+      "llm_calls": 2,
+      "events": 8
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "id": "p12_diag_01",
+    "category": "filesystem_calculator",
+    "query": "Read the number in test_num.txt using filesystem.read_file and calculate 15% of that number with calculator.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.read_file", "calculator"],
+    "expected_dependencies": [{"tool": "calculator", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p12_diag_02",
+    "category": "filesystem_notes",
+    "query": "Read report.txt with filesystem.read_file and save a summary note titled 'Report Summary' using notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p12_diag_03",
+    "category": "calendar_reminders",
+    "query": "List my calendar events on 2026-09-10 with calendar.list_events and create a reminder with reminders.create for the first event.",
+    "expected_servers": ["calendar", "reminders"],
+    "expected_tools": ["calendar.list_events", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "calendar.list_events"}]
+  },
+  {
+    "id": "p12_diag_04",
+    "category": "notes_calculator_reminders",
+    "query": "Read note note_001 using notes.read, calculate double the amount mentioned inside using calculator, and set a reminder with reminders.create for that total.",
+    "expected_servers": ["notes", "reminders"],
+    "expected_tools": ["notes.read", "calculator", "reminders.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "notes.read"},
+      {"tool": "reminders.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p12_diag_05",
+    "category": "filesystem_calculator_notes",
+    "query": "Read budget.txt with filesystem.read_file, calculate 20% tax using calculator, and create note 'Tax Note' using notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "calculator", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "filesystem.read_file"},
+      {"tool": "notes.create", "depends_on": "calculator"}
+    ]
+  }
+]

@@ -58,6 +58,7 @@ MAX_REPLANS = int(os.getenv("MAX_REPLANS", "1"))
 HYBRID_LEVEL_CAP = int(os.getenv("HYBRID_LEVEL_CAP", "2"))   # 0=baseline-only, 1=dependency, 2=replan allowed
 HYBRID_REPLAN = os.getenv("HYBRID_REPLAN", "1").lower() not in ("0", "false", "no")
 
-# Phase 11 — Result-Aware Replanning & Completion Guard (default: off)
+# Phase 11 & Phase 12 — Result-Aware Replanning & Completion Context (default: off)
 RESULT_AWARE_REPLANNING = os.getenv("RESULT_AWARE_REPLANNING", "off").lower()
 COMPLETION_GUARD = os.getenv("COMPLETION_GUARD", "off").lower()
+PLANNER_COMPLETION_CONTEXT = os.getenv("PLANNER_COMPLETION_CONTEXT", "off").lower()
