@@ -1,0 +1,182 @@
+{
+  "baseline": {
+    "strategy": "baseline",
+    "n": 60,
+    "server_selection_pct": 75.0,
+    "tool_selection_pct": 73.3,
+    "dependency_accuracy": 67.7,
+    "dependency_edges": "21/31",
+    "exact_sequence_pct": 46.7,
+    "acceptable_sequence_pct": 46.7,
+    "task_completion_pct": 75.0,
+    "premature_termination_pct": 3.3,
+    "tool_loop_rate_pct": 18.3,
+    "cases_with_repeats": 12,
+    "total_repeated_calls": 15,
+    "tool_efficiency": 0.0,
+    "latency": {
+      "mean": 9819.3,
+      "p50": 8217.5,
+      "p95": 21161.3
+    },
+    "latency_normal": {
+      "mean": 9028.3,
+      "p50": 7482.0,
+      "p95": 20426.8,
+      "n": 33
+    },
+    "latency_extra": {
+      "mean": 10786.1,
+      "p50": 10545.0,
+      "p95": 22546.2,
+      "n": 27
+    },
+    "avg_llm_calls_per_query": 0,
+    "by_service_count": {
+      "1": {
+        "n": 10,
+        "tool_selection_pct": 100.0,
+        "dependency_pct": null,
+        "completion_pct": 100.0,
+        "mean_latency_ms": 8718.9,
+        "avg_tools": 0
+      },
+      "2": {
+        "n": 30,
+        "tool_selection_pct": 80.0,
+        "dependency_pct": 84.2,
+        "completion_pct": 70.0,
+        "mean_latency_ms": 11040.2,
+        "avg_tools": 0
+      },
+      "3": {
+        "n": 10,
+        "tool_selection_pct": 30.0,
+        "dependency_pct": 41.7,
+        "completion_pct": 50.0,
+        "mean_latency_ms": 11868.3,
+        "avg_tools": 0
+      }
+    }
+  },
+  "dependency": {
+    "strategy": "dependency",
+    "n": 60,
+    "server_selection_pct": 85.0,
+    "tool_selection_pct": 81.7,
+    "dependency_accuracy": 80.6,
+    "dependency_edges": "25/31",
+    "exact_sequence_pct": 16.7,
+    "acceptable_sequence_pct": 16.7,
+    "task_completion_pct": 66.7,
+    "premature_termination_pct": 23.3,
+    "tool_loop_rate_pct": 5.0,
+    "cases_with_repeats": 47,
+    "total_repeated_calls": 66,
+    "tool_efficiency": 0.0,
+    "latency": {
+      "mean": 12085.2,
+      "p50": 12692.0,
+      "p95": 17245.3
+    },
+    "latency_normal": {
+      "mean": 9500,
+      "p50": 8486.5,
+      "p95": 16270.8,
+      "n": 8
+    },
+    "latency_extra": {
+      "mean": 12483.0,
+      "p50": 12758.0,
+      "p95": 17052.9,
+      "n": 52
+    },
+    "avg_llm_calls_per_query": 3.27,
+    "by_service_count": {
+      "1": {
+        "n": 10,
+        "tool_selection_pct": 100.0,
+        "dependency_pct": null,
+        "completion_pct": 100.0,
+        "mean_latency_ms": 9895,
+        "avg_tools": 0
+      },
+      "2": {
+        "n": 30,
+        "tool_selection_pct": 90.0,
+        "dependency_pct": 94.7,
+        "completion_pct": 73.3,
+        "mean_latency_ms": 12699.5,
+        "avg_tools": 0
+      },
+      "3": {
+        "n": 10,
+        "tool_selection_pct": 20.0,
+        "dependency_pct": 58.3,
+        "completion_pct": 0.0,
+        "mean_latency_ms": 13412.7,
+        "avg_tools": 0
+      }
+    }
+  },
+  "replan": {
+    "strategy": "replan",
+    "n": 60,
+    "server_selection_pct": 80.0,
+    "tool_selection_pct": 75.0,
+    "dependency_accuracy": 77.4,
+    "dependency_edges": "24/31",
+    "exact_sequence_pct": 51.7,
+    "acceptable_sequence_pct": 53.3,
+    "task_completion_pct": 75.0,
+    "premature_termination_pct": 6.7,
+    "tool_loop_rate_pct": 10.0,
+    "cases_with_repeats": 12,
+    "total_repeated_calls": 12,
+    "tool_efficiency": 0.0,
+    "latency": {
+      "mean": 11925.8,
+      "p50": 8438.0,
+      "p95": 38151.4
+    },
+    "latency_normal": {
+      "mean": 8900.4,
+      "p50": 7532.0,
+      "p95": 18433.6,
+      "n": 33
+    },
+    "latency_extra": {
+      "mean": 15623.4,
+      "p50": 12276.0,
+      "p95": 41552.7,
+      "n": 27
+    },
+    "avg_llm_calls_per_query": 4.83,
+    "by_service_count": {
+      "1": {
+        "n": 10,
+        "tool_selection_pct": 100.0,
+        "dependency_pct": null,
+        "completion_pct": 90.0,
+        "mean_latency_ms": 12808.4,
+        "avg_tools": 0
+      },
+      "2": {
+        "n": 30,
+        "tool_selection_pct": 80.0,
+        "dependency_pct": 84.2,
+        "completion_pct": 73.3,
+        "mean_latency_ms": 11587.4,
+        "avg_tools": 0
+      },
+      "3": {
+        "n": 10,
+        "tool_selection_pct": 50.0,
+        "dependency_pct": 66.7,
+        "completion_pct": 50.0,
+        "mean_latency_ms": 19859.8,
+        "avg_tools": 0
+      }
+    }
+  }
+}
