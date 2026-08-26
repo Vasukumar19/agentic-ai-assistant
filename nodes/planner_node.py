@@ -680,7 +680,8 @@ Decide the SINGLE next action that makes progress on the Remaining Goal.
         # Phase 8: state-aware alternating-loop detection.
         # A→A (identical sig) and A→B→A→B (same sigs recurring with unchanged
         # results) terminate; a repeated tool whose inputs/results changed is allowed.
-        loop_kind = detect_loop(tool_call_history, decision.tool, decision.arguments or {}, tool_results)
+        _hist = state.get("tool_call_history") or []
+        loop_kind = detect_loop(_hist, decision.tool, decision.arguments or {}, tool_results)
         if loop_kind is None and is_repeated_tool_call(decision.tool, decision.arguments or {}, tool_results):
             loop_kind = "consecutive_identical"
         if loop_kind:
