@@ -1,0 +1,865 @@
+{
+  "dataset": "phase13_reliability_diagnostic.json",
+  "total_cases": 40,
+  "cases": [
+    {
+      "id": "p13_multi_01",
+      "category": "multi_operation",
+      "question": "Read task_plan.txt using filesystem.read_file and save a summary note using notes.create.",
+      "expected_tools": [
+        "filesystem.read_file",
+        "notes.create"
+      ],
+      "called": [
+        "filesystem.read_file",
+        "notes.create",
+        "filesystem.read_file",
+        "filesystem.list_directory",
+        "filesystem.read_file"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 30573,
+      "events": 27
+    },
+    {
+      "id": "p13_multi_02",
+      "category": "multi_operation",
+      "question": "Read revenue.txt with filesystem.read_file, compute 15% bonus using calculator, and create a reminder with reminders.create.",
+      "expected_tools": [
+        "filesystem.read_file",
+        "calculator",
+        "reminders.create"
+      ],
+      "called": [
+        "filesystem.read_file",
+        "calculator",
+        "reminders.create",
+        "reminders.create",
+        "reminders.create"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 27300,
+      "events": 28
+    },
+    {
+      "id": "p13_multi_03",
+      "category": "multi_operation",
+      "question": "List all calendar events with calendar.list_events and create a note with notes.create summarizing them.",
+      "expected_tools": [
+        "calendar.list_events",
+        "notes.create"
+      ],
+      "called": [
+        "calendar_list_events",
+        "notes_create",
+        "calendar.list_events",
+        "notes.create"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "The calendar events have been listed, and a note titled \"Calendar Events Summary\" has been created. The event details are as follows:  \n- **Event ID:** evt_172  \n- **Title:** Event Title  \n- **Date:**",
+      "latency_ms": 14242,
+      "events": 20
+    },
+    {
+      "id": "p13_multi_04",
+      "category": "multi_operation",
+      "question": "Read note note_001 using notes.read, calculate double the number inside with calculator, and update the note with notes.update.",
+      "expected_tools": [
+        "notes.read",
+        "calculator",
+        "notes.update"
+      ],
+      "called": [
+        "notes.read",
+        "calculator",
+        "calculator",
+        "calculator"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 21748,
+      "events": 24
+    },
+    {
+      "id": "p13_multi_05",
+      "category": "multi_operation",
+      "question": "List reminders with reminders.list, complete reminder rem_001 using reminders.complete, and create an event with calendar.create_event.",
+      "expected_tools": [
+        "reminders.list",
+        "reminders.complete",
+        "calendar.create_event"
+      ],
+      "called": [
+        "reminders_list",
+        "reminders_complete",
+        "calendar_create_event",
+        "calendar.create_event"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "- **List reminders**: Use `reminders.list` to retrieve all reminders.  \n- **Complete reminder rem_001**: Use `reminders.complete` with the ID `rem_001`.  \n- **Create event**: Event `evt_196` was creat",
+      "latency_ms": 17986,
+      "events": 21
+    },
+    {
+      "id": "p13_multi_06",
+      "category": "multi_operation",
+      "question": "Create an event 'Sprint Review' with calendar.create_event, then add note 'Sprint Notes' with notes.create, then create a reminder 'Review Sprint' with reminders.create.",
+      "expected_tools": [
+        "calendar.create_event",
+        "notes.create",
+        "reminders.create"
+      ],
+      "called": [
+        "calendar.create_event",
+        "notes.create",
+        "reminders.create",
+        "reminders.create"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "The event 'Sprint Review' was created with a reminder 'Review Sprint' set for 2023-10-15T10:00:00. The note 'Sprint Notes' was added.",
+      "latency_ms": 25936,
+      "events": 22
+    },
+    {
+      "id": "p13_multi_07",
+      "category": "multi_operation",
+      "question": "Read config.txt with filesystem.read_file and write the updated version to config_backup.txt with filesystem.write_file.",
+      "expected_tools": [
+        "filesystem.read_file",
+        "filesystem.write_file"
+      ],
+      "called": [
+        "filesystem.read_file",
+        "filesystem.write_file",
+        "filesystem.write_file"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "The configuration file `config.txt` was successfully read, and the updated version was written to `config_backup.txt`.",
+      "latency_ms": 13705,
+      "events": 18
+    },
+    {
+      "id": "p13_multi_08",
+      "category": "multi_operation",
+      "question": "Fetch event evt_001 with calendar.get_event and create a reminder for that event using reminders.create.",
+      "expected_tools": [
+        "calendar.get_event",
+        "reminders.create"
+      ],
+      "called": [
+        "calendar_get_event",
+        "calendar_get_event",
+        "calendar_get_event"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 18772,
+      "events": 20
+    },
+    {
+      "id": "p13_multi_09",
+      "category": "multi_operation",
+      "question": "List notes with notes.list, delete note note_005 with notes.delete, and create note 'Cleaned Notes' with notes.create.",
+      "expected_tools": [
+        "notes.list",
+        "notes.delete",
+        "notes.create"
+      ],
+      "called": [],
+      "execution_status": "error",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "I couldn't construct a valid plan: step step2 (notes.delete) requires confirmation before execution",
+      "latency_ms": 8863,
+      "events": 8
+    },
+    {
+      "id": "p13_multi_10",
+      "category": "multi_operation",
+      "question": "Read data.json using filesystem.read_file, calculate total using calculator, and log result with notes.create.",
+      "expected_tools": [
+        "filesystem.read_file",
+        "calculator",
+        "notes.create"
+      ],
+      "called": [
+        "filesystem.read_file",
+        "filesystem.read_file",
+        "calculator",
+        "notes.create",
+        "notes.create",
+        "notes.create"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 31354,
+      "events": 32
+    },
+    {
+      "id": "p13_prem_01",
+      "category": "premature_termination",
+      "question": "Read note note_002 with notes.read and then create a reminder 'Followup' with reminders.create.",
+      "expected_tools": [
+        "notes.read",
+        "reminders.create"
+      ],
+      "called": [
+        "notes.read",
+        "notes.read",
+        "notes.read"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 18263,
+      "events": 20
+    },
+    {
+      "id": "p13_prem_02",
+      "category": "premature_termination",
+      "question": "List events on 2026-09-15 with calendar.list_events and create a reminder for each event using reminders.create.",
+      "expected_tools": [
+        "calendar.list_events",
+        "reminders.create"
+      ],
+      "called": [
+        "calendar_list_events",
+        "reminders_create",
+        "calendar.list_events",
+        "reminders.create"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "Events on 2026-09-15 have been listed and reminders created for each:\n\n1. **Event:** Sprint Planning  \n   **Time:** 09:00  \n   **Reminder:** Reminder for event: Sprint Planning  \n   **Time:** 2026-09-",
+      "latency_ms": 17451,
+      "events": 20
+    },
+    {
+      "id": "p13_prem_03",
+      "category": "premature_termination",
+      "question": "Find the notes matching 'Project' using notes.list and save a backup note using notes.create.",
+      "expected_tools": [
+        "notes.list",
+        "notes.create"
+      ],
+      "called": [
+        "notes_list",
+        "notes_create",
+        "notes.list",
+        "notes.read",
+        "notes.read",
+        "notes.read"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 29909,
+      "events": 30
+    },
+    {
+      "id": "p13_prem_04",
+      "category": "premature_termination",
+      "question": "Get event evt_002 details with calendar.get_event, compute end time + 2 hours with calculator, and update event with calendar.update_event.",
+      "expected_tools": [
+        "calendar.get_event",
+        "calculator",
+        "calendar.update_event"
+      ],
+      "called": [
+        "calendar_get_event",
+        "calculator",
+        "calendar_update_event",
+        "web_search",
+        "calendar_get_event",
+        "calculator",
+        "calculator"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 49081,
+      "events": 36
+    },
+    {
+      "id": "p13_prem_05",
+      "category": "premature_termination",
+      "question": "Read summary.txt with filesystem.read_file and create note 'File Summary' with notes.create.",
+      "expected_tools": [
+        "filesystem.read_file",
+        "notes.create"
+      ],
+      "called": [
+        "filesystem.read_file",
+        "filesystem.read_file",
+        "filesystem.read_file"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 17738,
+      "events": 20
+    },
+    {
+      "id": "p13_prem_06",
+      "category": "premature_termination",
+      "question": "Create event 'Client Sync' on 2026-10-10 with calendar.create_event, then add note 'Sync Agenda' with notes.create.",
+      "expected_tools": [
+        "calendar.create_event",
+        "notes.create"
+      ],
+      "called": [
+        "calendar.create_event",
+        "calendar.create_event",
+        "calendar.create_event"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 27057,
+      "events": 20
+    },
+    {
+      "id": "p13_prem_07",
+      "category": "premature_termination",
+      "question": "List all active reminders with reminders.list and write the list to reminders_backup.txt using filesystem.write_file.",
+      "expected_tools": [
+        "reminders.list",
+        "filesystem.write_file"
+      ],
+      "called": [
+        "reminders_list",
+        "filesystem_write_file",
+        "reminders.list",
+        "filesystem.write_file"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "The active reminders have been successfully listed and written to `reminders_backup.txt`.",
+      "latency_ms": 13366,
+      "events": 20
+    },
+    {
+      "id": "p13_prem_08",
+      "category": "premature_termination",
+      "question": "Read note note_004 with notes.read, calculate 25% discount using calculator, and create a reminder with reminders.create.",
+      "expected_tools": [
+        "notes.read",
+        "calculator",
+        "reminders.create"
+      ],
+      "called": [
+        "notes.read",
+        "calculator",
+        "reminders.create",
+        "notes.read",
+        "calculator",
+        "calculator",
+        "calculator"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 38385,
+      "events": 35
+    },
+    {
+      "id": "p13_prem_09",
+      "category": "premature_termination",
+      "question": "Get reminder rem_001 with reminders.get and create calendar event 'Reminder Sync' on 2026-09-18 with calendar.create_event.",
+      "expected_tools": [
+        "reminders.get",
+        "calendar.create_event"
+      ],
+      "called": [
+        "reminders.get",
+        "calendar.create_event",
+        "calendar.create_event"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "The reminder rem_001 was successfully retrieved using reminders.get, and the calendar event \"Reminder Sync\" was created on 2026-09-18 at 09:00 with event ID evt_197.",
+      "latency_ms": 15947,
+      "events": 18
+    },
+    {
+      "id": "p13_prem_10",
+      "category": "premature_termination",
+      "question": "Read numbers.txt using filesystem.read_file, calculate the sum with calculator, and save the sum in note 'Calculated Sum' with notes.create.",
+      "expected_tools": [
+        "filesystem.read_file",
+        "calculator",
+        "notes.create"
+      ],
+      "called": [
+        "filesystem.read_file",
+        "calculator",
+        "notes.create",
+        "calculator",
+        "calculator"
+      ],
+      "execution_status": "running",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "",
+      "latency_ms": 29240,
+      "events": 28
+    },
+    {
+      "id": "p13_arg_01",
+      "category": "argument_repair",
+      "question": "Create an event titled 'Strategy Meeting' on date 2026-09-12 with calendar.create_event.",
+      "expected_tools": [
+        "calendar.create_event"
+      ],
+      "called": [
+        "calendar.create_event"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 5586,
+      "events": 13
+    },
+    {
+      "id": "p13_arg_02",
+      "category": "argument_repair",
+      "question": "Save note 'Meeting Minutes' with content 'Discussed goals' using notes.create.",
+      "expected_tools": [
+        "notes.create"
+      ],
+      "called": [],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Got it! I'll remember that, your goal is to become an Discussed goals.",
+      "latency_ms": 1710,
+      "events": 6
+    },
+    {
+      "id": "p13_arg_03",
+      "category": "argument_repair",
+      "question": "Create reminder 'Submit Expense Report' due 2026-09-30 using reminders.create.",
+      "expected_tools": [
+        "reminders.create"
+      ],
+      "called": [
+        "reminders.create"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 3342,
+      "events": 13
+    },
+    {
+      "id": "p13_arg_04",
+      "category": "argument_repair",
+      "question": "Write 'v1.0.0 release notes' to release.txt using filesystem.write_file.",
+      "expected_tools": [
+        "filesystem.write_file"
+      ],
+      "called": [
+        "filesystem_write_file"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 3373,
+      "events": 13
+    },
+    {
+      "id": "p13_arg_05",
+      "category": "argument_repair",
+      "question": "Calculate math expression 125 * 40 using calculator.",
+      "expected_tools": [
+        "calculator"
+      ],
+      "called": [
+        "calculator"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 1893,
+      "events": 13
+    },
+    {
+      "id": "p13_arg_06",
+      "category": "argument_repair",
+      "question": "Search for notes containing 'roadmap' with notes.list.",
+      "expected_tools": [
+        "notes.list"
+      ],
+      "called": [
+        "notes_list"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 4024,
+      "events": 15
+    },
+    {
+      "id": "p13_arg_07",
+      "category": "argument_repair",
+      "question": "List calendar events on 2026-09-20 using calendar.list_events.",
+      "expected_tools": [
+        "calendar.list_events"
+      ],
+      "called": [
+        "calendar_list_events"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 3383,
+      "events": 13
+    },
+    {
+      "id": "p13_arg_08",
+      "category": "argument_repair",
+      "question": "Read file data.json using filesystem.read_file.",
+      "expected_tools": [
+        "filesystem.read_file"
+      ],
+      "called": [
+        "filesystem_read_file"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 2726,
+      "events": 13
+    },
+    {
+      "id": "p13_arg_09",
+      "category": "argument_repair",
+      "question": "Update calendar event evt_001 title to 'Updated Sync' with calendar.update_event.",
+      "expected_tools": [
+        "calendar.update_event"
+      ],
+      "called": [],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Got it! I'll remember that.",
+      "latency_ms": 1506,
+      "events": 6
+    },
+    {
+      "id": "p13_arg_10",
+      "category": "argument_repair",
+      "question": "Complete reminder rem_001 using reminders.complete.",
+      "expected_tools": [
+        "reminders.complete"
+      ],
+      "called": [
+        "reminders_complete"
+      ],
+      "execution_status": "completed",
+      "goal_check_count": 1,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Task complete.",
+      "latency_ms": 2999,
+      "events": 13
+    },
+    {
+      "id": "p13_srv_01",
+      "category": "server_hardening",
+      "question": "Fetch event details for evt_999 using calendar.get_event.",
+      "expected_tools": [
+        "calendar.get_event"
+      ],
+      "called": [
+        "calendar_get_event"
+      ],
+      "execution_status": "repeated_tool_call",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 1,
+      "had_errors": true,
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "latency_ms": 3705,
+      "events": 13
+    },
+    {
+      "id": "p13_srv_02",
+      "category": "server_hardening",
+      "question": "Read note note_999 with notes.read.",
+      "expected_tools": [
+        "notes.read"
+      ],
+      "called": [
+        "notes_read"
+      ],
+      "execution_status": "repeated_tool_call",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 1,
+      "had_errors": true,
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "latency_ms": 4761,
+      "events": 15
+    },
+    {
+      "id": "p13_srv_03",
+      "category": "server_hardening",
+      "question": "Get reminder rem_999 with reminders.get.",
+      "expected_tools": [
+        "reminders.get"
+      ],
+      "called": [
+        "reminders_get"
+      ],
+      "execution_status": "repeated_tool_call",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 1,
+      "had_errors": true,
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "latency_ms": 3956,
+      "events": 13
+    },
+    {
+      "id": "p13_srv_04",
+      "category": "server_hardening",
+      "question": "Read file missing_file_123.txt with filesystem.read_file.",
+      "expected_tools": [
+        "filesystem.read_file"
+      ],
+      "called": [
+        "filesystem_read_file"
+      ],
+      "execution_status": "repeated_tool_call",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 1,
+      "had_errors": true,
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "latency_ms": 3582,
+      "events": 13
+    },
+    {
+      "id": "p13_srv_05",
+      "category": "server_hardening",
+      "question": "Delete event evt_999 using calendar.delete_event.",
+      "expected_tools": [
+        "calendar.delete_event"
+      ],
+      "called": [
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event",
+        "calendar_delete_event"
+      ],
+      "execution_status": "budget_exhausted",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "Tool 'calendar_delete_event' requires confirmation before execution.",
+      "latency_ms": 9926,
+      "events": 35
+    },
+    {
+      "id": "p13_srv_06",
+      "category": "server_hardening",
+      "question": "Delete note note_999 using notes.delete.",
+      "expected_tools": [
+        "notes.delete"
+      ],
+      "called": [
+        "notes_delete",
+        "notes_delete",
+        "notes_delete",
+        "notes_delete",
+        "notes_delete",
+        "notes_delete",
+        "notes_delete",
+        "notes_delete",
+        "notes_delete"
+      ],
+      "execution_status": "budget_exhausted",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": true,
+      "answer_preview": "Tool 'notes_delete' requires confirmation before execution.",
+      "latency_ms": 9611,
+      "events": 35
+    },
+    {
+      "id": "p13_srv_07",
+      "category": "server_hardening",
+      "question": "Complete reminder rem_999 using reminders.complete.",
+      "expected_tools": [
+        "reminders.complete"
+      ],
+      "called": [
+        "reminders_complete"
+      ],
+      "execution_status": "repeated_tool_call",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 1,
+      "had_errors": true,
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "latency_ms": 3878,
+      "events": 13
+    },
+    {
+      "id": "p13_srv_08",
+      "category": "server_hardening",
+      "question": "List directory non_existent_dir_999 using filesystem.list_directory.",
+      "expected_tools": [
+        "filesystem.list_directory"
+      ],
+      "called": [
+        "filesystem_list_directory"
+      ],
+      "execution_status": "repeated_tool_call",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 1,
+      "had_errors": true,
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "latency_ms": 3923,
+      "events": 13
+    },
+    {
+      "id": "p13_srv_09",
+      "category": "server_hardening",
+      "question": "Update note note_999 title to 'Ghost Note' with notes.update.",
+      "expected_tools": [
+        "notes.update"
+      ],
+      "called": [],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Got it! I'll remember that.",
+      "latency_ms": 1531,
+      "events": 6
+    },
+    {
+      "id": "p13_srv_10",
+      "category": "server_hardening",
+      "question": "Update calendar event evt_999 time to 14:00 with calendar.update_event.",
+      "expected_tools": [
+        "calendar.update_event"
+      ],
+      "called": [],
+      "execution_status": "completed",
+      "goal_check_count": 0,
+      "goal_incomplete_count": 0,
+      "argument_repair_count": 0,
+      "had_errors": false,
+      "answer_preview": "Got it! I'll remember that.",
+      "latency_ms": 1399,
+      "events": 6
+    }
+  ]
+}

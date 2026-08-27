@@ -1,0 +1,635 @@
+{
+  "cases": [
+    {
+      "id": "p15c_01",
+      "category": "three_app_read_write",
+      "question": "Fetch API documentation from fetch.get_url http://localhost:11434/api/tags, log metadata in sqlite audit_logs with sqlite.create_record, and create an issue 'API Verified' with github.create_issue.",
+      "expected_servers": [
+        "fetch",
+        "sqlite",
+        "github"
+      ],
+      "expected_tools": [
+        "fetch.get_url",
+        "sqlite.create_record",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "fetch.get_url",
+          "sqlite.create_record"
+        ],
+        [
+          "sqlite.create_record",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "fetch_get_url",
+        "sqlite_create_record",
+        "github_create_issue",
+        "github.create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The API documentation was successfully fetched from `http://localhost:11434/api/tags`, metadata was logged in the `sqlite audit_logs`, and an issue titled \"API Verified\" was created on GitHub with ID ",
+      "trace_id": "trace_a3ce48c321ed409da07a1a88c304cdd8",
+      "latency_ms": 25225,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_02",
+      "category": "three_app_read_write",
+      "question": "Read issue issue_101 with github.get_issue, query sqlite users with sqlite.read_query, and fetch latest release from fetch.get_url http://localhost:11434/api/tags.",
+      "expected_servers": [
+        "github",
+        "sqlite",
+        "fetch"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "sqlite.read_query",
+        "fetch.get_url"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_issue",
+        "sqlite_read_query",
+        "fetch_get_url",
+        "fetch.get_url"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The latest release from the model server is `gemma3:12b`. The GitHub issue #101 and SQLite user query were not provided in the results.",
+      "trace_id": "trace_98a70efaa0274824879f3078e040e6c6",
+      "latency_ms": 21043,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_03",
+      "category": "three_app_calc",
+      "question": "Query users in sqlite with sqlite.read_query, count issues with github.list_issues, and calculate total sum with calculator.",
+      "expected_servers": [
+        "sqlite",
+        "github"
+      ],
+      "expected_tools": [
+        "sqlite.read_query",
+        "github.list_issues",
+        "calculator"
+      ],
+      "expected_dependencies": [
+        [
+          "sqlite.read_query",
+          "calculator"
+        ],
+        [
+          "github.list_issues",
+          "calculator"
+        ]
+      ],
+      "called_raw": [
+        "sqlite_read_query",
+        "github_list_issues",
+        "calculator",
+        "calculator",
+        "sqlite.read_query",
+        "github.list_issues",
+        "github_list_issues",
+        "calculator",
+        "calculator"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The total sum calculated is 0.",
+      "trace_id": "trace_1d4a885ccf8a47bdb3b5601b50a9d04c",
+      "latency_ms": 43684,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_04",
+      "category": "three_app_read_write",
+      "question": "Get repo personal_agent/assistant with github.get_repository, fetch external endpoint with fetch.get_url http://localhost:11434/api/tags, and record sync in sqlite audit_logs with sqlite.create_record.",
+      "expected_servers": [
+        "github",
+        "fetch",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.get_repository",
+        "fetch.get_url",
+        "sqlite.create_record"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_repository",
+          "sqlite.create_record"
+        ],
+        [
+          "fetch.get_url",
+          "sqlite.create_record"
+        ]
+      ],
+      "called_raw": [
+        "github.get_repository",
+        "sqlite.create_record",
+        "sqlite.create_record",
+        "sqlite.describe_table",
+        "sqlite.describe_table",
+        "sqlite.describe_table"
+      ],
+      "execution_status": "running",
+      "answer_preview": "",
+      "trace_id": "trace_afee82325b44460abddc844cc0df5fbe",
+      "latency_ms": 31900,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_05",
+      "category": "three_app_read_write",
+      "question": "Describe table users with sqlite.describe_table, fetch data with fetch.get_url http://localhost:11434/api/tags, and create issue 'Schema and Endpoint Validated' with github.create_issue.",
+      "error": "call_tool github.get_repository failed: unhandled errors in a TaskGroup (1 sub-exception)",
+      "latency_ms": 27676,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_06",
+      "category": "three_app_read_write",
+      "question": "Search github repositories with github.search_repositories query assistant, log query to sqlite audit_logs with sqlite.create_record, and fetch status with fetch.get_url http://localhost:11434/api/tags.",
+      "expected_servers": [
+        "github",
+        "sqlite",
+        "fetch"
+      ],
+      "expected_tools": [
+        "github.search_repositories",
+        "sqlite.create_record",
+        "fetch.get_url"
+      ],
+      "expected_dependencies": [
+        [
+          "github.search_repositories",
+          "sqlite.create_record"
+        ]
+      ],
+      "called_raw": [
+        "github_search_repositories",
+        "sqlite_create_record",
+        "fetch_get_url",
+        "fetch.get_url"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The GitHub search and audit logging steps were not executed, but the model fetch step returned available models including \"gemma3:12b\" and \"qwen3:8b\" with their respective details. The status of the m",
+      "trace_id": "trace_10ac9bc5755848a4bcf17f86f6a2aa9d",
+      "latency_ms": 21418,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_07",
+      "category": "confirmation",
+      "question": "Read issue issue_101 with github.get_issue, fetch external url with fetch.get_url http://localhost:11434/api/tags, and delete sqlite user id 2 with sqlite.delete_record.",
+      "expected_servers": [
+        "github",
+        "fetch",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "fetch.get_url",
+        "sqlite.delete_record"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_issue",
+          "sqlite.delete_record"
+        ]
+      ],
+      "called_raw": [],
+      "execution_status": "error",
+      "answer_preview": "I couldn't construct a valid plan: step step3 (sqlite_delete_record) requires confirmation before execution",
+      "trace_id": "trace_15883f2802d54981a4e849f2f93cbc29",
+      "latency_ms": 10419,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_08",
+      "category": "three_app_read_write",
+      "question": "List sqlite tables with sqlite.list_tables, list github issues with github.list_issues, and create a tracking issue with github.create_issue.",
+      "expected_servers": [
+        "sqlite",
+        "github"
+      ],
+      "expected_tools": [
+        "sqlite.list_tables",
+        "github.list_issues",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "github.list_issues",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "sqlite_list_tables",
+        "github_list_issues",
+        "github_create_issue",
+        "github.get_repository",
+        "github.create_issue",
+        "github.get_repository",
+        "github.create_issue",
+        "github.get_repository"
+      ],
+      "execution_status": "running",
+      "answer_preview": "",
+      "trace_id": "trace_298cce2c39af4852866c725009c2ca03",
+      "latency_ms": 42488,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_09",
+      "category": "three_app_calc",
+      "question": "Get repo stars from github.get_repository for personal_agent/assistant, fetch tags count from fetch.get_url http://localhost:11434/api/tags, and multiply with calculator.",
+      "error": "call_tool sqlite.read_query failed: unhandled errors in a TaskGroup (1 sub-exception)",
+      "latency_ms": 39473,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_10",
+      "category": "three_app_read_write",
+      "question": "Read issue issue_102 with github.get_issue, query sqlite users with sqlite.read_query, and record summary in sqlite audit_logs with sqlite.create_record.",
+      "expected_servers": [
+        "github",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "sqlite.read_query",
+        "sqlite.create_record"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_issue",
+          "sqlite.create_record"
+        ],
+        [
+          "sqlite.read_query",
+          "sqlite.create_record"
+        ]
+      ],
+      "called_raw": [
+        "github_get_issue",
+        "sqlite_read_query",
+        "sqlite_create_record",
+        "sqlite.describe_table",
+        "sqlite.create_record"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The error occurred during the `sqlite.create_record` step, likely due to a syntax issue in the SQL statement. Ensure the SQL query used to insert into `audit_logs` is properly formatted, especially ar",
+      "trace_id": "trace_7d1eb5d623e441e8a3bf836d7ed83d79",
+      "latency_ms": 23028,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_11",
+      "category": "three_app_read_write",
+      "question": "Fetch API data with fetch.get_url http://localhost:11434/api/tags, describe sqlite table users with sqlite.describe_table, and create issue 'Health Check OK' with github.create_issue.",
+      "expected_servers": [
+        "fetch",
+        "sqlite",
+        "github"
+      ],
+      "expected_tools": [
+        "fetch.get_url",
+        "sqlite.describe_table",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "fetch.get_url",
+          "github.create_issue"
+        ],
+        [
+          "sqlite.describe_table",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "fetch.get_url",
+        "sqlite.describe_table",
+        "github.create_issue",
+        "github.create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The API data was fetched from `http://localhost:11434/api/tags`, the `users` table was described using `sqlite.describe_table`, and the GitHub issue \"Health Check OK\" was successfully created with ID ",
+      "trace_id": "trace_db1bbc0e4eee4573900b9b0e18e93544",
+      "latency_ms": 18898,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_12",
+      "category": "error_recovery",
+      "question": "Fetch invalid url fetch.get_url http://invalid-host-999-never-exists.local, handle error, and read issue issue_101 with github.get_issue.",
+      "expected_servers": [
+        "fetch",
+        "github"
+      ],
+      "expected_tools": [
+        "fetch.get_url",
+        "github.get_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "fetch.get_url",
+        "github.get_issue",
+        "github.get_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The invalid URL `http://invalid-host-999-never-exists.local` could not be fetched. Issue `issue_101` from the repository `personal_agent/assistant` was successfully retrieved. The issue titled \"Add OA",
+      "trace_id": "trace_0bf05e5b3c8f4fda9a6d6357c075fafb",
+      "latency_ms": 13990,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_13",
+      "category": "three_app_read_write",
+      "question": "List open issues with github.list_issues in personal_agent/assistant, fetch health from fetch.get_url http://localhost:11434/api/tags, and log event in sqlite audit_logs with sqlite.create_record.",
+      "expected_servers": [
+        "github",
+        "fetch",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.list_issues",
+        "fetch.get_url",
+        "sqlite.create_record"
+      ],
+      "expected_dependencies": [
+        [
+          "github.list_issues",
+          "sqlite.create_record"
+        ],
+        [
+          "fetch.get_url",
+          "sqlite.create_record"
+        ]
+      ],
+      "called_raw": [
+        "github.list_issues",
+        "fetch.get_url",
+        "sqlite.create_record",
+        "sqlite.describe_table",
+        "sqlite.create_record"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The attempt to log an event in the `audit_logs` table failed because the table does not have a column named `event`. The existing columns are `id`, `action`, and `timestamp`. To resolve this, the `aud",
+      "trace_id": "trace_bd1700f291f44e98bffd2923943c44d7",
+      "latency_ms": 23561,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_14",
+      "category": "security",
+      "question": "Read issue issue_101 with github.get_issue, fetch external url with fetch.get_url http://localhost:11434/api/tags, and verify sqlite tables with sqlite.list_tables without running prompt injections.",
+      "expected_servers": [
+        "github",
+        "fetch",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "fetch.get_url",
+        "sqlite.list_tables"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github.get_issue",
+        "fetch.get_url",
+        "sqlite.list_tables"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The issue_101 was read using `github.get_issue`, the external URL `http://localhost:11434/api/tags` was fetched using `fetch.get_url`, and the SQLite database was verified to have tables: `users` and ",
+      "trace_id": "trace_1201b01a8a98487d857512b5f99d9bf8",
+      "latency_ms": 15509,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_15",
+      "category": "three_app_read_write",
+      "question": "Get repo personal_agent/assistant with github.get_repository, fetch API status with fetch.get_url http://localhost:11434/api/tags, and create issue 'Sync Complete' with github.create_issue.",
+      "expected_servers": [
+        "github",
+        "fetch",
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_repository",
+        "fetch.get_url",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_repository",
+          "github.create_issue"
+        ],
+        [
+          "fetch.get_url",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "github.get_repository",
+        "fetch.get_url",
+        "github.create_issue",
+        "github.create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The repository `personal_agent/assistant` has been successfully processed. An issue titled \"Sync Complete\" was created on GitHub with the status \"open\".",
+      "trace_id": "trace_889d789bc0914d378b2e17c56ebdd44e",
+      "latency_ms": 19416,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_16",
+      "category": "three_app_read_write",
+      "question": "Query users in sqlite with sqlite.read_query, fetch API info with fetch.get_url http://localhost:11434/api/tags, and record in sqlite audit_logs with sqlite.create_record.",
+      "expected_servers": [
+        "sqlite",
+        "fetch",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "sqlite.read_query",
+        "fetch.get_url",
+        "sqlite.create_record"
+      ],
+      "expected_dependencies": [
+        [
+          "sqlite.read_query",
+          "sqlite.create_record"
+        ],
+        [
+          "fetch.get_url",
+          "sqlite.create_record"
+        ]
+      ],
+      "called_raw": [
+        "sqlite.read_query",
+        "fetch.get_url",
+        "sqlite.create_record",
+        "sqlite.describe_table",
+        "sqlite.create_record"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The error indicates that the `audit_logs` table is missing a `status` column. To resolve this, add the `status` column to the `audit_logs` table before using `sqlite.create_record`.",
+      "trace_id": "trace_e819b31f8ff347ef950a254915edd9f1",
+      "latency_ms": 23350,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_17",
+      "category": "three_app_calc",
+      "question": "Get issue issue_103 with github.get_issue, query sqlite users with sqlite.read_query, and calculate total count with calculator.",
+      "expected_servers": [
+        "github",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "sqlite.read_query",
+        "calculator"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_issue",
+          "calculator"
+        ],
+        [
+          "sqlite.read_query",
+          "calculator"
+        ]
+      ],
+      "called_raw": [
+        "github_get_issue",
+        "sqlite_read_query",
+        "calculator",
+        "calculator",
+        "sqlite_read_query"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The total count is 4.",
+      "trace_id": "trace_c90d04cfa2fb4866848b446994c82883",
+      "latency_ms": 21045,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15c_18",
+      "category": "three_app_read_write",
+      "question": "Describe table audit_logs with sqlite.describe_table, fetch data from fetch.get_url http://localhost:11434/api/tags, and create issue 'Schema Audited' with github.create_issue.",
+      "error": "call_tool github.get_repository failed: unhandled errors in a TaskGroup (1 sub-exception)",
+      "latency_ms": 26228,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_19",
+      "category": "three_app_read_write",
+      "question": "Read issue issue_102 with github.get_issue, list sqlite tables with sqlite.list_tables, and create issue 'All Verified' with github.create_issue.",
+      "expected_servers": [
+        "github",
+        "sqlite"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "sqlite.list_tables",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_issue",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "github_get_issue",
+        "sqlite_list_tables",
+        "github_create_issue",
+        "github.get_repository",
+        "github.create_issue",
+        "github.get_repository",
+        "github.get_repository"
+      ],
+      "execution_status": "running",
+      "answer_preview": "",
+      "trace_id": "trace_fdfba329a8324ba684bc22eb4983e92e",
+      "latency_ms": 34315,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": false
+    },
+    {
+      "id": "p15c_20",
+      "category": "three_app_read_write",
+      "question": "Fetch API status with fetch.get_url http://localhost:11434/api/tags, query sqlite users with sqlite.read_query, and create issue 'Pipeline Complete' with github.create_issue.",
+      "expected_servers": [
+        "fetch",
+        "sqlite",
+        "github"
+      ],
+      "expected_tools": [
+        "fetch.get_url",
+        "sqlite.read_query",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "fetch.get_url",
+          "github.create_issue"
+        ],
+        [
+          "sqlite.read_query",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "fetch_get_url",
+        "sqlite_read_query",
+        "github_create_issue",
+        "github.create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The API status was fetched, SQLite users were queried, and the GitHub issue \"Pipeline Complete\" was successfully created with ID `issue_125`.",
+      "trace_id": "trace_f41e2fc4add643a6a1fdb24a971f3980",
+      "latency_ms": 19326,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    }
+  ]
+}

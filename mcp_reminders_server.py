@@ -61,7 +61,7 @@ async def get(reminder_id: str) -> str:
     d = _load()
     r = d.get("reminders", {}).get(reminder_id)
     if not r:
-        raise ValueError(f"Reminder not found: {reminder_id}")
+        return f"Error: Reminder not found: {reminder_id}"
     return _json.dumps({"reminder_id": reminder_id, **r})
 
 
@@ -71,7 +71,7 @@ async def complete(reminder_id: str) -> str:
     d = _load()
     r = d.get("reminders", {}).get(reminder_id)
     if not r:
-        raise ValueError(f"Reminder not found: {reminder_id}")
+        return f"Error: Reminder not found: {reminder_id}"
     r["done"] = True
     _save(d)
     return f"Completed {reminder_id}"
@@ -83,7 +83,7 @@ async def delete(reminder_id: str) -> str:
     d = _load()
     rems = d.get("reminders", {})
     if reminder_id not in rems:
-        raise ValueError(f"Reminder not found: {reminder_id}")
+        return f"Error: Reminder not found: {reminder_id}"
     del rems[reminder_id]
     _save(d)
     return f"Deleted {reminder_id}"

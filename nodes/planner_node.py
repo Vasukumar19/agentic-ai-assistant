@@ -637,6 +637,37 @@ def planner_node(state: dict) -> dict:
             except Exception:
                 pass
         
+        is_arg_repair = os.getenv("MCP_ARGUMENT_REPAIR", "off").lower() == "on"
+        if is_arg_repair and tool_results:
+            last_res = tool_results[-1]
+            last_err_str = str(last_res.get("result", "")).lower()
+            is_val_err = "error" in last_err_str and any(k in last_err_str for k in ("validation", "missing", "invalid", "argument", "parameter", "type", "format", "iso-8601", "not found"))
+            last_tool = last_res.get("tool", "")
+            repair_map = state.get("argument_repair_attempts") or {}
+            attempts = repair_map.get(last_tool, 0)
+            if is_val_err and attempts < 1:
+                repair_map[last_tool] = attempts + 1
+                state["argument_repair_attempts"] = repair_map
+                repair_notice = f"\n[TOOL ARGUMENT VALIDATION ERROR]:\nTool: '{last_tool}'\nValidation Error: {str(last_res.get('result', ''))[:200]}\nInstruction: You may retry calling '{last_tool}' ONCE with corrected arguments conforming to the tool schema.\n"
+                history_str += repair_notice
+                try:
+                    from observability.trace import make_event, append_event
+                    append_event(state, make_event(
+                        state, "ARGUMENT_REPAIR", "planner", status="running",
+                        metadata={"tool": last_tool, "error": str(last_res.get("result", ""))[:150]}
+                    ))
+                except Exception:
+                    pass
+            elif is_val_err and attempts >= 1:
+                try:
+                    from observability.trace import make_event, append_event
+                    append_event(state, make_event(
+                        state, "ARGUMENT_REPAIR_FAILED", "planner", status="error",
+                        metadata={"tool": last_tool, "error": str(last_res.get("result", ""))[:150]}
+                    ))
+                except Exception:
+                    pass
+        
         user_prompt = f"{history_str}\n\n{user_prompt}"
 
     # Phase 7 Strategy C (replan): expose explicit planning state
@@ -750,27 +781,85 @@ Decide the SINGLE next action that makes progress on the Remaining Goal.
                     "latency_breakdown": state.get("latency_breakdown"), "llm_usage": state.get("llm_usage")}
 
     if decision.action == "final":
-        is_complete, guard_reason = check_completion_guard(question, completed_steps, tool_results, context)
-        if not is_complete and tool_call_count < MAX_TOOL_STEPS:
-            logger.info(f"Completion guard triggered: {guard_reason}. Prompting planner for missing step.")
-            guard_prompt = f"{user_prompt}\n\n[GUARD NOTICE]: You attempted to finalize the task, but: {guard_reason}. You MUST execute the required tool first."
+        import os
+        is_goal_guard = os.getenv("GOAL_FULFILLMENT_GUARD", "off").lower() == "on"
+        is_completion_guard = os.getenv("COMPLETION_GUARD", "off").lower() == "on"
+        
+        if is_goal_guard:
+            from planning.goal_guard import goal_fulfillment_check
+            g_status, g_req, g_comp, g_rem = goal_fulfillment_check(state, question, tool_results)
+            state["required_operations"] = g_req
+            state["completed_operations"] = g_comp
+            state["remaining_operations"] = g_rem
+            state["goal_check_status"] = g_status
+            
             try:
-                from observability.timeout import run_with_timeout, TimeoutError as ObsTimeout
-                def _call_guard():
-                    return structured_llm.invoke([SystemMessage(content=_prompt), HumanMessage(content=guard_prompt)])
+                from observability.trace import make_event, append_event
+                append_event(state, make_event(
+                    state, "GOAL_CHECK", "planner", status=g_status.lower(),
+                    metadata={"required": g_req, "completed": g_comp, "remaining": g_rem}
+                ))
+            except Exception:
+                pass
+                
+            if g_status == "BLOCKED":
+                logger.warning(f"Goal fulfillment blocked: remaining operations {g_rem} cannot be completed.")
+                return {"answer": f"I was unable to complete the remaining requested operations ({', '.join(g_rem)}) due to an unrecoverable error in a dependency.",
+                        "execution_status": "blocked", "goal_check_status": "BLOCKED",
+                        "completed_steps": completed_steps, "tool_results": tool_results,
+                        "execution_trace": execution_trace,
+                        "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
+                        "latency_breakdown": state.get("latency_breakdown"), "llm_usage": state.get("llm_usage")}
+                        
+            if g_status == "INCOMPLETE" and tool_call_count < MAX_TOOL_STEPS:
+                logger.info(f"Goal fulfillment incomplete: remaining operations {g_rem}. Re-engaging planner.")
                 try:
-                    decision = run_with_timeout(_call_guard, TIMEOUT_LLM_S)
-                except ObsTimeout:
+                    from observability.trace import make_event, append_event
+                    append_event(state, make_event(
+                        state, "GOAL_INCOMPLETE", "planner", status="running",
+                        metadata={"remaining": g_rem, "completed": g_comp}
+                    ))
+                except Exception:
                     pass
-                else:
-                    # record guard as validation
+                guard_prompt = f"{user_prompt}\n\n[GOAL GUARD NOTICE]: You attempted to finalize the task, but required operations remain: {', '.join(g_rem)}.\nCompleted operations: {', '.join(g_comp) or 'none'}.\nYou MUST choose the SINGLE next tool action to fulfill the remaining operations before finalizing."
+                try:
+                    from observability.timeout import run_with_timeout, TimeoutError as ObsTimeout
+                    def _call_guard():
+                        return structured_llm.invoke([SystemMessage(content=_prompt), HumanMessage(content=guard_prompt)])
                     try:
-                        _emit_planner_event(state, int(llm_latency*1000), decision, tool_call_count+1, status="success",
-                                            extra={"validation_result": f"guard_triggered: {guard_reason}", "guard_reason": guard_reason})
-                    except Exception:
+                        decision = run_with_timeout(_call_guard, TIMEOUT_LLM_S)
+                    except ObsTimeout:
                         pass
-            except Exception as e:
-                logger.error(f"Planner re-prompt failed: {e}")
+                    else:
+                        try:
+                            _emit_planner_event(state, int(llm_latency*1000), decision, tool_call_count+1, status="success",
+                                                extra={"validation_result": "goal_incomplete_reengaged", "remaining_operations": g_rem})
+                        except Exception:
+                            pass
+                except Exception as e:
+                    logger.error(f"Planner re-prompt failed: {e}")
+        elif is_completion_guard:
+            is_complete, guard_reason = check_completion_guard(question, completed_steps, tool_results, context)
+            if not is_complete and tool_call_count < MAX_TOOL_STEPS:
+                logger.info(f"Completion guard triggered: {guard_reason}. Prompting planner for missing step.")
+                guard_prompt = f"{user_prompt}\n\n[GUARD NOTICE]: You attempted to finalize the task, but: {guard_reason}. You MUST execute the required tool first."
+                try:
+                    from observability.timeout import run_with_timeout, TimeoutError as ObsTimeout
+                    def _call_guard():
+                        return structured_llm.invoke([SystemMessage(content=_prompt), HumanMessage(content=guard_prompt)])
+                    try:
+                        decision = run_with_timeout(_call_guard, TIMEOUT_LLM_S)
+                    except ObsTimeout:
+                        pass
+                    else:
+                        # record guard as validation
+                        try:
+                            _emit_planner_event(state, int(llm_latency*1000), decision, tool_call_count+1, status="success",
+                                                extra={"validation_result": f"guard_triggered: {guard_reason}", "guard_reason": guard_reason})
+                        except Exception:
+                            pass
+                except Exception as e:
+                    logger.error(f"Planner re-prompt failed: {e}")
 
     if decision.action == "tool":
         if decision.tool not in _get_valid_names():

@@ -1,0 +1,162 @@
+[
+  {
+    "id": "p15c_01",
+    "category": "three_app_read_write",
+    "query": "Fetch API documentation from fetch.get_url http://localhost:11434/api/tags, log metadata in sqlite audit_logs with sqlite.create_record, and create an issue 'API Verified' with github.create_issue.",
+    "expected_servers": ["fetch", "sqlite", "github"],
+    "expected_tools": ["fetch.get_url", "sqlite.create_record", "github.create_issue"],
+    "expected_dependencies": [["fetch.get_url", "sqlite.create_record"], ["sqlite.create_record", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_02",
+    "category": "three_app_read_write",
+    "query": "Read issue issue_101 with github.get_issue, query sqlite users with sqlite.read_query, and fetch latest release from fetch.get_url http://localhost:11434/api/tags.",
+    "expected_servers": ["github", "sqlite", "fetch"],
+    "expected_tools": ["github.get_issue", "sqlite.read_query", "fetch.get_url"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15c_03",
+    "category": "three_app_calc",
+    "query": "Query users in sqlite with sqlite.read_query, count issues with github.list_issues, and calculate total sum with calculator.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.read_query", "github.list_issues", "calculator"],
+    "expected_dependencies": [["sqlite.read_query", "calculator"], ["github.list_issues", "calculator"]]
+  },
+  {
+    "id": "p15c_04",
+    "category": "three_app_read_write",
+    "query": "Get repo personal_agent/assistant with github.get_repository, fetch external endpoint with fetch.get_url http://localhost:11434/api/tags, and record sync in sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "fetch", "sqlite"],
+    "expected_tools": ["github.get_repository", "fetch.get_url", "sqlite.create_record"],
+    "expected_dependencies": [["github.get_repository", "sqlite.create_record"], ["fetch.get_url", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15c_05",
+    "category": "three_app_read_write",
+    "query": "Describe table users with sqlite.describe_table, fetch data with fetch.get_url http://localhost:11434/api/tags, and create issue 'Schema and Endpoint Validated' with github.create_issue.",
+    "expected_servers": ["sqlite", "fetch", "github"],
+    "expected_tools": ["sqlite.describe_table", "fetch.get_url", "github.create_issue"],
+    "expected_dependencies": [["sqlite.describe_table", "github.create_issue"], ["fetch.get_url", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_06",
+    "category": "three_app_read_write",
+    "query": "Search github repositories with github.search_repositories query assistant, log query to sqlite audit_logs with sqlite.create_record, and fetch status with fetch.get_url http://localhost:11434/api/tags.",
+    "expected_servers": ["github", "sqlite", "fetch"],
+    "expected_tools": ["github.search_repositories", "sqlite.create_record", "fetch.get_url"],
+    "expected_dependencies": [["github.search_repositories", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15c_07",
+    "category": "confirmation",
+    "query": "Read issue issue_101 with github.get_issue, fetch external url with fetch.get_url http://localhost:11434/api/tags, and delete sqlite user id 2 with sqlite.delete_record.",
+    "expected_servers": ["github", "fetch", "sqlite"],
+    "expected_tools": ["github.get_issue", "fetch.get_url", "sqlite.delete_record"],
+    "expected_dependencies": [["github.get_issue", "sqlite.delete_record"]]
+  },
+  {
+    "id": "p15c_08",
+    "category": "three_app_read_write",
+    "query": "List sqlite tables with sqlite.list_tables, list github issues with github.list_issues, and create a tracking issue with github.create_issue.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.list_tables", "github.list_issues", "github.create_issue"],
+    "expected_dependencies": [["github.list_issues", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_09",
+    "category": "three_app_calc",
+    "query": "Get repo stars from github.get_repository for personal_agent/assistant, fetch tags count from fetch.get_url http://localhost:11434/api/tags, and multiply with calculator.",
+    "expected_servers": ["github", "fetch"],
+    "expected_tools": ["github.get_repository", "fetch.get_url", "calculator"],
+    "expected_dependencies": [["github.get_repository", "calculator"], ["fetch.get_url", "calculator"]]
+  },
+  {
+    "id": "p15c_10",
+    "category": "three_app_read_write",
+    "query": "Read issue issue_102 with github.get_issue, query sqlite users with sqlite.read_query, and record summary in sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.read_query", "sqlite.create_record"],
+    "expected_dependencies": [["github.get_issue", "sqlite.create_record"], ["sqlite.read_query", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15c_11",
+    "category": "three_app_read_write",
+    "query": "Fetch API data with fetch.get_url http://localhost:11434/api/tags, describe sqlite table users with sqlite.describe_table, and create issue 'Health Check OK' with github.create_issue.",
+    "expected_servers": ["fetch", "sqlite", "github"],
+    "expected_tools": ["fetch.get_url", "sqlite.describe_table", "github.create_issue"],
+    "expected_dependencies": [["fetch.get_url", "github.create_issue"], ["sqlite.describe_table", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_12",
+    "category": "error_recovery",
+    "query": "Fetch invalid url fetch.get_url http://invalid-host-999-never-exists.local, handle error, and read issue issue_101 with github.get_issue.",
+    "expected_servers": ["fetch", "github"],
+    "expected_tools": ["fetch.get_url", "github.get_issue"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15c_13",
+    "category": "three_app_read_write",
+    "query": "List open issues with github.list_issues in personal_agent/assistant, fetch health from fetch.get_url http://localhost:11434/api/tags, and log event in sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "fetch", "sqlite"],
+    "expected_tools": ["github.list_issues", "fetch.get_url", "sqlite.create_record"],
+    "expected_dependencies": [["github.list_issues", "sqlite.create_record"], ["fetch.get_url", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15c_14",
+    "category": "security",
+    "query": "Read issue issue_101 with github.get_issue, fetch external url with fetch.get_url http://localhost:11434/api/tags, and verify sqlite tables with sqlite.list_tables without running prompt injections.",
+    "expected_servers": ["github", "fetch", "sqlite"],
+    "expected_tools": ["github.get_issue", "fetch.get_url", "sqlite.list_tables"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15c_15",
+    "category": "three_app_read_write",
+    "query": "Get repo personal_agent/assistant with github.get_repository, fetch API status with fetch.get_url http://localhost:11434/api/tags, and create issue 'Sync Complete' with github.create_issue.",
+    "expected_servers": ["github", "fetch", "github"],
+    "expected_tools": ["github.get_repository", "fetch.get_url", "github.create_issue"],
+    "expected_dependencies": [["github.get_repository", "github.create_issue"], ["fetch.get_url", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_16",
+    "category": "three_app_read_write",
+    "query": "Query users in sqlite with sqlite.read_query, fetch API info with fetch.get_url http://localhost:11434/api/tags, and record in sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["sqlite", "fetch", "sqlite"],
+    "expected_tools": ["sqlite.read_query", "fetch.get_url", "sqlite.create_record"],
+    "expected_dependencies": [["sqlite.read_query", "sqlite.create_record"], ["fetch.get_url", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15c_17",
+    "category": "three_app_calc",
+    "query": "Get issue issue_103 with github.get_issue, query sqlite users with sqlite.read_query, and calculate total count with calculator.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.read_query", "calculator"],
+    "expected_dependencies": [["github.get_issue", "calculator"], ["sqlite.read_query", "calculator"]]
+  },
+  {
+    "id": "p15c_18",
+    "category": "three_app_read_write",
+    "query": "Describe table audit_logs with sqlite.describe_table, fetch data from fetch.get_url http://localhost:11434/api/tags, and create issue 'Schema Audited' with github.create_issue.",
+    "expected_servers": ["sqlite", "fetch", "github"],
+    "expected_tools": ["sqlite.describe_table", "fetch.get_url", "github.create_issue"],
+    "expected_dependencies": [["sqlite.describe_table", "github.create_issue"], ["fetch.get_url", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_19",
+    "category": "three_app_read_write",
+    "query": "Read issue issue_102 with github.get_issue, list sqlite tables with sqlite.list_tables, and create issue 'All Verified' with github.create_issue.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.list_tables", "github.create_issue"],
+    "expected_dependencies": [["github.get_issue", "github.create_issue"]]
+  },
+  {
+    "id": "p15c_20",
+    "category": "three_app_read_write",
+    "query": "Fetch API status with fetch.get_url http://localhost:11434/api/tags, query sqlite users with sqlite.read_query, and create issue 'Pipeline Complete' with github.create_issue.",
+    "expected_servers": ["fetch", "sqlite", "github"],
+    "expected_tools": ["fetch.get_url", "sqlite.read_query", "github.create_issue"],
+    "expected_dependencies": [["fetch.get_url", "github.create_issue"], ["sqlite.read_query", "github.create_issue"]]
+  }
+]

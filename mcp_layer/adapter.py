@@ -48,7 +48,10 @@ def mcp_tool_to_langchain(normalized: NormalizedTool, client) -> StructuredTool:
         # filter None values that were optional but not provided
         clean = {k: v for k, v in kwargs.items() if v is not None}
         # StructuredTool will pass kwargs matching schema
-        return client.call_tool(normalized.name, clean, timeout_s=normalized.timeout_s)
+        try:
+            return client.call_tool(normalized.name, clean, timeout_s=normalized.timeout_s)
+        except Exception as e:
+            return f"Error: {e}"
 
     # StructuredTool.from_function requires func with proper signature; use args_schema instead
     tool = StructuredTool.from_function(

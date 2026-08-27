@@ -1,0 +1,349 @@
+[
+  {
+    "id": "p13_multi_01",
+    "category": "multi_operation",
+    "query": "Read task_plan.txt using filesystem.read_file and save a summary note using notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p13_multi_02",
+    "category": "multi_operation",
+    "query": "Read revenue.txt with filesystem.read_file, compute 15% bonus using calculator, and create a reminder with reminders.create.",
+    "expected_servers": ["filesystem", "reminders"],
+    "expected_tools": ["filesystem.read_file", "calculator", "reminders.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "filesystem.read_file"},
+      {"tool": "reminders.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p13_multi_03",
+    "category": "multi_operation",
+    "query": "List all calendar events with calendar.list_events and create a note with notes.create summarizing them.",
+    "expected_servers": ["calendar", "notes"],
+    "expected_tools": ["calendar.list_events", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "calendar.list_events"}]
+  },
+  {
+    "id": "p13_multi_04",
+    "category": "multi_operation",
+    "query": "Read note note_001 using notes.read, calculate double the number inside with calculator, and update the note with notes.update.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.read", "calculator", "notes.update"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "notes.read"},
+      {"tool": "notes.update", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p13_multi_05",
+    "category": "multi_operation",
+    "query": "List reminders with reminders.list, complete reminder rem_001 using reminders.complete, and create an event with calendar.create_event.",
+    "expected_servers": ["reminders", "calendar"],
+    "expected_tools": ["reminders.list", "reminders.complete", "calendar.create_event"],
+    "expected_dependencies": [
+      {"tool": "reminders.complete", "depends_on": "reminders.list"},
+      {"tool": "calendar.create_event", "depends_on": "reminders.complete"}
+    ]
+  },
+  {
+    "id": "p13_multi_06",
+    "category": "multi_operation",
+    "query": "Create an event 'Sprint Review' with calendar.create_event, then add note 'Sprint Notes' with notes.create, then create a reminder 'Review Sprint' with reminders.create.",
+    "expected_servers": ["calendar", "notes", "reminders"],
+    "expected_tools": ["calendar.create_event", "notes.create", "reminders.create"],
+    "expected_dependencies": [
+      {"tool": "notes.create", "depends_on": "calendar.create_event"},
+      {"tool": "reminders.create", "depends_on": "notes.create"}
+    ]
+  },
+  {
+    "id": "p13_multi_07",
+    "category": "multi_operation",
+    "query": "Read config.txt with filesystem.read_file and write the updated version to config_backup.txt with filesystem.write_file.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.read_file", "filesystem.write_file"],
+    "expected_dependencies": [{"tool": "filesystem.write_file", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p13_multi_08",
+    "category": "multi_operation",
+    "query": "Fetch event evt_001 with calendar.get_event and create a reminder for that event using reminders.create.",
+    "expected_servers": ["calendar", "reminders"],
+    "expected_tools": ["calendar.get_event", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "calendar.get_event"}]
+  },
+  {
+    "id": "p13_multi_09",
+    "category": "multi_operation",
+    "query": "List notes with notes.list, delete note note_005 with notes.delete, and create note 'Cleaned Notes' with notes.create.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.list", "notes.delete", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "notes.delete", "depends_on": "notes.list"},
+      {"tool": "notes.create", "depends_on": "notes.delete"}
+    ]
+  },
+  {
+    "id": "p13_multi_10",
+    "category": "multi_operation",
+    "query": "Read data.json using filesystem.read_file, calculate total using calculator, and log result with notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "calculator", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "filesystem.read_file"},
+      {"tool": "notes.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p13_prem_01",
+    "category": "premature_termination",
+    "query": "Read note note_002 with notes.read and then create a reminder 'Followup' with reminders.create.",
+    "expected_servers": ["notes", "reminders"],
+    "expected_tools": ["notes.read", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "notes.read"}]
+  },
+  {
+    "id": "p13_prem_02",
+    "category": "premature_termination",
+    "query": "List events on 2026-09-15 with calendar.list_events and create a reminder for each event using reminders.create.",
+    "expected_servers": ["calendar", "reminders"],
+    "expected_tools": ["calendar.list_events", "reminders.create"],
+    "expected_dependencies": [{"tool": "reminders.create", "depends_on": "calendar.list_events"}]
+  },
+  {
+    "id": "p13_prem_03",
+    "category": "premature_termination",
+    "query": "Find the notes matching 'Project' using notes.list and save a backup note using notes.create.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.list", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "notes.list"}]
+  },
+  {
+    "id": "p13_prem_04",
+    "category": "premature_termination",
+    "query": "Get event evt_002 details with calendar.get_event, compute end time + 2 hours with calculator, and update event with calendar.update_event.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.get_event", "calculator", "calendar.update_event"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "calendar.get_event"},
+      {"tool": "calendar.update_event", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p13_prem_05",
+    "category": "premature_termination",
+    "query": "Read summary.txt with filesystem.read_file and create note 'File Summary' with notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "filesystem.read_file"}]
+  },
+  {
+    "id": "p13_prem_06",
+    "category": "premature_termination",
+    "query": "Create event 'Client Sync' on 2026-10-10 with calendar.create_event, then add note 'Sync Agenda' with notes.create.",
+    "expected_servers": ["calendar", "notes"],
+    "expected_tools": ["calendar.create_event", "notes.create"],
+    "expected_dependencies": [{"tool": "notes.create", "depends_on": "calendar.create_event"}]
+  },
+  {
+    "id": "p13_prem_07",
+    "category": "premature_termination",
+    "query": "List all active reminders with reminders.list and write the list to reminders_backup.txt using filesystem.write_file.",
+    "expected_servers": ["reminders", "filesystem"],
+    "expected_tools": ["reminders.list", "filesystem.write_file"],
+    "expected_dependencies": [{"tool": "filesystem.write_file", "depends_on": "reminders.list"}]
+  },
+  {
+    "id": "p13_prem_08",
+    "category": "premature_termination",
+    "query": "Read note note_004 with notes.read, calculate 25% discount using calculator, and create a reminder with reminders.create.",
+    "expected_servers": ["notes", "reminders"],
+    "expected_tools": ["notes.read", "calculator", "reminders.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "notes.read"},
+      {"tool": "reminders.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p13_prem_09",
+    "category": "premature_termination",
+    "query": "Get reminder rem_001 with reminders.get and create calendar event 'Reminder Sync' on 2026-09-18 with calendar.create_event.",
+    "expected_servers": ["reminders", "calendar"],
+    "expected_tools": ["reminders.get", "calendar.create_event"],
+    "expected_dependencies": [{"tool": "calendar.create_event", "depends_on": "reminders.get"}]
+  },
+  {
+    "id": "p13_prem_10",
+    "category": "premature_termination",
+    "query": "Read numbers.txt using filesystem.read_file, calculate the sum with calculator, and save the sum in note 'Calculated Sum' with notes.create.",
+    "expected_servers": ["filesystem", "notes"],
+    "expected_tools": ["filesystem.read_file", "calculator", "notes.create"],
+    "expected_dependencies": [
+      {"tool": "calculator", "depends_on": "filesystem.read_file"},
+      {"tool": "notes.create", "depends_on": "calculator"}
+    ]
+  },
+  {
+    "id": "p13_arg_01",
+    "category": "argument_repair",
+    "query": "Create an event titled 'Strategy Meeting' on date 2026-09-12 with calendar.create_event.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.create_event"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_02",
+    "category": "argument_repair",
+    "query": "Save note 'Meeting Minutes' with content 'Discussed goals' using notes.create.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.create"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_03",
+    "category": "argument_repair",
+    "query": "Create reminder 'Submit Expense Report' due 2026-09-30 using reminders.create.",
+    "expected_servers": ["reminders"],
+    "expected_tools": ["reminders.create"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_04",
+    "category": "argument_repair",
+    "query": "Write 'v1.0.0 release notes' to release.txt using filesystem.write_file.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.write_file"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_05",
+    "category": "argument_repair",
+    "query": "Calculate math expression 125 * 40 using calculator.",
+    "expected_servers": [],
+    "expected_tools": ["calculator"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_06",
+    "category": "argument_repair",
+    "query": "Search for notes containing 'roadmap' with notes.list.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.list"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_07",
+    "category": "argument_repair",
+    "query": "List calendar events on 2026-09-20 using calendar.list_events.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.list_events"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_08",
+    "category": "argument_repair",
+    "query": "Read file data.json using filesystem.read_file.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.read_file"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_09",
+    "category": "argument_repair",
+    "query": "Update calendar event evt_001 title to 'Updated Sync' with calendar.update_event.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.update_event"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_arg_10",
+    "category": "argument_repair",
+    "query": "Complete reminder rem_001 using reminders.complete.",
+    "expected_servers": ["reminders"],
+    "expected_tools": ["reminders.complete"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_01",
+    "category": "server_hardening",
+    "query": "Fetch event details for evt_999 using calendar.get_event.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.get_event"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_02",
+    "category": "server_hardening",
+    "query": "Read note note_999 with notes.read.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.read"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_03",
+    "category": "server_hardening",
+    "query": "Get reminder rem_999 with reminders.get.",
+    "expected_servers": ["reminders"],
+    "expected_tools": ["reminders.get"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_04",
+    "category": "server_hardening",
+    "query": "Read file missing_file_123.txt with filesystem.read_file.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.read_file"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_05",
+    "category": "server_hardening",
+    "query": "Delete event evt_999 using calendar.delete_event.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.delete_event"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_06",
+    "category": "server_hardening",
+    "query": "Delete note note_999 using notes.delete.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.delete"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_07",
+    "category": "server_hardening",
+    "query": "Complete reminder rem_999 using reminders.complete.",
+    "expected_servers": ["reminders"],
+    "expected_tools": ["reminders.complete"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_08",
+    "category": "server_hardening",
+    "query": "List directory non_existent_dir_999 using filesystem.list_directory.",
+    "expected_servers": ["filesystem"],
+    "expected_tools": ["filesystem.list_directory"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_09",
+    "category": "server_hardening",
+    "query": "Update note note_999 title to 'Ghost Note' with notes.update.",
+    "expected_servers": ["notes"],
+    "expected_tools": ["notes.update"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p13_srv_10",
+    "category": "server_hardening",
+    "query": "Update calendar event evt_999 time to 14:00 with calendar.update_event.",
+    "expected_servers": ["calendar"],
+    "expected_tools": ["calendar.update_event"],
+    "expected_dependencies": []
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "id": "p15b_01",
+    "category": "cross_app_read_write",
+    "query": "Read issue issue_101 with github.get_issue, then log an entry in sqlite table audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.create_record"],
+    "expected_dependencies": [["github.get_issue", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15b_02",
+    "category": "cross_app_read_write",
+    "query": "Query users in sqlite using sqlite.read_query on users table, then create an issue in personal_agent/assistant using github.create_issue.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.read_query", "github.create_issue"],
+    "expected_dependencies": [["sqlite.read_query", "github.create_issue"]]
+  },
+  {
+    "id": "p15b_03",
+    "category": "cross_app_read",
+    "query": "Check github.get_repository for personal_agent/assistant and list tables in sqlite with sqlite.list_tables.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_repository", "sqlite.list_tables"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15b_04",
+    "category": "cross_app_calc",
+    "query": "Get issue issue_102 with github.get_issue, count rows from sqlite.read_query on users, and add the values using calculator.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.read_query", "calculator"],
+    "expected_dependencies": [["github.get_issue", "calculator"], ["sqlite.read_query", "calculator"]]
+  },
+  {
+    "id": "p15b_05",
+    "category": "cross_app_read_write",
+    "query": "List open issues with github.list_issues for personal_agent/assistant, and record the issue count in sqlite table audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.list_issues", "sqlite.create_record"],
+    "expected_dependencies": [["github.list_issues", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15b_06",
+    "category": "cross_app_read_write",
+    "query": "Describe table users in sqlite with sqlite.describe_table, then create an issue 'Schema Verified' with github.create_issue.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.describe_table", "github.create_issue"],
+    "expected_dependencies": [["sqlite.describe_table", "github.create_issue"]]
+  },
+  {
+    "id": "p15b_07",
+    "category": "confirmation",
+    "query": "Query users with sqlite.read_query, then attempt to delete record id 1 with sqlite.delete_record.",
+    "expected_servers": ["sqlite"],
+    "expected_tools": ["sqlite.read_query", "sqlite.delete_record"],
+    "expected_dependencies": [["sqlite.read_query", "sqlite.delete_record"]]
+  },
+  {
+    "id": "p15b_08",
+    "category": "cross_app_read_write",
+    "query": "Read issue issue_103 with github.get_issue, verify status, and create record in sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.create_record"],
+    "expected_dependencies": [["github.get_issue", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15b_09",
+    "category": "cross_app_read",
+    "query": "List tables with sqlite.list_tables and list issues with github.list_issues in personal_agent/assistant.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.list_tables", "github.list_issues"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15b_10",
+    "category": "cross_app_read_write",
+    "query": "Search repos with github.search_repositories query assistant, and insert repo metadata into sqlite table audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.search_repositories", "sqlite.create_record"],
+    "expected_dependencies": [["github.search_repositories", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15b_11",
+    "category": "cross_app_read_write",
+    "query": "Read users with sqlite.read_query WHERE role='admin', then create a GitHub issue with github.create_issue titled 'Admin Assigned'.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.read_query", "github.create_issue"],
+    "expected_dependencies": [["sqlite.read_query", "github.create_issue"]]
+  },
+  {
+    "id": "p15b_12",
+    "category": "cross_app_calc",
+    "query": "Inspect repo personal_agent/assistant with github.get_repository, query sqlite users with sqlite.read_query, and calculate total count with calculator.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_repository", "sqlite.read_query", "calculator"],
+    "expected_dependencies": [["github.get_repository", "calculator"], ["sqlite.read_query", "calculator"]]
+  },
+  {
+    "id": "p15b_13",
+    "category": "cross_app_read_write",
+    "query": "Get issue issue_101 with github.get_issue, and insert a new user in sqlite table users with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.create_record"],
+    "expected_dependencies": [["github.get_issue", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15b_14",
+    "category": "error_recovery",
+    "query": "Query nonexistent table in sqlite with sqlite.read_query SELECT * FROM nonexistent, and fetch repo personal_agent/assistant with github.get_repository.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.read_query", "github.get_repository"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15b_15",
+    "category": "cross_app_read_write",
+    "query": "Describe table audit_logs in sqlite with sqlite.describe_table, then create issue 'Audit Log Checked' with github.create_issue.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.describe_table", "github.create_issue"],
+    "expected_dependencies": [["sqlite.describe_table", "github.create_issue"]]
+  },
+  {
+    "id": "p15b_16",
+    "category": "cross_app_read_write",
+    "query": "List open issues with github.list_issues in personal_agent/assistant, and log 'issue sync completed' to sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.list_issues", "sqlite.create_record"],
+    "expected_dependencies": [["github.list_issues", "sqlite.create_record"]]
+  },
+  {
+    "id": "p15b_17",
+    "category": "cross_app_read",
+    "query": "Read issue issue_102 with github.get_issue and describe table users with sqlite.describe_table.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.describe_table"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15b_18",
+    "category": "cross_app_read_write",
+    "query": "Read sqlite users with sqlite.read_query, and create issue 'Sync DB Users' with github.create_issue.",
+    "expected_servers": ["sqlite", "github"],
+    "expected_tools": ["sqlite.read_query", "github.create_issue"],
+    "expected_dependencies": [["sqlite.read_query", "github.create_issue"]]
+  },
+  {
+    "id": "p15b_19",
+    "category": "security",
+    "query": "Read issue issue_101 with github.get_issue and verify sqlite tables with sqlite.list_tables without executing SQL injection.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_issue", "sqlite.list_tables"],
+    "expected_dependencies": []
+  },
+  {
+    "id": "p15b_20",
+    "category": "cross_app_read_write",
+    "query": "Get repo personal_agent/assistant with github.get_repository and record repo stars in sqlite audit_logs with sqlite.create_record.",
+    "expected_servers": ["github", "sqlite"],
+    "expected_tools": ["github.get_repository", "sqlite.create_record"],
+    "expected_dependencies": [["github.get_repository", "sqlite.create_record"]]
+  }
+]

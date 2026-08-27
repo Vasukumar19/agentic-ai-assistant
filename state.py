@@ -99,3 +99,10 @@ class AgentState(TypedDict):
     pending_step_id: Optional[str]       # dependency strategy: step awaiting result
     tool_call_history: Optional[list[dict]]  # Phase 8: sig+result history for loop detection
     plan_replans: Optional[int]
+
+    # Phase 13 — Goal Fulfillment & MCP Reliability
+    required_operations: Optional[list[str]]
+    completed_operations: Optional[list[str]]
+    remaining_operations: Optional[list[str]]
+    goal_check_status: Optional[str]
+    argument_repair_attempts: Optional[dict[str, int]]

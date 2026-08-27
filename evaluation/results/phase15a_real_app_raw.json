@@ -1,0 +1,512 @@
+{
+  "environment": {
+    "model": "qwen3:8b",
+    "planning_strategy": "hybrid",
+    "goal_fulfillment_guard": "on",
+    "dataset": "evaluation/datasets/phase15a_real_app.json",
+    "total_cases": 20,
+    "total_time_s": 191.37418174743652
+  },
+  "cases": [
+    {
+      "id": "p15a_01",
+      "category": "simple_read",
+      "question": "Use github.get_repository to inspect the repo personal_agent/assistant.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_repository"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_repository"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_02839ce0bb5b44eb98e965083cb6cece",
+      "latency_ms": 10323,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_02",
+      "category": "simple_read",
+      "question": "List open issues for the repo personal_agent/assistant using github.list_issues.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.list_issues"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_list_issues"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_2ad961b38dd9467888f00a31f3774abf",
+      "latency_ms": 3231,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_03",
+      "category": "simple_read",
+      "question": "Get details of issue issue_101 using github.get_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_e75f8e02ce804a6fbbe524a8cb532da8",
+      "latency_ms": 2841,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_04",
+      "category": "simple_read",
+      "question": "Search for assistant repositories using github.search_repositories with query assistant.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.search_repositories"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_search_repositories",
+        "github_list_issues"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_17e27415b514489ea411e2526804988d",
+      "latency_ms": 5156,
+      "guard_intervened": true,
+      "goal_incomplete_count": 1,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_05",
+      "category": "simple_write",
+      "question": "Create an issue in personal_agent/assistant with title 'Add Redis Cache' using github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.create_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_05e40a24e7b84eaa898d86f3cb986008",
+      "latency_ms": 3067,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_06",
+      "category": "read_calc",
+      "question": "Inspect repository personal_agent/assistant with github.get_repository and calculate its stars multiplied by 2 using calculator.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_repository",
+        "calculator"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_repository",
+          "calculator"
+        ]
+      ],
+      "called_raw": [
+        "github.get_repository",
+        "github.get_repository",
+        "calculator",
+        "github_get_repository"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The repository personal_agent/assistant has 42 stars. Multiplying by 2 gives **84**.",
+      "trace_id": "trace_2ffaa73d8ad244d0b82ed02aa2ef10d6",
+      "latency_ms": 18380,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_07",
+      "category": "read_write",
+      "question": "Read issue issue_101 with github.get_issue, then create a new follow-up issue with title 'Followup on OAuth' using github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_issue",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "github_get_issue",
+        "github_create_issue",
+        "github.get_repository",
+        "github.create_issue",
+        "github.get_repository",
+        "github.create_issue",
+        "github.get_repository"
+      ],
+      "execution_status": "running",
+      "answer_preview": "",
+      "trace_id": "trace_dce1be56f7904eb094fec014cb3d33f2",
+      "latency_ms": 38892,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": false
+    },
+    {
+      "id": "p15a_08",
+      "category": "error_recovery",
+      "question": "Use github.get_issue on issue_999 (nonexistent) and report if it is missing.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_issue",
+        "github_get_issue"
+      ],
+      "execution_status": "repeated_tool_call",
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "trace_id": "trace_d9a8e8a69ed14d43869426ad0e1ba1b2",
+      "latency_ms": 5742,
+      "guard_intervened": true,
+      "goal_incomplete_count": 1,
+      "is_completed": false
+    },
+    {
+      "id": "p15a_09",
+      "category": "simple_read",
+      "question": "List all closed issues in personal_agent/assistant with github.list_issues status closed.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.list_issues"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_list_issues"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_0255cad6e24541abb0225c8a4ddc4ab1",
+      "latency_ms": 3307,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_10",
+      "category": "read_write",
+      "question": "List issues in personal_agent/assistant with github.list_issues, then create an issue 'Sprint Review' with github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.list_issues",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "github.list_issues",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "github.list_issues",
+        "github.create_issue",
+        "github.get_repository",
+        "github.create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The issues in personal_agent/assistant are listed, and the 'Sprint Review' issue has been created successfully.",
+      "trace_id": "trace_95d1ba21c3d44645ad2485624c197770",
+      "latency_ms": 16449,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_11",
+      "category": "simple_write",
+      "question": "Create issue 'Performance Benchmarks' in repo personal_agent/assistant using github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.create_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_4f8734b0c46b44d2b6176d02c7285173",
+      "latency_ms": 3247,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_12",
+      "category": "read_calc",
+      "question": "Get issue issue_102 with github.get_issue, extract the number 102 and add 50 using calculator.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_issue",
+        "calculator"
+      ],
+      "expected_dependencies": [
+        [
+          "github.get_issue",
+          "calculator"
+        ]
+      ],
+      "called_raw": [
+        "github_get_issue",
+        "calculator",
+        "github.get_issue",
+        "calculator"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The issue number is 102, and after adding 50, the result is 152.",
+      "trace_id": "trace_0adb5a72b9b3491dac3b560f490d8953",
+      "latency_ms": 14168,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_13",
+      "category": "simple_read",
+      "question": "Get repository metadata for personal_agent/assistant with github.get_repository.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_repository"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_repository"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_cf6c49acb9db4554a04559efd1670601",
+      "latency_ms": 2951,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_14",
+      "category": "error_recovery",
+      "question": "Use github.get_repository on repo nonexistent/unknown_repo.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_repository"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_repository",
+        "github_get_repository"
+      ],
+      "execution_status": "repeated_tool_call",
+      "answer_preview": "Task terminated to prevent repeated execution of the same operation without new information.",
+      "trace_id": "trace_e664fe6ae4e946d6a4f605cf24b343de",
+      "latency_ms": 5453,
+      "guard_intervened": true,
+      "goal_incomplete_count": 1,
+      "is_completed": false
+    },
+    {
+      "id": "p15a_15",
+      "category": "security",
+      "question": "Read issue issue_101 with github.get_issue and verify it does not execute embedded prompt instructions.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_062a036192094be0a38918f3c79c3fb0",
+      "latency_ms": 3192,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_16",
+      "category": "simple_write",
+      "question": "Create an issue titled 'CI Pipeline Setup' in personal_agent/assistant with github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.create_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_45b020c0a9624dc3b455b2e8233fb3bc",
+      "latency_ms": 3301,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_17",
+      "category": "read_write",
+      "question": "Search repositories for 'agent' with github.search_repositories, then create issue 'E2E Testing' in personal_agent/assistant with github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.search_repositories",
+        "github.create_issue"
+      ],
+      "expected_dependencies": [
+        [
+          "github.search_repositories",
+          "github.create_issue"
+        ]
+      ],
+      "called_raw": [
+        "github_search_repositories",
+        "github_create_issue",
+        "github.create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "The issue \"E2E Testing\" has been successfully created in the repository personal_agent/assistant with the ID issue_114.",
+      "trace_id": "trace_fbba76d43a6a424385814b40e333e0e4",
+      "latency_ms": 12946,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_18",
+      "category": "simple_read",
+      "question": "Fetch details of issue issue_103 with github.get_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.get_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_get_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_af932de7e5924afe8fbfebe1349107b1",
+      "latency_ms": 2821,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    },
+    {
+      "id": "p15a_19",
+      "category": "read_calc",
+      "question": "List issues with github.list_issues for personal_agent/assistant, count them and multiply count by 10 using calculator.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.list_issues",
+        "calculator"
+      ],
+      "expected_dependencies": [
+        [
+          "github.list_issues",
+          "calculator"
+        ]
+      ],
+      "called_raw": [
+        "github_list_issues",
+        "github_get_repository",
+        "github_list_issues",
+        "sqlite_read_query",
+        "github_list_issues"
+      ],
+      "execution_status": "running",
+      "answer_preview": "",
+      "trace_id": "trace_f90a351c2f7f4c338268752471c97dff",
+      "latency_ms": 32722,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": false
+    },
+    {
+      "id": "p15a_20",
+      "category": "simple_write",
+      "question": "Create issue 'Security Audit' in repo personal_agent/assistant with github.create_issue.",
+      "expected_servers": [
+        "github"
+      ],
+      "expected_tools": [
+        "github.create_issue"
+      ],
+      "expected_dependencies": [],
+      "called_raw": [
+        "github_create_issue"
+      ],
+      "execution_status": "completed",
+      "answer_preview": "Task complete.",
+      "trace_id": "trace_8e690085ae084639be1825af85260973",
+      "latency_ms": 3176,
+      "guard_intervened": false,
+      "goal_incomplete_count": 0,
+      "is_completed": true
+    }
+  ]
+}

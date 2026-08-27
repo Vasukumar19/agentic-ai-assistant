@@ -95,6 +95,10 @@ class ToolRegistry:
             except Exception as e:
                 logger.warning(f"invalid MCP server config {s}: {e}")
 
+    def register_server(self, cfg: MCPServerConfig) -> None:
+        """Register a single server config directly."""
+        self._servers[cfg.name] = cfg
+
     def discover(self, force: bool = False) -> int:
         """Connect to each enabled server, list tools, register them. Returns count of new tools."""
         if self._discovered and not force:
@@ -208,7 +212,8 @@ class ToolRegistry:
     def requires_confirmation(self, tool_name: str, arguments: dict | None = None) -> bool:
         norm = self.get_normalized(tool_name)
         if not norm:
-            return False
+            pol = _infer_policy(tool_name, "")
+            return bool(pol.get("requires_confirmation", False))
         return bool(norm.requires_confirmation)
 
     def tool_info(self) -> str:

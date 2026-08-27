@@ -63,7 +63,7 @@ async def get_event(event_id: str) -> str:
     d = _load()
     e = d.get("events", {}).get(event_id)
     if not e:
-        raise ValueError(f"Event not found: {event_id}")
+        return f"Error: Event not found: {event_id}"
     return _json.dumps({"event_id": event_id, **e})
 
 
@@ -73,7 +73,7 @@ async def update_event(event_id: str, title: str = "", date: str = "", time: str
     d = _load()
     e = d.get("events", {}).get(event_id)
     if not e:
-        raise ValueError(f"Event not found: {event_id}")
+        return f"Error: Event not found: {event_id}"
     for k, v in (("title", title), ("date", date), ("time", time), ("description", description)):
         if v:
             e[k] = v
@@ -87,7 +87,7 @@ async def delete_event(event_id: str) -> str:
     d = _load()
     events = d.get("events", {})
     if event_id not in events:
-        raise ValueError(f"Event not found: {event_id}")
+        return f"Error: Event not found: {event_id}"
     del events[event_id]
     _save(d)
     return f"Deleted {event_id}"

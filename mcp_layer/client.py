@@ -160,15 +160,14 @@ class MCPClient:
                     else:
                         parts.append(str(c))
                 joined = "".join(parts)
-                # SDK v2 uses isError, v1 uses is_error — check both, plus content heuristic
                 is_err = bool(getattr(result, "isError", False) or getattr(result, "is_error", False))
                 if is_err or "Unknown tool" in joined or "Error:" in joined or "error:" in joined.lower():
                     low = joined.lower()
                     if "unknown tool" in low or "not found" in low:
                         raise MCPError("MCP_TOOL_NOT_FOUND", joined or "tool not found", server=self.config.name)
-                    if "permission" in low or "denied" in low or "forbidden" in low:
+                    if "permission" in low or "denied" in low or "forbidden" in low or "outside sandbox" in low:
                         raise MCPError("MCP_PERMISSION_ERROR", joined or "permission denied", server=self.config.name)
-                    if "invalid" in low or "validation" in low or "argument" in low:
+                    if "invalid" in low or "validation" in low or "argument" in low or "rejected arguments" in low:
                         raise MCPError("MCP_INVALID_ARGUMENT", joined or "invalid argument", server=self.config.name)
                     raise MCPError("MCP_SERVER_ERROR", joined or "tool returned error", server=self.config.name)
                 return joined if parts else json.dumps(getattr(result, "structuredContent", {}) or {}, ensure_ascii=False)

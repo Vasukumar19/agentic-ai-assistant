@@ -62,3 +62,8 @@ HYBRID_REPLAN = os.getenv("HYBRID_REPLAN", "1").lower() not in ("0", "false", "n
 RESULT_AWARE_REPLANNING = os.getenv("RESULT_AWARE_REPLANNING", "off").lower()
 COMPLETION_GUARD = os.getenv("COMPLETION_GUARD", "off").lower()
 PLANNER_COMPLETION_CONTEXT = os.getenv("PLANNER_COMPLETION_CONTEXT", "off").lower()
+
+# Phase 13 — Goal Fulfillment & MCP Reliability (default: off)
+GOAL_FULFILLMENT_GUARD = os.getenv("GOAL_FULFILLMENT_GUARD", "off").lower()
+MCP_ARGUMENT_REPAIR = os.getenv("MCP_ARGUMENT_REPAIR", "off").lower()
+MAX_ARGUMENT_REPAIR_ATTEMPTS = int(os.getenv("MAX_ARGUMENT_REPAIR_ATTEMPTS", "1"))

@@ -30,11 +30,11 @@ async def list_directory(path: str = "") -> str:
     try:
         target.relative_to(SANDBOX.resolve())
     except ValueError:
-        raise PermissionError(f"Access denied: {path} is outside sandbox")
+        return f"Error: Access denied: {path} is outside sandbox"
     if not target.exists():
-        raise FileNotFoundError(f"Path not found: {path}")
+        return f"Error: Path not found: {path}"
     if not target.is_dir():
-        raise NotADirectoryError(f"Not a directory: {path}")
+        return f"Error: Not a directory: {path}"
     items = []
     for p in sorted(target.iterdir()):
         items.append(f"{'DIR' if p.is_dir() else 'FILE'} {p.name}")
@@ -48,11 +48,11 @@ async def read_file(path: str) -> str:
     try:
         target.relative_to(SANDBOX.resolve())
     except ValueError:
-        raise PermissionError(f"Access denied: {path} is outside sandbox")
+        return f"Error: Access denied: {path} is outside sandbox"
     if not target.exists():
-        raise FileNotFoundError(f"File not found: {path}")
+        return f"Error: File not found: {path}"
     if not target.is_file():
-        raise IsADirectoryError(f"Not a file: {path}")
+        return f"Error: Not a file: {path}"
     # limit size to 10KB for sandbox
     data = target.read_text(encoding="utf-8", errors="replace")
     if len(data) > 10000:
@@ -67,7 +67,7 @@ async def write_file(path: str, content: str) -> str:
     try:
         target.relative_to(SANDBOX.resolve())
     except ValueError:
-        raise PermissionError(f"Access denied: {path} is outside sandbox")
+        return f"Error: Access denied: {path} is outside sandbox"
     # ensure parent exists
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content, encoding="utf-8")
@@ -82,9 +82,9 @@ async def get_file_info(path: str) -> str:
     try:
         target.relative_to(SANDBOX.resolve())
     except ValueError:
-        raise PermissionError(f"Access denied: {path} is outside sandbox")
+        return f"Error: Access denied: {path} is outside sandbox"
     if not target.exists():
-        raise FileNotFoundError(f"Path not found: {path}")
+        return f"Error: Path not found: {path}"
     stat = target.stat()
     info = {"path": path, "is_file": target.is_file(), "is_dir": target.is_dir(), "size": stat.st_size}
     return json.dumps(info)

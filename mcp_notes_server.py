@@ -58,7 +58,7 @@ async def read(note_id: str) -> str:
     d = _load()
     n = d.get("notes", {}).get(note_id)
     if not n:
-        raise ValueError(f"Note not found: {note_id}")
+        return f"Error: Note not found: {note_id}"
     return f"[{n['title']}]\n{n['content']}"
 
 
@@ -68,7 +68,7 @@ async def update(note_id: str, title: str = "", content: str = "") -> str:
     d = _load()
     n = d.get("notes", {}).get(note_id)
     if not n:
-        raise ValueError(f"Note not found: {note_id}")
+        return f"Error: Note not found: {note_id}"
     if title:
         n["title"] = title
     if content:
@@ -83,7 +83,7 @@ async def delete(note_id: str) -> str:
     d = _load()
     notes = d.get("notes", {})
     if note_id not in notes:
-        raise ValueError(f"Note not found: {note_id}")
+        return f"Error: Note not found: {note_id}"
     del notes[note_id]
     _save(d)
     return f"Deleted {note_id}"
