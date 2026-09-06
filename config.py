@@ -2,8 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env BEFORE reading any env vars below. config may be imported before
-# llm.py (e.g. via graph.py), so it must self-load rather than rely on import order.
+# Load .env BEFORE reading any env vars below.
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -12,58 +11,54 @@ SEMANTIC_MEMORY_DIR = MEMORY_DIR / "semantic_memory"
 CHAT_HISTORY_PATH = MEMORY_DIR / "chat_history.json"
 MEMORY_FILE = MEMORY_DIR / "memory.json"
 FAISS_INDEX_DIR = PROJECT_ROOT / "faiss_index"
+
 # Default Model Configuration
 MODEL_NAME = "gemini-3.6-flash"
 TEMPERATURE = 0.3
 MAX_TOOL_STEPS = 5
-# Phase 8 — decoupled execution budget (loop protection is separate and unchanged).
-# MAX_TOOL_STEPS retained for backward compatibility; the graph enforces
-# MAX_EXECUTION_STEPS as the legitimate-workflow budget.
-MAX_EXECUTION_STEPS = int(os.getenv("MAX_EXECUTION_STEPS", str(MAX_TOOL_STEPS)))
 
 # LLM Provider Configuration (env-overridable)
-# LLM_PROVIDER: google | openrouter | groq | ollama
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "").lower()
-LLM_MODEL_OVERRIDE = os.getenv("LLM_MODEL", "")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
+LLM_MODEL = os.getenv("LLM_MODEL", "qwen3:8b")
+LLM_MODEL_OVERRIDE = LLM_MODEL
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 # Phase 2 Config
-RETRIEVAL_MODE = "hybrid" # Options: faiss, hybrid, rrf, reranker
+RETRIEVAL_MODE = "hybrid"  # Options: faiss, hybrid, rrf, reranker
 RRF_K = 60
 
 # Phase 5 — Observability & Reliability
 TRACE_DIR = PROJECT_ROOT / "evaluation" / "traces"
-# Timeouts (seconds) — conservative defaults; a single hanging call must not hang the agent
 TIMEOUT_LLM_S = float(os.getenv("TIMEOUT_LLM_S", "30"))
 TIMEOUT_WEB_SEARCH_S = float(os.getenv("TIMEOUT_WEB_SEARCH_S", "15"))
 TIMEOUT_RETRIEVAL_S = float(os.getenv("TIMEOUT_RETRIEVAL_S", "10"))
 TIMEOUT_TOOL_S = float(os.getenv("TIMEOUT_TOOL_S", "15"))
-# Retry
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "1"))
 MAX_TOOL_FAILURES_PER_TOOL = int(os.getenv("MAX_TOOL_FAILURES_PER_TOOL", "3"))
+
+# Phase 8 — execution budget
+MAX_EXECUTION_STEPS = int(os.getenv("MAX_EXECUTION_STEPS", "10"))
 
 # Phase 6A — MCP
 TIMEOUT_MCP_S = float(os.getenv("TIMEOUT_MCP_S", "15"))
 MCP_CONFIG_FILE = os.getenv("MCP_CONFIG_FILE", "")
-# MCP_SERVERS is a JSON array string or a path; parsed by mcp_layer/registry.py
-# Example: '[{"name":"test","transport":"stdio","command":"python","args":["mcp_test_server.py"]}]'
 MCP_SERVERS_RAW = os.getenv("MCP_SERVERS", "")
 
-# Phase 7 — Planning strategy experiment (baseline | dependency | replan | hybrid)
-PLANNING_STRATEGY = os.getenv("PLANNING_STRATEGY", "baseline").lower()
-MAX_PLAN_STEPS = int(os.getenv("MAX_PLAN_STEPS", "6"))
+# Phase 7 — Planning strategy (default: hybrid)
+PLANNING_STRATEGY = os.getenv("PLANNING_STRATEGY", "hybrid").lower()
+MAX_PLAN_STEPS = int(os.getenv("MAX_PLAN_STEPS", "10"))
 
 # Phase 7B — Hybrid adaptive planner
 MAX_REPLANS = int(os.getenv("MAX_REPLANS", "1"))
-HYBRID_LEVEL_CAP = int(os.getenv("HYBRID_LEVEL_CAP", "2"))   # 0=baseline-only, 1=dependency, 2=replan allowed
+HYBRID_LEVEL_CAP = int(os.getenv("HYBRID_LEVEL_CAP", "2"))
 HYBRID_REPLAN = os.getenv("HYBRID_REPLAN", "1").lower() not in ("0", "false", "no")
 
-# Phase 11 & Phase 12 — Result-Aware Replanning & Completion Context (default: off)
-RESULT_AWARE_REPLANNING = os.getenv("RESULT_AWARE_REPLANNING", "off").lower()
-COMPLETION_GUARD = os.getenv("COMPLETION_GUARD", "off").lower()
-PLANNER_COMPLETION_CONTEXT = os.getenv("PLANNER_COMPLETION_CONTEXT", "off").lower()
+# Phase 11 & Phase 12 — Result-Aware Replanning & Completion Context (default: on)
+RESULT_AWARE_REPLANNING = os.getenv("RESULT_AWARE_REPLANNING", "on").lower()
+COMPLETION_GUARD = os.getenv("COMPLETION_GUARD", "on").lower()
+PLANNER_COMPLETION_CONTEXT = os.getenv("PLANNER_COMPLETION_CONTEXT", "on").lower()
 
-# Phase 13 — Goal Fulfillment & MCP Reliability (default: off)
-GOAL_FULFILLMENT_GUARD = os.getenv("GOAL_FULFILLMENT_GUARD", "off").lower()
-MCP_ARGUMENT_REPAIR = os.getenv("MCP_ARGUMENT_REPAIR", "off").lower()
+# Phase 13 — Goal Fulfillment & MCP Reliability (default: on)
+GOAL_FULFILLMENT_GUARD = os.getenv("GOAL_FULFILLMENT_GUARD", "on").lower()
+MCP_ARGUMENT_REPAIR = os.getenv("MCP_ARGUMENT_REPAIR", "on").lower()
 MAX_ARGUMENT_REPAIR_ATTEMPTS = int(os.getenv("MAX_ARGUMENT_REPAIR_ATTEMPTS", "1"))

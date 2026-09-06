@@ -74,7 +74,7 @@ def memory_retriever_node(state: dict) -> dict:
 
     # Retrieve semantic memory
     if retrieval_plan.get("semantic", False):
-        if SEMANTIC_MEMORY_DIR.exists():
+        if (SEMANTIC_MEMORY_DIR / "index.faiss").exists():
             try:
                 vector_store = FAISS.load_local(
                     str(SEMANTIC_MEMORY_DIR),

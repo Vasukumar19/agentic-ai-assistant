@@ -76,7 +76,15 @@ class ToolRegistry:
                         logger.warning(f"failed to load MCP config file {cfg_path}: {e}")
                         servers = []
                 else:
-                    servers = []
+                    servers = [
+                        {"name": "calendar", "transport": "stdio", "command": "python", "args": ["mcp_calendar_server.py"]},
+                        {"name": "notes", "transport": "stdio", "command": "python", "args": ["mcp_notes_server.py"]},
+                        {"name": "reminders", "transport": "stdio", "command": "python", "args": ["mcp_reminders_server.py"]},
+                        {"name": "filesystem", "transport": "stdio", "command": "python", "args": ["mcp_filesystem_server.py"]},
+                        {"name": "github", "transport": "stdio", "command": "python", "args": ["mcp_github_server.py"]},
+                        {"name": "sqlite", "transport": "stdio", "command": "python", "args": ["mcp_sqlite_server.py"]},
+                        {"name": "fetch", "transport": "stdio", "command": "python", "args": ["mcp_fetch_server.py"]},
+                    ]
             else:
                 try:
                     # try json array
