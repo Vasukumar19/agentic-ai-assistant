@@ -42,43 +42,24 @@ The agent node handles reasoning and optional tool use. Retrieval and memory per
 
 ## 2. File Reference
 
-### [`agent_langgraph.py`](../agent_langgraph.py)
+### [`main.py`](../main.py)
 
 | | |
 |---|---|
-| **Purpose** | Application entry point and interactive CLI |
-| **Responsibilities** | Load env, validate API key, compile graph, run queries, load/save conversation history |
-| **Key functions** | `load_chat_history()`, `ask()`, `main()` |
-| **Inputs** | User string via CLI or argv |
-| **Outputs** | Printed answer; persisted history via graph's `save_history` node |
-| **Dependencies** | `graph`, `state`, `config`, `langchain_core.messages` |
+| **Purpose** | Application entry point, interactive shell, and one-command runner |
+| **Responsibilities** | Check Ollama connectivity, discover MCP servers, compile LangGraph, run multi-turn queries, format rich Markdown outputs |
+| **Key functions** | `check_ollama()`, `init_mcp()`, `run_query()`, `interactive_loop()`, `main()` |
+| **Inputs** | User string via interactive prompt or CLI arguments |
+| **Outputs** | Formatted Markdown responses; persisted traces and chat history |
+| **Dependencies** | `graph`, `state`, `config`, `llm`, `mcp_layer.registry` |
 
 **Startup sequence:**
 
 1. `load_dotenv()`
-2. Verify `GROQ_API_KEY`
-3. `create_runnable_graph()` once at import time
-4. Interactive loop or single-shot CLI argument
-
-**Initial state** created in `ask()`:
-
-```python
-{
-    "question": question,
-    "route": "",
-    "retrieval_plan": {"profile": False, "semantic": False, "rag": False},
-    "profile_context": "",
-    "semantic_context": "",
-    "rag_context": "",
-    "extracted_profile": {},
-    "extracted_semantic": [],
-    "answer": "",
-    "_combined_context": "",
-    "messages": load_chat_history(),
-}
-```
-
-Safe defaults ensure the chat path never requires planner or extractor fields.
+2. Check Ollama connectivity / Cloud API configuration
+3. `registry.discover()` to initialize all 7 MCP servers
+4. `create_runnable_graph()` with checkpointing
+5. Interactive shell with streaming output
 
 ---
 

@@ -413,7 +413,7 @@ Each field has a single producer during a graph run:
 
 | Field | Produced By | Notes |
 |-------|-------------|-------|
-| `question` | `agent_langgraph.ask()` | Set in initial state; unchanged during run |
+| `question` | `main.py` | Set in initial state; unchanged during run |
 | `route` | `intent_router` | |
 | `retrieval_plan` | `retrieval_planner` | Safe default in initial state: all `false` |
 | `extracted_profile` | `memory_extractor` | Safe default: `{}` |
@@ -422,8 +422,8 @@ Each field has a single producer during a graph run:
 | `semantic_context` | `memory_retriever` | Safe default: `""` |
 | `rag_context` | `rag_retriever` | Safe default: `""` |
 | `_combined_context` | `context_builder` | Safe default: `""` |
-| `answer` | `chat`, `agent`, or `memory_response` | Whichever terminal node on the active branch |
-| `messages` | `agent`, `tools` (`ToolNode`) | Loaded at start from chat history; appended on research/tool path |
+| `answer` | `chat`, `planner`, or `memory_response` | Whichever terminal node on the active branch |
+| `messages` | `planner`, `tools` (`ToolNode`) | Loaded at start from chat history; appended on research/tool path |
 
 Nodes should not overwrite fields owned by other nodes. The chat and memory branches never run planner or extractor, so they rely on initial-state defaults for unused fields.
 
@@ -437,8 +437,8 @@ Approximate work per path (single user turn):
 |------|----------------|-------------------|-------|------------|-------|
 | **Chat** | router → chat → save_history | 0–1 (0 if pre-routed greeting) | No | save history only | No |
 | **Memory update** | router → extractor → saver → response → save_history | 1–3 (router LLM only if not pre-routed) | write semantic index | read/write memory JSON | No |
-| **Research (no tools)** | router → planner → retrievers → context → agent → save_history | 1–3 + 1 agent | maybe read | save history | No |
-| **Research (with tools)** | same + agent ↔ tools loop | +1 per agent iteration (max 5 tool rounds) | maybe read | save history | 1+ tool executions |
+| **Research (no tools)** | router → planner → retrievers → context → planner → save_history | 1–3 + 1 planner | maybe read | save history | No |
+| **Research (with tools)** | same + planner ↔ tools loop | +1 per planner iteration (budget cap: 10) | maybe read | save history | 1+ tool executions |
 
 ### Where LLM calls occur
 
@@ -448,9 +448,9 @@ Approximate work per path (single user turn):
 | `chat` | Always (after routing to chat) |
 | `memory_extractor` | Always on memory_update path |
 | `retrieval_planner` | When heuristics cannot decide |
-| `agent` | Every agent loop iteration on research path |
+| `planner` | Every planner loop iteration on research path |
 
-Shared LLM instance: [`llm.py`](../llm.py) — single `ChatGroq` for the entire project.
+Shared LLM instance: [`llm.py`](../llm.py) — Multi-provider factory (`get_llm()` supporting Ollama, Claude, OpenAI, Gemini, Groq).
 
 ---
 
@@ -463,8 +463,8 @@ Shared LLM instance: [`llm.py`](../llm.py) — single `ChatGroq` for the entire 
 | Memory extractor JSON fails | Empty extraction; saver may no-op; response still generated |
 | `memory.json` missing | Profile retrieval returns empty string |
 | Semantic FAISS missing | Semantic retrieval skipped; warning logged on save/load errors |
-| `faiss_index/` missing | RAG returns empty context; agent proceeds without document context |
-| Max tool iterations reached | Graph stops tool loop even if last AI message still has `tool_calls` |
+| `faiss_index/` missing | RAG returns empty context; planner proceeds without document context |
+| Max execution budget reached | Graph stops tool loop cleanly and returns partial/best answer |
 | Empty `answer` at save | Fallback string written to history |
 | Declarative personal statement | Pre-routing skips LLM question detection; router LLM may return `memory_update` |
 | Question with greeting prefix | `"hello, what is my name?"` → pre-routed to `chat` because greeting matches first |
@@ -478,5 +478,5 @@ Shared LLM instance: [`llm.py`](../llm.py) — single `ChatGroq` for the entire 
 | [`graph.py`](../graph.py) | Graph construction, routing helpers, save history |
 | [`state.py`](../state.py) | `AgentState` TypedDict |
 | [`config.py`](../config.py) | Paths and constants |
-| [`llm.py`](../llm.py) | Shared Groq LLM singleton |
-| [`agent_langgraph.py`](../agent_langgraph.py) | CLI entry point, initial state, history loading |
+| [`llm.py`](../llm.py) | Multi-provider LLM factory (`get_llm()`) |
+| [`main.py`](../main.py) | CLI entry point, interactive REPL, format output |
