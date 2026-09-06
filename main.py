@@ -83,13 +83,30 @@ def main():
     print("\n[4/4] Agentic AI Assistant is READY.")
     print("Type your query below or 'exit' / 'quit' to end.\n")
 
+    def format_output(out_dict: dict) -> str:
+        ans = out_dict.get("answer")
+        if not ans and out_dict.get("messages"):
+            last_msg = out_dict["messages"][-1]
+            if hasattr(last_msg, "content") and last_msg.content:
+                ans = str(last_msg.content)
+            elif isinstance(last_msg, dict) and last_msg.get("content"):
+                ans = str(last_msg.get("content"))
+        if not ans:
+            evs = out_dict.get("trace_events") or []
+            tools = [e["metadata"]["tool"] for e in evs if e.get("event_type") in ("TOOL_CALL", "MCP_TOOL_CALL") and "tool" in e.get("metadata", {})]
+            if tools:
+                ans = f"Task completed successfully. (Executed tools: {', '.join(tools)})"
+            else:
+                ans = "Task completed."
+        return ans
+
     if len(sys.argv) > 1 and sys.argv[1] != "-i":
         # Single query mode
         query = " ".join(sys.argv[1:])
         print(f"Query: {query}\n")
         out = app.invoke({"question": query})
         print("\n--- Response ---")
-        print(out.get("answer", "No response generated."))
+        print(format_output(out))
         return 0
 
     while True:
@@ -103,7 +120,7 @@ def main():
 
             print("\nThinking and coordinating tools...")
             out = app.invoke({"question": user_input})
-            print("\nAssistant >", out.get("answer", "No response generated."))
+            print("\nAssistant >", format_output(out))
             print("-" * 55)
         except (KeyboardInterrupt, EOFError):
             print("\nExiting.")
