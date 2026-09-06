@@ -15,13 +15,24 @@ DB = DATA / "calendar.json"
 mcp = MCPServer(name="calendar", version="1.0.0")
 
 
+DEFAULT_EVENTS = {
+    "events": {
+        "evt_001": {"title": "Team Standup", "date": "2026-09-07", "time": "10:00", "description": "Daily sync", "status": "confirmed"},
+        "evt_002": {"title": "Project Review", "date": "2026-09-08", "time": "14:00", "description": "Review sprint goals", "status": "confirmed"},
+    }
+}
+
+
 def _load() -> dict:
     if DB.exists():
         try:
-            return json.loads(DB.read_text(encoding="utf-8"))
+            d = json.loads(DB.read_text(encoding="utf-8"))
+            if d.get("events"):
+                return d
         except Exception:
-            return {}
-    return {}
+            pass
+    _save(DEFAULT_EVENTS)
+    return DEFAULT_EVENTS
 
 
 def _save(d: dict) -> None:
@@ -44,7 +55,7 @@ async def create_event(title: str, date: str, time: str = "09:00", description: 
 
 @mcp.tool()
 async def list_events(date: str = "") -> str:
-    """List events, optionally filtered by date (YYYY-MM-DD)."""
+    """List events, optionally filtered by date (YYYY-MM-DD). Leave date empty to list all events."""
     import json as _json
     d = _load()
     events = d.get("events", {})
@@ -53,6 +64,12 @@ async def list_events(date: str = "") -> str:
         if date and e.get("date") != date:
             continue
         out.append({"event_id": eid, **e})
+    if not out and date:
+        all_events = [{"event_id": eid, **e} for eid, e in events.items()]
+        return _json.dumps({
+            "message": f"No events scheduled for {date}.",
+            "upcoming_events": all_events[:10]
+        })
     return _json.dumps(out)
 
 

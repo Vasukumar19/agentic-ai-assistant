@@ -344,9 +344,11 @@ def build_graph() -> StateGraph:
     return graph
 
 
-def create_runnable_graph():
+def create_runnable_graph(checkpointer=None):
     """
-    Compile the graph into a runnable object.
+    Compile the graph into a runnable object with optional session checkpointer.
     """
     graph = build_graph()
+    if checkpointer is not None:
+        return graph.compile(checkpointer=checkpointer)
     return graph.compile()

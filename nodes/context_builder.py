@@ -23,14 +23,21 @@ def context_builder_node(state: dict) -> dict:
     semantic_context = state.get("semantic_context", "")
     rag_context = state.get("rag_context", "")
 
-    context_parts = []
+    import datetime
+    now = datetime.datetime.now()
+    temporal_context = (
+        f"=== CURRENT DATE & TIME ===\n"
+        f"Today's Date: {now.strftime('%Y-%m-%d')} ({now.strftime('%A')})\n"
+        f"Current Time: {now.strftime('%H:%M:%S')}"
+    )
+    context_parts = [temporal_context]
     if profile_context:
         context_parts.append(profile_context)
     if semantic_context:
         context_parts.append(semantic_context)
     if rag_context:
         context_parts.append(rag_context)
-    combined = "\n\n".join(context_parts) if context_parts else ""
+    combined = "\n\n".join(context_parts)
 
     if combined:
         logger.info("Built context from %d source(s) (%d chars)", len(context_parts), len(combined))

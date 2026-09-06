@@ -7,9 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from config import PROJECT_ROOT
-
-TRACE_DIR = PROJECT_ROOT / "evaluation" / "traces"
+from config import PROJECT_ROOT, TRACE_DIR
 
 
 def _trace_file_for(date_str: Optional[str] = None) -> Path:

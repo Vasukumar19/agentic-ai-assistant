@@ -109,6 +109,10 @@ MANDATORY RULES:
    - Only return 'final' when ALL required operations have been executed and you have all facts to answer completely.
 6. Pure Context Queries:
    - If 'RETRIEVED CONTEXT' contains the exact information needed AND NO arithmetic/calculation/search was requested, return 'action': 'final'.
+7. Resource Discovery (Search/List Before Read):
+   - If the user asks to read, inspect, or modify a resource (e.g. note, event, reminder) but does not provide the exact resource ID, call the list/search tool first (e.g. notes.list, calendar.list_events) to discover the valid ID.
+8. Informative Final Answers:
+   - When action is 'final', write a clear, informative, user-friendly response. If tools retrieved data (events, notes, database tables, query rows, calculation results), present and format that data clearly (using bullet points or tables). Never reply with bare phrases like 'Task complete' or 'Got it'.
 """
 
 class PlannerDecision(BaseModel):
@@ -294,8 +298,8 @@ Available Tools:
 
 Rules:
 - Use only tools from Available Tools (exact names).
-- arguments must match each tool's schema. Do not invent values that must come from another step's output;
-  instead declare depends_on so the value can be resolved at execution time.
+- arguments must match each tool's schema. If a parameter (like note_id="note_001", title="Weekly Tasks", date="2026-09-08") is mentioned in the User Goal, put it directly into arguments. Do not leave arguments empty.
+- Do not invent values that must come from another step's output; instead declare depends_on so the value can be resolved at execution time.
 - Keep it minimal: only steps required by the goal.
 - Max {MAX_PLAN_STEPS} steps.
 
@@ -313,10 +317,7 @@ User Goal: {question}
         except Exception as e:
             _emit_planner_event(state, int((_t.perf_counter() - t0) * 1000), None, 1, status="error",
                                 extra={"strategy": "dependency", "validation_result": f"plan_generation_failed: {str(e)[:200]}"})
-            return {"answer": "I couldn't construct a valid plan for this request.",
-                    "execution_status": "error",
-                    "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
-                    "latency_breakdown": state.get("latency_breakdown")}
+            return None
 
         # cap steps
         if len(plan.steps) > MAX_PLAN_STEPS:
@@ -353,10 +354,9 @@ User Goal: {question}
                 except Exception:
                     pass
             if not validation.valid:
-                return {"answer": "I couldn't construct a valid plan: " + "; ".join(validation.errors[:3]),
-                        "execution_status": "error", "plan_invalid_count": invalid_count, "plan_replans": int(state.get("plan_replans") or 0), "_dup_guard": dup_guard,
-                        "trace_events": state.get("trace_events"), "trace_step": state.get("trace_step"),
-                        "latency_breakdown": state.get("latency_breakdown")}
+                _emit_plan_event(state, "PLANNER", {"strategy": "hybrid", "phase": "fallback_to_step_planner",
+                                                    "errors": validation.errors[:3]}, status="error")
+                return None
 
         return {
             "active_plan": plan.model_dump(),

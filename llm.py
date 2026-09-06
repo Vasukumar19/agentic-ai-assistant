@@ -1,3 +1,5 @@
+"""Unified LLM Provider Factory — Seamless Local ($0 Ollama) ↔ Cloud (Claude/GPT) Switching."""
+
 import os
 import logging
 from pathlib import Path
@@ -5,13 +7,13 @@ from dotenv import load_dotenv
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import Runnable
 
-# Load .env BEFORE importing config, which reads provider env vars at import time.
-env_path = Path(__file__).resolve().parent / ".env"
-load_dotenv(dotenv_path=env_path)
+# Load .env
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
-from config import MODEL_NAME, TEMPERATURE, LLM_MODEL_OVERRIDE, OLLAMA_BASE_URL
+from config import MODEL_NAME, TEMPERATURE, LLM_MODEL, OLLAMA_BASE_URL
 
 logger = logging.getLogger(__name__)
+
 
 def normalize_message(msg):
     if isinstance(msg, AIMessage) and isinstance(msg.content, list):
@@ -30,6 +32,7 @@ def normalize_message(msg):
             tool_calls=getattr(msg, "tool_calls", []),
         )
     return msg
+
 
 class NormalizedGoogleGenAI(Runnable):
     """Wraps ChatGoogleGenerativeAI to guarantee string contents on AIMessage."""
@@ -53,50 +56,60 @@ class NormalizedGoogleGenAI(Runnable):
         return other | Runnable.from_runnable(self)
 
 
-# Provider selection
-if os.getenv("MOCK_LLM") == "1":
-    from evaluation.mock_llm import MockLLM
-    llm = MockLLM()
-else:
-    google_key = os.getenv("GOOGLE_API_KEY") or os.getenv("google_api_key")
-    openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("open_router_api")
-    groq_key = os.getenv("GROQ_API_KEY") or os.getenv("groq_api_key")
-    provider = os.getenv("LLM_PROVIDER", "").lower()
+def get_llm():
+    """Instantiate the active LLM based on environment configuration."""
+    if os.getenv("MOCK_LLM") == "1":
+        from evaluation.mock_llm import MockLLM
+        return MockLLM()
+
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+    model_override = os.getenv("LLM_MODEL", LLM_MODEL)
 
     if provider == "ollama":
-        # Local provider (e.g. Ollama + Qwen3) — no API key required.
-        # OLLAMA_REASONING=0 (default) disables the Qwen3 <think> block;
-        # set to 1 to enable native thinking mode.
         from langchain_ollama import ChatOllama
-        llm = ChatOllama(
-            model=LLM_MODEL_OVERRIDE or MODEL_NAME,
+        return ChatOllama(
+            model=model_override or "qwen3:8b",
             base_url=OLLAMA_BASE_URL,
             temperature=TEMPERATURE,
             num_ctx=int(os.getenv("OLLAMA_NUM_CTX", "8192")),
             reasoning=os.getenv("OLLAMA_REASONING", "0").lower() not in ("0", "false", "no"),
         )
-    elif (provider == "google" or not provider) and google_key:
+    elif provider == "anthropic":
+        from langchain_anthropic import ChatAnthropic
+        return ChatAnthropic(
+            model=model_override or "claude-3-5-sonnet-latest",
+            temperature=TEMPERATURE,
+            api_key=os.getenv("ANTHROPIC_API_KEY"),
+        )
+    elif provider == "openai":
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=model_override or "gpt-4o",
+            temperature=TEMPERATURE,
+            api_key=os.getenv("OPENAI_API_KEY"),
+        )
+    elif provider == "google":
         from langchain_google_genai import ChatGoogleGenerativeAI
         raw_llm = ChatGoogleGenerativeAI(
-            model=MODEL_NAME if "gemini" in MODEL_NAME else "gemini-3.6-flash",
-            google_api_key=google_key,
+            model=model_override or "gemini-1.5-pro",
+            google_api_key=os.getenv("GOOGLE_API_KEY"),
             temperature=TEMPERATURE,
         )
-        llm = NormalizedGoogleGenAI(raw_llm)
-    elif (provider == "openrouter" or not provider) and openrouter_key:
-        from langchain_openai import ChatOpenAI
-        llm = ChatOpenAI(
-            model=MODEL_NAME if "gemini" not in MODEL_NAME and ":" in MODEL_NAME else "nvidia/nemotron-3-super-120b-a12b:free",
-            api_key=openrouter_key,
-            base_url="https://openrouter.ai/api/v1",
-            temperature=TEMPERATURE,
-        )
-    elif groq_key:
+        return NormalizedGoogleGenAI(raw_llm)
+    elif provider == "groq":
         from langchain_groq import ChatGroq
-        llm = ChatGroq(
-            model=MODEL_NAME if "gemini" not in MODEL_NAME else "llama-3.1-8b-instant",
+        return ChatGroq(
+            model=model_override or "llama-3.1-8b-instant",
             temperature=TEMPERATURE,
-            groq_api_key=groq_key,
+            groq_api_key=os.getenv("GROQ_API_KEY"),
         )
     else:
-        raise ValueError("No valid LLM API key configured in .env")
+        from langchain_ollama import ChatOllama
+        return ChatOllama(
+            model=model_override or "qwen3:8b",
+            base_url=OLLAMA_BASE_URL,
+            temperature=TEMPERATURE,
+        )
+
+
+llm = get_llm()

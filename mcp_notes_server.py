@@ -15,13 +15,25 @@ DB = DATA / "notes.json"
 mcp = MCPServer(name="notes", version="1.0.0")
 
 
+DEFAULT_NOTES = {
+    "notes": {
+        "note_001": {"title": "Project Review agenda", "content": "Review Q3 goals and milestones. Date: 2026-09-10"},
+        "note_002": {"title": "Meeting Notes Q3", "content": "Discuss engineering roadmap and release plan. Date: 2026-09-12"},
+        "note_009": {"title": "Shopping List", "content": "Milk, Bread, Eggs, Butter, Apples"},
+    }
+}
+
+
 def _load() -> dict:
     if DB.exists():
         try:
-            return json.loads(DB.read_text(encoding="utf-8"))
+            d = json.loads(DB.read_text(encoding="utf-8"))
+            if d.get("notes"):
+                return d
         except Exception:
-            return {}
-    return {}
+            pass
+    _save(DEFAULT_NOTES)
+    return DEFAULT_NOTES
 
 
 def _save(d: dict) -> None:
@@ -41,13 +53,17 @@ async def create(title: str, content: str) -> str:
 
 @mcp.tool()
 async def list(query: str = "") -> str:
-    """List notes (id + title), optionally filtered by title substring."""
+    """List notes (id + title), optionally filtered by title or content substring."""
     import json as _json
     d = _load()
     out = []
     for nid, n in d.get("notes", {}).items():
-        if query and query.lower() not in n.get("title", "").lower():
-            continue
+        if query:
+            q = query.lower()
+            title_match = q in n.get("title", "").lower()
+            content_match = q in n.get("content", "").lower()
+            if not (title_match or content_match):
+                continue
         out.append({"note_id": nid, "title": n["title"]})
     return _json.dumps(out)
 

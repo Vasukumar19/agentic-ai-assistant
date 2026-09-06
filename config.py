@@ -28,7 +28,7 @@ RETRIEVAL_MODE = "hybrid"  # Options: faiss, hybrid, rrf, reranker
 RRF_K = 60
 
 # Phase 5 — Observability & Reliability
-TRACE_DIR = PROJECT_ROOT / "evaluation" / "traces"
+TRACE_DIR = PROJECT_ROOT / "traces"
 TIMEOUT_LLM_S = float(os.getenv("TIMEOUT_LLM_S", "30"))
 TIMEOUT_WEB_SEARCH_S = float(os.getenv("TIMEOUT_WEB_SEARCH_S", "15"))
 TIMEOUT_RETRIEVAL_S = float(os.getenv("TIMEOUT_RETRIEVAL_S", "10"))

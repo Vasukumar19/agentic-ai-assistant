@@ -18,6 +18,10 @@ def validate_plan(plan: Plan, valid_tool_names: list[str], confirmation_required
     for s in plan.steps:
         if s.tool not in valid_tool_names:
             errors.append(f"unknown tool '{s.tool}' in step {s.id}")
+        # Validate that read/create/get tools have arguments if no dependency declared
+        t_lower = s.tool.lower()
+        if any(k in t_lower for k in ("read", "create", "get", "update", "delete", "describe")) and not s.arguments and not s.depends_on:
+            errors.append(f"step {s.id} ({s.tool}) has empty arguments without dependencies")
         for dep in s.depends_on:
             if dep not in idset:
                 errors.append(f"step {s.id} depends on missing step '{dep}'")

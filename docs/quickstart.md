@@ -1,158 +1,92 @@
-# LangGraph Agent — Quickstart
+# Agentic AI Assistant — Quickstart Guide
 
-Onboarding guide for running and understanding the LangGraph Agent project as implemented.
+Onboarding guide for running, configuring, and testing the Agentic AI Assistant.
 
 ---
 
 ## Prerequisites
 
-- Python 3.10+ (3.12 recommended)
-- Groq API key ([https://console.groq.com](https://console.groq.com))
-- Internet access (Groq API, DuckDuckGo search, HuggingFace model download on first run)
+- Python 3.10+ (tested on Python 3.12)
+- [Ollama](https://ollama.ai) installed and running locally
+- (Optional) API keys for Anthropic, OpenAI, Google, or Groq if testing cloud providers
 
 ---
 
 ## Installation
 
-### 1. Clone or open the project
-
+### 1. Clone the project
 ```bash
-cd agent_langGraph
+git clone https://github.com/Vasukumar19/agentic-ai-assistant.git
+cd agentic-ai-assistant
 ```
 
 ### 2. Create and activate a virtual environment
 
 **Windows (PowerShell):**
-
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
 **macOS / Linux:**
-
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
 ### 3. Install dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
-First run also downloads the HuggingFace embedding model (`all-MiniLM-L6-v2`), which may take a few minutes.
-
-### 4. Configure environment variables
-
-Create a `.env` file in the project root:
-
-```env
-GROQ_API_KEY=your_groq_api_key_here
+### 4. Pull the local LLM model
+```bash
+ollama pull qwen3:8b
 ```
 
-The app raises an error at startup if this variable is missing.
+### 5. Setup Configuration
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+### 6. Ingest Knowledge Base (for RAG)
+```bash
+python ingest.py
+```
 
 ---
 
 ## Running Locally
 
-### Interactive CLI
-
+### Interactive CLI Mode
 ```bash
-python agent_langgraph.py
+python main.py
 ```
 
-Type messages at the `You:` prompt. Exit with `quit`, `exit`, or `q`.
+Type queries at the prompt. Special commands:
+- `help`: View guidance and sample queries
+- `clear`: Clear screen
+- `q` or `exit`: Exit the assistant
 
-### Single question (non-interactive)
-
+### Single Query Mode
 ```bash
-python agent_langgraph.py What is 2 + 2?
+python main.py "What is our company remote work policy?"
 ```
-
-### Programmatic use
-
-```python
-from agent_langgraph import ask
-
-answer = ask("hello")
-print(answer)
-```
-
-The graph is compiled once when `agent_langgraph` is imported.
 
 ---
 
-## Project Structure
+## Testing & Verification
 
-```
-agent_langGraph/
-├── agent_langgraph.py      # CLI entry point, ask(), history loading
-├── graph.py                # StateGraph construction, save_history, routing helpers
-├── state.py                # AgentState TypedDict
-├── config.py               # Paths, model name, temperature, max tool iterations
-├── llm.py                  # Shared ChatGroq singleton
-├── ingest.py               # Document ingestion pipeline (FAISS + BM25)
-├── reranker.py             # Cross-encoder reranking model
-├── requirements.txt
-├── .env                    # GROQ_API_KEY (not committed)
-├── rag.md                  # Hybrid RAG pipeline documentation
-├── nodes/
-│   ├── router.py           # intent_router — route classification
-│   ├── chat.py             # chat_node — direct LLM replies
-│   ├── memory_extractor.py # extract, save, confirm memory
-│   ├── retrieval_planner.py# retrieval_planner_node (planner)
-│   ├── memory_retriever.py # profile + semantic retrieval
-│   ├── rag_retriever.py    # Hybrid RAG (FAISS + BM25 + reranker)
-│   ├── bm25.py             # BM25 keyword search module
-│   ├── context_builder.py  # merges context for agent
-│   ├── agent.py            # reasoning + tool binding
-│   ├── tools.py            # web_search, calculator, ToolNode
-│   ├── embeddings.py       # HuggingFace embeddings singleton
-│   └── __init__.py
-├── documents/              # Place .txt files here for ingestion
-├── faiss_index/            # FAISS vector index (built by ingest.py)
-├── bm25_chunks.pkl         # BM25 tokenized chunks (built by ingest.py)
-├── memory/
-│   ├── memory.json         # profile memory (created on first save)
-│   ├── chat_history.json   # conversation log (created on first turn)
-│   └── semantic_memory/    # FAISS index for semantic memories
-└── docs/
-    ├── graphvisual.md
-    ├── implementation.md
-    └── quickstart.md
-```
-
-> **Note:** The planner lives in `nodes/retrieval_planner.py`, NOT `planner.py`.
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | Yes | API key for Groq ChatGroq LLM |
-
-Loaded via `python-dotenv` in `llm.py` and `agent_langgraph.py`.
-
----
-
-## Testing
-
+### 1. Production Smoke Test
 ```bash
-python -m unittest discover -s tests -v
+python scripts/smoke_test.py
 ```
 
-Expected tests:
-
-- Agent node invoke behavior
-- Save history fallback when answer is empty
-- Memory extractor JSON parsing
-- Chat history file loading
-
-All tests use mocks or temporary directories — no live API calls required.
+### 2. Full Automated PyTest Suite
+```bash
+python -m pytest tests/ -v
+```
 
 ---
 
