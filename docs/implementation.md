@@ -1,6 +1,6 @@
-# LangGraph Agent — Implementation Guide
+# LangGraph Agentic AI Assistant — Implementation Guide
 
-This guide explains how the LangGraph Agentic AI project is implemented today. All descriptions are derived from the current source code.
+This guide explains how the Agentic AI Assistant is implemented. All descriptions are derived directly from the active source code.
 
 ---
 
@@ -8,35 +8,23 @@ This guide explains how the LangGraph Agentic AI project is implemented today. A
 
 ### What this project is
 
-A Python CLI agent that routes each user message through a **LangGraph `StateGraph`**. Depending on intent, it either:
+A production-grade Python agent that routes each user message through a **LangGraph `StateGraph`**. Depending on intent, it either:
 
 - replies directly (`chat`),
-- extracts and stores personal memory (`memory_update`), or
-- plans retrieval, gathers context, reasons, and optionally calls tools (`research_query`).
+- extracts and stores personal memory facts (`memory_update`), or
+- plans retrieval, gathers context, performs Hybrid RAG, reasons, and executes multi-step actions across 7 **Model Context Protocol (MCP)** servers (`research_query`).
 
 ### Core concepts
 
 | Concept | Implementation |
 |---------|----------------|
-| **LangGraph** | Workflow orchestration library (`langgraph==0.1.17`) |
+| **LangGraph** | Workflow orchestration library (`langgraph`) |
 | **StateGraph** | Built in [`graph.py`](../graph.py) with typed state [`AgentState`](../state.py) |
-| **Nodes** | Plain Python callables under [`nodes/`](../nodes/) |
-| **AgentState** | Shared dict-like state passed between nodes |
-| **Conditional edges** | Python functions return next node name(s) |
-| **Fan-out** | `Send(...)` in `fan_out_retrievers()` for parallel retrieval |
-| **Tool loop** | `agent` ↔ `tools` until no tool calls or max iterations |
-
-### High-level architecture (post-refactor)
-
-Three responsibilities were split into dedicated nodes:
-
-```
-Router          → classifies route only
-Memory Extractor → extracts memory only
-Retrieval Planner → builds retrieval_plan only
-```
-
-The agent node handles reasoning and optional tool use. Retrieval and memory persistence are graph nodes, not LLM tools.
+| **Multi-LLM Engine** | Unified provider factory in [`llm.py`](../llm.py) (Ollama $0 local, Claude, GPT-4o, Gemini, Groq) |
+| **Hybrid RAG** | Dense FAISS + Sparse BM25 + Reciprocal Rank Fusion + Cross-Encoder Reranking in [`nodes/rag_retriever.py`](../nodes/rag_retriever.py) |
+| **Model Context Protocol** | Dynamic multi-server registry in [`mcp_layer/`](../mcp_layer/) across 7 servers |
+| **ReAct Planning Node** | Dynamic reasoning, goal fulfillment verification, and parameter repair in [`nodes/planner_node.py`](../nodes/planner_node.py) |
+| **Observability** | Structured JSONL tracing in `traces/` with latency breakdowns in [`observability/`](../observability/) |
 
 ---
 
@@ -68,7 +56,7 @@ The agent node handles reasoning and optional tool use. Retrieval and memory per
 | | |
 |---|---|
 | **Purpose** | Construct and compile the LangGraph workflow |
-| **Responsibilities** | Register nodes/edges, routing helpers, save history |
+| **Responsibilities** | Register nodes/edges, routing helpers, save history, execution budget circuit breakers |
 | **Key functions** | `build_graph()`, `create_runnable_graph()`, `route_from_router()`, `fan_out_retrievers()`, `should_continue()`, `save_history_node()` |
 | **Inputs** | `AgentState` dict per invocation |
 | **Outputs** | Compiled runnable graph; terminal state after invoke |
@@ -78,6 +66,7 @@ The agent node handles reasoning and optional tool use. Retrieval and memory per
 
 | Registered name | Function |
 |-----------------|----------|
+| `trace_init` | `trace_init_node` |
 | `intent_router` | `intent_router` |
 | `chat` | `chat_node` |
 | `memory_extractor` | `memory_extractor_node` |
@@ -87,7 +76,7 @@ The agent node handles reasoning and optional tool use. Retrieval and memory per
 | `memory_retriever` | `memory_retriever_node` |
 | `rag_retriever` | `rag_retriever_node` |
 | `context_builder` | `context_builder_node` |
-| `agent` | `agent_node` |
+| `planner` | `planner_node` |
 | `tools` | `tool_node` |
 | `save_history` | `save_history_node` |
 
@@ -98,27 +87,9 @@ The agent node handles reasoning and optional tool use. Retrieval and memory per
 | | |
 |---|---|
 | **Purpose** | Define the graph state schema |
-| **Responsibilities** | TypedDict + message reducer |
+| **Responsibilities** | TypedDict for complete graph state |
 | **Key type** | `AgentState` |
 | **Dependencies** | `typing`, `langchain_core.messages`, `langgraph.graph.message.add_messages` |
-
-**Fields:**
-
-| Field | Type | Reducer |
-|-------|------|---------|
-| `question` | `str` | replace |
-| `route` | `str` | replace |
-| `retrieval_plan` | `Optional[dict]` | replace |
-| `profile_context` | `str` | replace |
-| `semantic_context` | `str` | replace |
-| `rag_context` | `str` | replace |
-| `extracted_profile` | `dict` | replace |
-| `extracted_semantic` | `list` | replace |
-| `answer` | `str` | replace |
-| `_combined_context` | `str` | replace |
-| `messages` | `Annotated[list, add_messages]` | append/merge |
-
-Only `messages` uses a reducer. All other fields are overwritten by the node that returns them.
 
 ---
 
@@ -126,21 +97,19 @@ Only `messages` uses a reducer. All other fields are overwritten by the node tha
 
 | | |
 |---|---|
-| **Purpose** | Centralized constants and filesystem paths |
-| **Responsibilities** | Single source of truth for paths and model settings |
-| **Dependencies** | `pathlib.Path` |
+| **Purpose** | Centralized constants, environment settings, and filesystem paths |
+| **Responsibilities** | Single source of truth for paths, model settings, and budgets |
+| **Dependencies** | `pathlib.Path`, `dotenv` |
 
-| Constant | Value / Path |
-|----------|--------------|
-| `PROJECT_ROOT` | Directory containing `config.py` |
-| `MEMORY_DIR` | `PROJECT_ROOT / "memory"` |
-| `SEMANTIC_MEMORY_DIR` | `MEMORY_DIR / "semantic_memory"` |
-| `CHAT_HISTORY_PATH` | `MEMORY_DIR / "chat_history.json"` |
-| `MEMORY_FILE` | `MEMORY_DIR / "memory.json"` |
-| `FAISS_INDEX_DIR` | `PROJECT_ROOT / "faiss_index"` |
-| `MODEL_NAME` | `"llama-3.3-70b-versatile"` |
-| `TEMPERATURE` | `0.3` |
-| `MAX_TOOL_ITERATIONS` | `5` |
+| Setting | Default Value | Purpose |
+|---------|---------------|---------|
+| `LLM_PROVIDER` | `"ollama"` | Active LLM provider (`ollama`, `anthropic`, `openai`, `google`, `groq`) |
+| `LLM_MODEL` | `"qwen3:8b"` | Model identifier |
+| `OLLAMA_BASE_URL` | `"http://localhost:11434"` | Local Ollama endpoint |
+| `MAX_EXECUTION_STEPS`| `10` | Hard cap on ReAct tool iterations |
+| `RETRIEVAL_MODE` | `"hybrid"` | RAG search strategy (`hybrid`, `faiss`, `rrf`, `reranker`) |
+| `RRF_K` | `60` | Reciprocal Rank Fusion smoothing constant |
+| `TRACE_DIR` | `PROJECT_ROOT / "traces"` | JSONL trace storage directory |
 
 ---
 
@@ -148,14 +117,10 @@ Only `messages` uses a reducer. All other fields are overwritten by the node tha
 
 | | |
 |---|---|
-| **Purpose** | Shared LLM singleton |
-| **Responsibilities** | Load `.env`, read `GROQ_API_KEY`, create exactly one `ChatGroq` |
-| **Exports** | `llm`, `GROQ_API_KEY` |
-| **Dependencies** | `dotenv`, `langchain_groq`, `config` |
-
-This is the **only** file that instantiates `ChatGroq(...)`.
-
-Consumers: `router`, `chat`, `memory_extractor`, `retrieval_planner`, `agent`.
+| **Purpose** | Multi-provider LLM factory |
+| **Responsibilities** | Instantiate the active chat model based on `LLM_PROVIDER` |
+| **Key functions** | `get_llm(provider, model_name)` |
+| **Supported Providers** | Ollama (`ChatOllama`), Anthropic (`ChatAnthropic`), OpenAI (`ChatOpenAI`), Google (`ChatGoogleGenerativeAI`), Groq (`ChatGroq`) |
 
 ---
 
@@ -166,17 +131,8 @@ Consumers: `router`, `chat`, `memory_extractor`, `retrieval_planner`, `agent`.
 | **Purpose** | Intent classification |
 | **Function** | `intent_router(state)` |
 | **Inputs** | `question` |
-| **Outputs** | `route` |
+| **Outputs** | `route` (`chat`, `memory_update`, `research_query`) |
 | **Dependencies** | `llm` |
-
-**Does not:** extract memory, build retrieval plans, initialize unrelated state fields.
-
-**Classification order:**
-
-1. Python greeting detection → `chat`
-2. Python question detection → `research_query`
-3. LLM JSON classification → one of three routes
-4. LLM failure → `research_query`
 
 ---
 
@@ -184,43 +140,20 @@ Consumers: `router`, `chat`, `memory_extractor`, `retrieval_planner`, `agent`.
 
 | | |
 |---|---|
-| **Purpose** | Small-talk responses |
+| **Purpose** | Conversational small-talk responses |
 | **Function** | `chat_node(state)` |
-| **Inputs** | `question` |
+| **Inputs** | `question`, `messages` |
 | **Outputs** | `answer` |
 | **Dependencies** | `llm` |
-
-Passes a conversational system prompt along with the full chat history and current question to the LLM.
 
 ---
 
 ### [`nodes/memory_extractor.py`](../nodes/memory_extractor.py)
 
-Three node functions in one file:
-
-#### `memory_extractor_node`
-
-| | |
-|---|---|
-| **Inputs** | `question` |
-| **Outputs** | `extracted_profile`, `extracted_semantic` |
-| **LLM** | Yes — JSON extraction prompt |
-
-#### `memory_saver_node`
-
-| | |
-|---|---|
-| **Inputs** | `extracted_profile`, `extracted_semantic` |
-| **Outputs** | `{}` |
-| **Side effects** | Writes `MEMORY_FILE`, updates `SEMANTIC_MEMORY_DIR` FAISS index |
-
-#### `memory_response_node`
-
-| | |
-|---|---|
-| **Inputs** | `extracted_profile`, `extracted_semantic` |
-| **Outputs** | `answer` |
-| **LLM** | No — template string |
+Contains three pipeline node functions:
+- `memory_extractor_node`: Extracts profile facts and semantic memories via JSON prompt.
+- `memory_saver_node`: Persists profile to `memory/memory.json` and updates FAISS index in `memory/semantic_memory/`.
+- `memory_response_node`: Produces confirmation message to the user.
 
 ---
 
@@ -228,33 +161,9 @@ Three node functions in one file:
 
 | | |
 |---|---|
-| **Purpose** | Build retrieval plan for research queries |
+| **Purpose** | Route queries to profile memory, semantic memory, or RAG documents |
 | **Function** | `retrieval_planner_node(state)` |
-| **Inputs** | `question` |
-| **Outputs** | `retrieval_plan` dict |
-| **Dependencies** | `llm` |
-
-Runs only when `route == "research_query"`.
-
-Heuristics first, LLM second, all-false fallback on parse error.
-
-> File name is `retrieval_planner.py`, not `planner.py`.
-
----
-
-### [`nodes/memory_retriever.py`](../nodes/memory_retriever.py)
-
-| | |
-|---|---|
-| **Purpose** | Read profile JSON and search semantic FAISS |
-| **Function** | `memory_retriever_node(state)` |
-| **Inputs** | `question`, `retrieval_plan` |
-| **Outputs** | `profile_context`, `semantic_context` |
-| **Dependencies** | `config`, `embeddings`, `FAISS` |
-
-Profile formatting includes labeled sections (`=== PROFILE INFORMATION ===`).
-
-Semantic search uses `similarity_search(question, k=3)`.
+| **Outputs** | `retrieval_plan` dict (`{"profile": bool, "semantic": bool, "rag": bool}`) |
 
 ---
 
@@ -262,55 +171,10 @@ Semantic search uses `similarity_search(question, k=3)`.
 
 | | |
 |---|---|
-| **Purpose** | Search company document FAISS index using a hybrid retrieval pipeline |
+| **Purpose** | Hybrid RAG search engine over company knowledge base |
 | **Function** | `rag_retriever_node(state)` |
-| **Inputs** | `question`, `retrieval_plan` |
-| **Outputs** | `rag_context` |
-| **Dependencies** | `config`, `embeddings`, `FAISS`, `bm25`, `reranker`, `llm` |
-
-**Hybrid RAG Pipeline (3 stages):**
-
-1. **Query Rewriting** — The user's question is rewritten into a concise, optimized search query via `ChatPromptTemplate` + LLM (`rewrite_prompt`)
-2. **Dual Retrieval** — Both FAISS semantic search (`similarity_search_with_score`, k=20) and BM25 keyword search (`bm25_search`, k=20) run. Results are merged by `chunk_id`. FAISS results above a similarity threshold of 0.8 are filtered out; BM25 results are always included
-3. **Cross-Encoder Reranking** — Up to 20 merged candidates are re-ranked using the `cross-encoder/ms-marco-MiniLM-L6-v2` model from `reranker.py`. The top 5 most relevant results are selected
-
-The FAISS vectorstore is **lazily loaded** on first call and cached globally. If the index is missing or corrupt, the node returns empty context rather than crashing the graph.
-
-### [`nodes/bm25.py`](../nodes/bm25.py)
-
-| | |
-|---|---|
-| **Purpose** | BM25 keyword-based retrieval for hybrid search |
-| **Key function** | `bm25_search(query, k=5)` |
-| **Dependencies** | `rank_bm25`, pickle |
-
-Tokenizes text using regex `\w+` and builds a `BM25Okapi` index from pickled document chunks (`bm25_chunks.pkl`). The index is lazily loaded on first call. Used by `rag_retriever_node` to supplement FAISS semantic search with keyword matching.
-
-### [`reranker.py`](../reranker.py)
-
-| | |
-|---|---|
-| **Purpose** | Cross-encoder reranking for RAG results |
-| **Key function** | `rerank(query, items, top_k=5)` |
-| **Dependencies** | `sentence-transformers` |
-
-Uses the `cross-encoder/ms-marco-MiniLM-L6-v2` model to compute relevance scores between the query and each candidate document. Returns the top-k items sorted by relevance. Improves precision over pure embedding similarity by using a dedicated cross-attention model.
-
-### [`ingest.py`](../ingest.py)
-
-| | |
-|---|---|
-| **Purpose** | Document ingestion pipeline |
-| **Key function** | `ingest_documents()` |
-| **Dependencies** | `TextLoader`, `RecursiveCharacterTextSplitter`, `FAISS`, `embeddings`, pickle |
-
-Processes `.txt` files from the `documents/` directory:
-1. Loads each file using `TextLoader`
-2. Splits into chunks using `RecursiveCharacterTextSplitter` (chunk_size=800, overlap=150)
-3. Enriches metadata with `document_id`, `chunk_id`, `source`, page info, etc.
-4. Builds a `FAISS` vector index from all chunks
-5. Saves the index to `faiss_index/`
-6. Pickles the chunk list to `bm25_chunks.pkl` for BM25 retrieval
+| **Pipeline** | Query rewriting $\rightarrow$ FAISS vector search + BM25 keyword search $\rightarrow$ Reciprocal Rank Fusion $\rightarrow$ Cross-encoder reranking |
+| **Dependencies** | `embeddings`, `bm25`, `rrf`, `reranker` |
 
 ---
 
@@ -318,325 +182,36 @@ Processes `.txt` files from the `documents/` directory:
 
 | | |
 |---|---|
-| **Purpose** | Merge retrieval strings |
+| **Purpose** | Assemble dynamic prompt context |
 | **Function** | `context_builder_node(state)` |
-| **Inputs** | `profile_context`, `semantic_context`, `rag_context` |
-| **Outputs** | `_combined_context` |
-
-Pure string assembly — no I/O, no LLM.
+| **Injected Data** | Real-time timestamp/clock, user profile facts, semantic memories, and retrieved document passages |
 
 ---
 
-### [`nodes/agent.py`](../nodes/agent.py)
+### [`nodes/planner_node.py`](../nodes/planner_node.py)
 
 | | |
 |---|---|
-| **Purpose** | Research-path reasoning and tool binding |
-| **Function** | `agent_node(state)` |
-| **Inputs** | `question`, `_combined_context`, `messages` |
-| **Outputs** | `messages`; `answer` when finished |
-| **Dependencies** | `llm`, `tools` |
-
-Builds a `SystemMessage` with `AGENT_SYSTEM_PROMPT` and `_combined_context`, then prepends it to the conversation history (`state["messages"]`), ensures the current `question` is appended, and finally calls `llm.bind_tools(tools).invoke(llm_input)`.
+| **Purpose** | ReAct reasoning engine, multi-step orchestration, goal fulfillment guard, and parameter auto-healing |
+| **Function** | `planner_node(state)` |
+| **Key Features** | Compact workflow progress summary, parameter repair, loop detection, formatting synthesis rules |
 
 ---
 
-### [`nodes/tools.py`](../nodes/tools.py)
+### [`nodes/tools.py`](../nodes/tools.py) & MCP Multi-Server Layer
 
 | | |
 |---|---|
-| **Purpose** | Define and execute agent tools |
-| **Exports** | `web_search_tool`, `calculator`, `tools`, `tool_node`, `run_tool` |
-| **Dependencies** | `DuckDuckGoSearchRun`, `asteval`, `langgraph.prebuilt.ToolNode` |
-
-| Tool | Backend |
-|------|---------|
-| `web_search` | DuckDuckGo via `langchain_community` |
-| `calculator` | `asteval.Interpreter` |
-
-Memory and RAG are intentionally **not** tools.
+| **Purpose** | Execute native tools and 7 Model Context Protocol (MCP) servers |
+| **Servers** | `calendar`, `notes`, `reminders`, `filesystem`, `github`, `sqlite`, `fetch` |
+| **Safety** | Human-in-the-loop confirmation for destructive actions, `mcp_sandbox/` jail for file operations |
 
 ---
 
-### [`nodes/embeddings.py`](../nodes/embeddings.py)
+## 3. Testing & Verification
 
-| | |
-|---|---|
-| **Purpose** | Shared embedding model singleton |
-| **Exports** | `embeddings` |
-| **Model** | `sentence-transformers/all-MiniLM-L6-v2` on CPU |
+Automated test suites live under [`tests/`](../tests/):
 
-Used by semantic memory save/search and RAG search.
-
----
-
-### [`nodes/__init__.py`](../nodes/__init__.py)
-
-Re-exports all node functions for `graph.py` imports.
-
----
-
-## 3. Detailed Execution Flows
-
-### Chat Path
-
-**Example:** `"hello"`
-
-| Step | Node | State changes |
-|------|------|---------------|
-| 1 | `intent_router` | `route = "chat"` (pre-routed, no LLM) |
-| 2 | `chat` | `answer = <LLM response>` |
-| 3 | `save_history` | Appends user + assistant entries to `CHAT_HISTORY_PATH` |
-
-**LLM calls:** 1 (chat node only)
-
-**Unchanged fields:** `retrieval_plan`, all context fields, `messages` (not appended on this path)
-
----
-
-### Memory Update Path
-
-**Example:** `"My name is Alice and I built a todo app in React."`
-
-| Step | Node | State changes |
-|------|------|---------------|
-| 1 | `intent_router` | Declarative statement → LLM → `route = "memory_update"` |
-| 2 | `memory_extractor` | `extracted_profile`, `extracted_semantic` populated |
-| 3 | `memory_saver` | Writes JSON + FAISS (side effects only) |
-| 4 | `memory_response` | `answer = "Got it! I'll remember that ..."` |
-| 5 | `save_history` | Persists Q&A to disk |
-
-**LLM calls:** 1 router (if not pre-routed) + 1 extractor
-
----
-
-### Research Path (No Tools)
-
-**Example:** `"What's my name?"`
-
-| Step | Node | State changes |
-|------|------|---------------|
-| 1 | `intent_router` | `route = "research_query"` (question pre-route) |
-| 2 | `retrieval_planner` | `retrieval_plan = {profile: true, semantic: false, rag: false}` via heuristics |
-| 3 | `memory_retriever` | `profile_context = "=== PROFILE INFORMATION ===\n..."` |
-| 4 | `context_builder` | `_combined_context` merged string |
-| 5 | `agent` | `answer` set, `messages` appended |
-| 6 | `save_history` | History persisted |
-
-If `retrieval_plan` is all false, fan-out skips retrievers and sends state directly to `context_builder`.
-
----
-
-### Research Path (With Tools)
-
-**Example:** `"What is 157 * 23?"`
-
-| Step | Node | State changes |
-|------|------|---------------|
-| 1–4 | router → planner → (maybe retrievers) → context | as above |
-| 5 | `agent` (iteration 1) | AI message with `tool_calls`; no `answer` yet |
-| 6 | `should_continue` | returns `"tools"` |
-| 7 | `tools` | Appends `ToolMessage`(s) to `messages` |
-| 8 | `agent` (iteration 2) | `answer` set if LLM responds without more tool calls |
-| 9 | `should_continue` | returns `"end"` |
-| 10 | `save_history` | Persists final answer |
-
-**Loop limit:** Stops after `MAX_TOOL_ITERATIONS` (5) AI messages that contain `tool_calls`.
-
----
-
-## 4. State Lifecycle
-
-### At graph entry (`ask()`)
-
-All fields initialized explicitly. Prior conversation loaded into `messages` from `CHAT_HISTORY_PATH`.
-
-### During execution
-
-Each node returns a partial dict. LangGraph merges it into state:
-
-- Scalar fields → replaced
-- `messages` → merged via `add_messages`
-
-### Branch-specific mutations
-
-| Field | Chat | Memory | Research |
-|-------|------|--------|----------|
-| `route` | set | set | set |
-| `retrieval_plan` | unchanged | unchanged | set by planner |
-| `extracted_*` | unchanged | set | unchanged |
-| `*_context` | unchanged | unchanged | set by retrievers |
-| `_combined_context` | unchanged | unchanged | set by context_builder |
-| `answer` | set by chat | set by memory_response | set by agent |
-| `messages` | unchanged | unchanged | appended by agent/tools |
-
-### At graph exit
-
-`save_history` writes `question` and final `answer` to JSON. The in-memory `messages` list from the research path is **not** written back to `CHAT_HISTORY_PATH` as structured LangChain messages — only the simple Q&A pair format is persisted.
-
----
-
-## 5. Tool Loop
-
-### Flow
-
-```
-User question
-     ↓
-  agent  ── builds llm_input (history + context + question), invokes LLM with tools
-     ↓
-  AIMessage with tool_calls added to messages
-     ↓
-  should_continue → "tools"
-     ↓
-  ToolNode executes web_search / calculator
-     ↓
-  ToolMessage(s) appended to messages (add_messages reducer)
-     ↓
-  agent again
-     ↓
-  AIMessage without tool_calls → answer set
-     ↓
-  save_history
-```
-
-### Message accumulation
-
-Each agent invocation appends:
-
-```python
-SystemMessage(content=...)
-... (prior chat history) ...
-HumanMessage(content=question)
-AIMessage(content=..., tool_calls=...)  # or final answer
-```
-
-`ToolNode` appends one `ToolMessage` per executed tool call.
-
-### Message history integration
-
-The agent correctly builds the prompt by appending the `SystemMessage` to the full `messages` list. Prior `ToolMessage` contents and AI tool calls are perfectly preserved in the conversation, allowing the LLM to correctly reason over multi-step tool workflows (ReAct loop).
-
----
-
-## 6. Memory Architecture
-
-Four distinct storage mechanisms:
-
-| Store | Location | Format | Written by | Read by |
-|-------|----------|--------|------------|---------|
-| **Profile memory** | `memory/memory.json` | JSON key-value | `memory_saver` | `memory_retriever` |
-| **Semantic memory** | `memory/semantic_memory/` | FAISS index | `memory_saver` | `memory_retriever`, `memory_saver` |
-| **RAG documents** | `faiss_index/` | FAISS index | external / manual | `rag_retriever` |
-| **Conversation history** | `memory/chat_history.json` | JSON list of `{role, content}` | `save_history` | `load_chat_history()` |
-
-### How they differ
-
-| | Profile | Semantic | RAG | Conversation |
-|---|---------|----------|-----|--------------|
-| **Content** | Stable identity fields (name, goal, …) | Long-term experiential facts | Company docs | Recent Q&A turns |
-| **Structure** | Structured JSON | Vector chunks | Vector chunks | Chronological messages |
-| **Retrieval** | Full file read | Similarity search, k=3 | Similarity search, k=3 | Loaded entirely at session start |
-| **Update path** | memory_update route | memory_update route | not updated by graph | every graph completion |
-
-### Profile fields supported in extraction schema
-
-`name`, `goal`, `profession`, `education`, `interests`, `favorite_technologies`, `preferences`
-
----
-
-## 7. Design Decisions
-
-### Why Router, Planner, and Memory Extractor are separate
-
-| Node | Single responsibility |
-|------|----------------------|
-| Router | Choose workflow branch only |
-| Memory Extractor | Parse storable facts from declarative input |
-| Retrieval Planner | Choose retrieval sources for questions |
-
-This avoids one monolithic LLM call doing routing + extraction + planning, reduces prompt size, and enforces field ownership.
-
-### Why retrieval is parallel
-
-`fan_out_retrievers()` can dispatch `memory_retriever` and `rag_retriever` concurrently via `Send`. Both write different state fields (`profile_context` / `semantic_context` vs `rag_context`), so they do not conflict. `context_builder` merges results once all branches complete.
-
-### Why memory and RAG are graph nodes, not tools
-
-- Retrieval is **deterministic** and always runs before reasoning on the research path.
-- The agent prompt already includes retrieved context in `_combined_context`.
-- Keeps tool surface limited to external actions: web search and calculator.
-- Prevents the LLM from deciding whether to "call memory" mid-reasoning.
-
-### Why the agent only owns reasoning
-
-Upstream nodes prepare inputs:
-
-- Planner → `retrieval_plan`
-- Retrievers → context strings
-- Context builder → `_combined_context`
-
-The agent consumes prepared context and decides whether external tools are needed.
-
----
-
-## 8. Extending the System
-
-### Add a new tool
-
-1. Define the tool in [`nodes/tools.py`](../nodes/tools.py).
-2. Append it to the `tools` list.
-3. Update `AGENT_SYSTEM_PROMPT` in [`nodes/agent.py`](../nodes/agent.py) with usage guidance.
-
-No changes to router or planner required unless the new capability needs a new route.
-
-### Add a new retriever
-
-1. Add a boolean flag to `retrieval_plan` (requires updating planner prompt/heuristics and `AgentState` docs).
-2. Create `nodes/my_retriever.py` returning a new context field.
-3. Extend `fan_out_retrievers()` to `Send` the new node.
-4. Add an edge from the new node → `context_builder`.
-5. Update `context_builder_node` to include the new field in `_combined_context`.
-
-Existing retrievers remain unchanged if the new flag defaults to `false`.
-
-### Add a new route
-
-1. Add route value handling in `intent_router` and `route_from_router()`.
-2. Register new nodes and edges in `build_graph()`.
-3. Ensure new branch sets `answer` before `save_history`.
-4. Add safe defaults in `ask()` initial state for any new fields.
-
----
-
-## 9. Testing
-
-Tests live in [`tests/test_runtime_fixes.py`](../tests/test_runtime_fixes.py):
-
-| Test | Validates |
-|------|-----------|
-| `test_agent_node_uses_message_history_in_invoke` | Agent node invoke behavior with prior messages in state |
-| `test_save_history_uses_fallback_when_answer_missing` | Empty answer fallback string |
-| `test_memory_extractor_node_extracts_profile_and_semantic` | Extractor JSON parsing |
-| `test_load_chat_history_restores_previous_turns` | History file loading |
-
-Run:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-Requires all dependencies installed in the active environment.
-
----
-
-## 10. Dependency Notes
-
-[`requirements.txt`](../requirements.txt) lists core packages. Additional runtime imports:
-
-| Package | Used by | In requirements.txt |
-|---------|---------|---------------------|
-| `asteval` | `calculator` tool | **Yes** |
-| `duckduckgo-search`, `ddgs` | `web_search` tool | **Yes** |
-
-Embeddings pull `sentence-transformers` and download model weights on first use.
+- **Integration Tests** (`tests/integration/test_real_app_mcp.py`): Validates multi-server discovery, GitHub, SQLite, and Web Fetch data flow.
+- **Security Tests** (`tests/security/test_real_app_security.py`): Validates human confirmation enforcement, URL scheme restrictions, and secret redaction.
+- **One-Command Smoke Test** (`scripts/smoke_test.py`): Rapid 9-point verification of Ollama, MCP registry, filesystem sandboxing, and graph execution.

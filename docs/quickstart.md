@@ -137,7 +137,6 @@ My name is Kumar and I am learning LangGraph.
 **Prerequisite:** Profile saved (e.g., name in `memory/memory.json`).
 
 **Input:**
-
 ```
 What's my name?
 ```
@@ -145,18 +144,15 @@ What's my name?
 | | |
 |---|---|
 | **Expected route** | `research_query` (question pre-route) |
-| **Path** | `intent_router` → `retrieval_planner` → `memory_retriever` → `context_builder` → `agent` → `save_history` |
+| **Path** | `intent_router` → `retrieval_planner` → `memory_retriever` → `context_builder` → `planner` → `save_history` |
 | **Planner** | `{profile: true, semantic: false, rag: false}` via `"my name"` heuristic |
-| **Expected output** | Answer using profile context, e.g. states stored name |
-
-If `memory.json` is empty or missing, agent receives no profile context and may not know the name.
+| **Expected output** | Answer using profile context, stating stored user name |
 
 ---
 
 ### Calculator
 
 **Input:**
-
 ```
 What is 157 * 23?
 ```
@@ -164,79 +160,31 @@ What is 157 * 23?
 | | |
 |---|---|
 | **Expected route** | `research_query` |
-| **Path** | research path + possible tool loop |
-| **Planner** | Likely all false (no profile/semantic/rag hints) |
-| **Expected output** | Agent calls `calculator` tool, then returns numeric result |
-
-**Tool loop:**
-
-```
-Question
-   ↓
-Agent (requests calculator tool)
-   ↓
-ToolNode (runs calculator)
-   ↓
-Agent (returns final answer)
-   ↓
-save_history
-```
+| **Path** | research path + tool loop |
+| **Expected output** | Planner calls `calculator` tool, then returns numeric result (3611) |
 
 ---
 
-### Web Search
+### Multi-Server Compound Action Workflow
 
 **Input:**
-
 ```
-What is the current price of gold?
+Read the note titled 'Quarterly Planning', calculate a 15% increase on the budget inside, and schedule a calendar event for tomorrow at 2 PM.
 ```
 
 | | |
 |---|---|
 | **Expected route** | `research_query` |
-| **Planner** | Likely all false |
-| **Expected output** | Agent calls `web_search` via DuckDuckGo, summarizes results |
-
-Requires network access. DuckDuckGo rate limits or blocks may cause tool errors.
+| **Execution Steps** | 1. `notes.list` / `notes.get` → 2. `calculator` → 3. `calendar.create_event` → 4. `planner` final answer |
+| **Safeguards** | Goal fulfillment guard ensures all 3 operations finish before terminating |
 
 ---
 
-### Tool Loop (Multi-Step)
+### Hybrid RAG / Enterprise Knowledge Query
+
+**Prerequisite:** Knowledge base ingested via `python ingest.py`.
 
 **Input:**
-
-```
-Calculate sqrt(144) and then multiply the result by 5
-```
-
-| | |
-|---|---|
-| **Expected route** | `research_query` |
-| **Max iterations** | 5 tool rounds (`MAX_TOOL_ITERATIONS`) |
-
-```
-Question
-   ↓
-Agent → may call calculator
-   ↓
-ToolNode → ToolMessage in state.messages
-   ↓
-Agent → final answer (or another tool call, up to limit)
-   ↓
-save_history
-```
-
-If max iterations is reached with tool calls still pending, graph routes to `save_history` with fallback answer if `answer` is still empty.
-
----
-
-### RAG / Company Documents
-
-**Prerequisite:** `faiss_index/` exists at project root.
-
-**Input:**
-
 ```
 What is the company policy on remote work?
 ```
@@ -245,146 +193,60 @@ What is the company policy on remote work?
 |---|---|
 | **Expected route** | `research_query` |
 | **Planner** | `{rag: true}` via policy heuristic |
-| **Path** | includes `rag_retriever` → `context_builder` → `agent` |
-| **Expected output** | Answer grounded in retrieved document chunks |
-
-Without `faiss_index/`, RAG retriever returns empty context and the agent answers without document grounding.
+| **Path** | `rag_retriever` (FAISS + BM25 + RRF + Reranker) → `context_builder` → `planner` |
+| **Expected output** | Answer grounded in retrieved document chunks from `documents/` |
 
 ---
 
 ## Troubleshooting
 
-### Missing API key
+### Ollama Connectivity Error
 
 **Symptom:**
-
 ```
-EnvironmentError: GROQ_API_KEY not found. Please add it to your .env file.
+[ERROR] Ollama is not accessible on http://localhost:11434
 ```
 
 **Fix:**
-
-1. Create `.env` in the project root.
-2. Add `GROQ_API_KEY=...`
-3. Restart the application.
+1. Make sure Ollama desktop is running.
+2. In terminal run: `ollama run qwen3:8b`.
+3. Verify connectivity at `http://localhost:11434`.
 
 ---
 
-### Missing FAISS / dependency errors
+### Missing FAISS Vector Index (`faiss_index/`)
 
 **Symptom:**
-
 ```
-ModuleNotFoundError: No module named 'faiss'
+[RAG Retriever] FAISS index directory not found at faiss_index (index not built)
 ```
 
-**Fix:**
-
+**Fix:** Run the ingestion pipeline to build both FAISS and BM25 indices:
 ```bash
-pip install faiss-cpu
+python ingest.py
 ```
-
-Already pinned in `requirements.txt` as `faiss-cpu==1.8.0`.
 
 ---
 
+### Missing Profile Memory
 
-
-### Missing FAISS index (`faiss_index/`)
-
-**Symptom (console):**
-
-```
-[RAG Retriever] No documents found (faiss_index not built)
-```
-
-**Behavior:** Graph continues. RAG context is empty. Agent answers without document retrieval.
-
-**Fix:** Build or copy a FAISS index into `faiss_index/` at the project root. The repository does not include an index builder script.
-
----
-
-### Missing profile memory
-
-**Symptom:** `"What's my name?"` returns a generic or unknown answer.
-
-**Cause:** `memory/memory.json` does not exist or has no `name` field.
+**Symptom:** `"What's my name?"` returns a generic answer.
 
 **Fix:** Store memory first:
-
 ```
 My name is Alice.
 ```
-
 Then ask retrieval questions.
 
 ---
 
-### Missing semantic memory index
+### Resetting Sandbox & Server Data
 
-**Symptom:**
-
+To reset calendar, notes, reminders, or database state:
+```bash
+# Clear JSON stores
+rm mcp_data/*.json
 ```
-[Memory Retriever] Error loading semantic memory FAISS index
-```
-
-**Behavior:** Semantic context stays empty; graph continues.
-
-**Fix:** Save semantic memories via the memory update path, which creates `memory/semantic_memory/`.
-
----
-
-### Empty or corrupt chat history
-
-**Symptom:** Prior turns not loaded.
-
-**Behavior:** `load_chat_history()` returns `[]` on missing file or parse error.
-
-**Fix:** Delete or repair `memory/chat_history.json`. File must be a JSON array of `{role, content}` objects.
-
----
-
-### Groq / network errors
-
-**Symptom:**
-
-```
-[Error] ...
-Answer: I encountered an error processing your request. Please try again.
-```
-
-**Fix:** Check API key validity, Groq service status, and network connectivity.
-
-**For Rate Limit Errors (429):**
-If you encounter a `RateLimitError` (especially for Tokens Per Day on the free tier), open `config.py` and change `MODEL_NAME` to a smaller model, such as `llama-3.1-8b-instant` or `mixtral-8x7b-32768`.
-
----
-
-### DuckDuckGo search failures
-
-**Symptom:** Tool returns error string; agent may still respond with partial info.
-
-**Fix:** Retry later, check network, verify `duckduckgo-search` is installed.
-
----
-
-### Embedding model download slow or fails
-
-**Symptom:** Long pause on first memory/RAG operation; or HuggingFace download error.
-
-**Fix:** Ensure internet access and disk space. Model: `sentence-transformers/all-MiniLM-L6-v2`.
-
----
-
-### Tests fail to import `langchain_core`
-
-**Symptom:**
-
-```
-ModuleNotFoundError: No module named 'langchain_core'
-```
-
-**Fix:** Activate the virtual environment and run `pip install -r requirements.txt`.
 
 ---
 
@@ -394,9 +256,13 @@ All tunables in [`config.py`](../config.py):
 
 | Setting | Default | Purpose |
 |---------|---------|---------|
-| `MODEL_NAME` | `llama-3.3-70b-versatile` | Groq model |
-| `TEMPERATURE` | `0.3` | LLM temperature |
-| `MAX_TOOL_ITERATIONS` | `5` | Tool loop cap |
+| `LLM_PROVIDER` | `"ollama"` | LLM provider (`ollama`, `anthropic`, `openai`, `google`, `groq`) |
+| `LLM_MODEL` | `"qwen3:8b"` | Model name |
+| `OLLAMA_BASE_URL` | `"http://localhost:11434"` | Ollama endpoint |
+| `MAX_EXECUTION_STEPS` | `10` | Hard cap on multi-step tool loops |
+| `RETRIEVAL_MODE` | `"hybrid"` | RAG search strategy (`hybrid`, `faiss`, `rrf`, `reranker`) |
+| `RRF_K` | `60` | Reciprocal Rank Fusion constant |
+| `TRACE_DIR` | `PROJECT_ROOT / "traces"` | Execution trace directory |
 
 ---
 
@@ -404,5 +270,9 @@ All tunables in [`config.py`](../config.py):
 
 | Document | Contents |
 |----------|----------|
-| [graphvisual.md](./graphvisual.md) | Full graph diagram, node I/O, state ownership, performance |
-| [implementation.md](./implementation.md) | File-by-file guide, execution flows, design decisions, extension patterns |
+| [architecture.md](./architecture.md) | Full system topology, safety policies, and components |
+| [graphvisual.md](./graphvisual.md) | LangGraph visual flow, node I/O, and state ownership |
+| [implementation.md](./implementation.md) | Complete file-by-file implementation guide |
+| [mcp.md](./mcp.md) | Model Context Protocol integration and server developer guide |
+| [real_applications.md](./real_applications.md) | GitHub, SQLite, and Web Fetch server guides |
+
