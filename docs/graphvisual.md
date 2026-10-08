@@ -1,15 +1,20 @@
 # LangGraph Agent — Architecture Reference
 
-This document describes the **actual** LangGraph workflow as implemented in `graph.py` and the node modules under `nodes/`. It reflects the post-refactor architecture where routing, memory extraction, and retrieval planning are separate nodes.
+This document describes the **actual** LangGraph workflow as implemented in `graph.py` and the node modules under `nodes/`. It reflects the modern architecture featuring structured tracing, intent routing, hybrid retrieval planning, the MCP-integrated execution planner, safety confirmation gates, and deterministic goal fulfillment guards.
 
 ---
 
-## Overall Graph
+## Overall Graph Architecture
 
-The compiled graph is built by `build_graph()` in [`graph.py`](../graph.py) and entered through `intent_router`.
+The compiled graph is built by `build_graph()` in [`graph.py`](../graph.py). Execution begins at `trace_init` to establish distributed trace contexts before passing control to `intent_router`.
 
 ```
                               START
+                                |
+                                v
+                        +---------------+
+                        |  trace_init   |
+                        +---------------+
                                 |
                                 v
                         +---------------+
@@ -23,111 +28,98 @@ The compiled graph is built by `build_graph()` in [`graph.py`](../graph.py) and 
                    +------+  +------------------+  +-------------------+
                       |              |                      |
                       |              v                      |
-                      |       +--------------+            |
-                      |       | memory_saver |            |
-                      |       +--------------+            |
+                      |       +--------------+              |
+                      |       | memory_saver |              |
+                      |       +--------------+              |
                       |              |                      |
                       |              v                      |
                       |     +------------------+            |
                       |     | memory_response  |            |
                       |     +------------------+            |
                       |              |                      |
-                      |              |         +-----------+-----------+
-                      |              |         | fan_out_retrievers    |
-                      |              |         +-----------+-----------+
-                      |              |              /    |    \
-                      |              |             /     |     \
-                      |              |            v      v      v
+                      |              |         +------------+------------+
+                      |              |         |   fan_out_retrievers    |
+                      |              |         +------------+------------+
+                      |              |              /       |       \
+                      |              |             /        |        \
+                      |              |            v         v         v
                       |              |    +-----------+ +-----------+ +-----------------+
                       |              |    | memory_   | | rag_      | | context_builder |
                       |              |    | retriever | | retriever | | (direct skip)   |
                       |              |    +-----------+ +-----------+ +-----------------+
-                      |              |            \       /              /
-                      |              |             \     /              /
-                      |              |              v   v              v
+                      |              |            \         /               /
+                      |              |             \       /               /
+                      |              |              v     v               v
                       |              |           +-----------------+
                       |              |           | context_builder |
                       |              |           +-----------------+
                       |              |                      |
                       |              |                      v
-                      |              |                 +-------+
-                      |              |                 | agent |
-                      |              |                 +-------+
-                      |              |                   /     \
-                      |              |                  /       \
-                      |              |           tool_calls?    no tool_calls
-                      |              |                /             \
-                      |              |               v               v
-                      |              |          +-------+    +-------------+
-                      |              |          | tools |    | save_history|
-                      |              |          +-------+    +-------------+
-                      |              |               |               |
-                      |              |               v               v
-                      |              |          (back to agent)      END
-                      |              |                             
-                      v              v                             
-                 +-------------+                                   
-                 | save_history|                                   
-                 +-------------+                                   
-                        |                                          
-                        v                                          
-                       END                                         
+                      |              |                 +---------+
+                      |              |                 | planner |<----------+
+                      |              |                 +---------+           |
+                      |              |                   /     \             |
+                      |              |                  /       \            |
+                      |              |         should_continue?  final/end   |
+                      |              |                /             \        |
+                      |              |               v               v       |
+                      |              |          +---------+    +-------------+
+                      |              |          |  tools  |----+ save_history|
+                      |              |          +---------+    +-------------+
+                      |              |          (MCP + Native)       |
+                      |              |                               v
+                      v              v                              END
+                 +-------------+
+                 | save_history|
+                 +-------------+
+                        |
+                        v
+                       END
 ```
 
-### Edge Types
+### Edge Definitions & Flow Routing
 
 | From | To | Type | Condition |
-|------|----|------|-----------|
-| `START` | `intent_router` | fixed | always |
-| `intent_router` | `chat` | conditional | `route == "chat"` |
-| `intent_router` | `memory_extractor` | conditional | `route == "memory_update"` |
-| `intent_router` | `retrieval_planner` | conditional | `route == "research_query"` (default) |
-| `chat` | `save_history` | fixed | always |
-| `memory_extractor` | `memory_saver` | fixed | always |
-| `memory_saver` | `memory_response` | fixed | always |
-| `memory_response` | `save_history` | fixed | always |
-| `retrieval_planner` | retrievers / `context_builder` | conditional fan-out | see below |
-| `memory_retriever` | `context_builder` | fixed | always |
-| `rag_retriever` | `context_builder` | fixed | always |
-| `context_builder` | `agent` | fixed | always |
-| `agent` | `tools` or `save_history` | conditional | `should_continue()` |
-| `tools` | `agent` | fixed | always |
-| `save_history` | `END` | fixed | always |
+| :--- | :--- | :--- | :--- |
+| `START` | `trace_init` | Fixed | Always (initializes request ID, trace ID, and metrics) |
+| `trace_init` | `intent_router` | Fixed | Always |
+| `intent_router` | `chat` | Conditional | `route == "chat"` (greetings & simple conversational turns) |
+| `intent_router` | `memory_extractor` | Conditional | `route == "memory_update"` (explicit user facts & preferences) |
+| `intent_router` | `retrieval_planner` | Conditional | `route == "research_query"` (default for queries & tool execution) |
+| `chat` | `save_history` | Fixed | Always |
+| `memory_extractor` | `memory_saver` | Fixed | Always |
+| `memory_saver` | `memory_response` | Fixed | Always |
+| `memory_response` | `save_history` | Fixed | Always |
+| `retrieval_planner` | Retrievers / `context_builder` | Conditional Fan-Out | Dispatches to requested retrievers via `Send()` |
+| `memory_retriever` | `context_builder` | Fixed | Always |
+| `rag_retriever` | `context_builder` | Fixed | Always |
+| `context_builder` | `planner` | Fixed | Always |
+| `planner` | `tools` or `save_history` | Conditional | `should_continue(state)` evaluates loop guards, failure limits, and budget |
+| `tools` | `planner` | Fixed | Loops back to planner with structured tool outputs |
+| `save_history` | `END` | Fixed | Persists Q&A history, emits `FINAL_ANSWER`, and flushes trace logs |
 
 ### Fan-Out Retrieval (`fan_out_retrievers`)
 
 Implemented in [`graph.py`](../graph.py) using LangGraph `Send`:
-
 1. If `retrieval_plan.profile` or `retrieval_plan.semantic` is `True` → send to `memory_retriever`.
 2. If `retrieval_plan.rag` is `True` → send to `rag_retriever`.
 3. If neither applies → send directly to `context_builder` (skip retrieval nodes).
 
 Parallel retriever branches converge at `context_builder`. LangGraph waits for all inbound branches before running `context_builder`.
 
-### Tool Loop
+### The Scaffold & Tool Execution Loop
 
 Controlled by `should_continue()` in [`graph.py`](../graph.py):
 
 ```
-agent  --[last message has tool_calls]-->  tools  -->  agent  -->  ...
-agent  --[no tool_calls OR max rounds]-->  save_history
+planner  --[action: "tool" AND budget/circuit ok]-->  tools  -->  planner  -->  ...
+planner  --[action: "final" OR budget/circuit trip]-->  save_history
 ```
 
-- Maximum tool rounds: `MAX_TOOL_ITERATIONS` (5) from [`config.py`](../config.py).
-- Tool execution uses LangGraph's prebuilt `ToolNode` from [`nodes/tools.py`](../nodes/tools.py).
-- `ToolMessage` objects are appended to `state.messages` via the `add_messages` reducer defined in [`state.py`](../state.py).
-
-### Context Injection (Research Path)
-
-Retrieval happens **once** before the tool loop:
-
-1. `context_builder_node` reads `profile_context`, `semantic_context`, and `rag_context`.
-2. It writes `_combined_context` once.
-3. `agent_node` reads `_combined_context` from state on each agent invocation and embeds it in a string prompt.
-
-The agent does **not** re-run retrievers during the tool loop. `_combined_context` stays unchanged unless another graph run starts.
-
-**Important implementation detail:** The agent maintains the ReAct loop properly by passing the accumulated `messages` list (including `ToolMessage`s) to the LLM on every iteration, enabling true multi-step tool reasoning.
+- **Step Budget**: Default `MAX_EXECUTION_STEPS` (10).
+- **Loop Detection**: State-aware hashing catches duplicate signatures and cyclic oscillations.
+- **Circuit Breaker**: Trips per-tool if failures reach `MAX_TOOL_FAILURES_PER_TOOL` (3).
+- **Goal Guard**: `planning/goal_guard.py` ensures required multi-step operations complete before final answer.
 
 ---
 
@@ -350,20 +342,20 @@ Joins non-empty sections with `\n\n`. If all inputs are empty, `_combined_contex
 
 ---
 
-### `agent`
+### `planner`
 
 | | |
 |---|---|
-| **File** | [`nodes/agent.py`](../nodes/agent.py) |
-| **Purpose** | Reason over retrieved context and optionally call tools. |
-| **Inputs** | `question`, `_combined_context`, `messages` |
-| **Outputs** | `messages` always; `answer` when no tool calls |
-| **LLM** | Yes — `llm.bind_tools(tools).invoke(llm_input)` |
+| **File** | [`nodes/planner_node.py`](../nodes/planner_node.py) |
+| **Purpose** | Multi-step reasoning over retrieved context, previous tool outputs, and goal verification. |
+| **Inputs** | `question`, `_combined_context`, `tool_results`, `completed_steps` |
+| **Outputs** | `answer` (when action is 'final') or next tool decision |
+| **LLM** | Yes — structured decision format (`PlannerDecision`) |
 | **FAISS** | No |
 | **Filesystem** | No |
-| **Tools** | Binds `web_search` and `calculator` |
+| **Tools** | Evaluates all Native + MCP tool schemas dynamically |
 
-Reads `messages` history and appends the new `AIMessage(..., tool_calls=...)` or final answer on each invocation.
+Iteratively outputs either `action: "tool"` with arguments, or `action: "final"` with comprehensive answer. Enforces deterministic completion verification via `planning/goal_guard.py`.
 
 ---
 
@@ -372,15 +364,18 @@ Reads `messages` history and appends the new `AIMessage(..., tool_calls=...)` or
 | | |
 |---|---|
 | **File** | [`nodes/tools.py`](../nodes/tools.py) |
-| **Purpose** | Execute tool calls from the last AI message. |
-| **Inputs** | `messages` (must end with AI message containing `tool_calls`) |
-| **Outputs** | Appends `ToolMessage`(s) to `messages` |
+| **Purpose** | Execute native tools and external MCP servers with circuit breaking, timeout bounds, and HITL confirmation. |
+| **Inputs** | Next tool call from `planner` |
+| **Outputs** | Appends execution result to `tool_results` and records call signature history |
 | **LLM** | No |
 | **FAISS** | No |
-| **Filesystem** | No |
-| **Tools** | Executes `web_search`, `calculator` |
+| **Filesystem** | Sandboxed via `mcp_filesystem_server.py` |
+| **Tools** | Native (`calculator`, `web_search`) + MCP (`calendar`, `notes`, `reminders`, `filesystem`, `sqlite`, `github`, `fetch`) |
 
-Implemented as LangGraph `ToolNode(tools)`.
+Features:
+- **Human-in-the-Loop (HITL)**: Destructive actions require explicit confirmation before running.
+- **Reversible Soft-Delete**: SQLite staging tables and Trash dictionaries enable instant `undo_delete`.
+- **Per-Tool Circuit Breakers**: Automatically disables tools failing $\ge$ 3 times.
 
 ---
 
@@ -475,8 +470,11 @@ Shared LLM instance: [`llm.py`](../llm.py) — Multi-provider factory (`get_llm(
 
 | File | Role |
 |------|------|
-| [`graph.py`](../graph.py) | Graph construction, routing helpers, save history |
-| [`state.py`](../state.py) | `AgentState` TypedDict |
-| [`config.py`](../config.py) | Paths and constants |
+| [`graph.py`](../graph.py) | Graph construction, trace initialization, routing helpers, save history |
+| [`state.py`](../state.py) | `AgentState` TypedDict & state field management |
+| [`config.py`](../config.py) | Paths, timeouts, and execution budget constants |
 | [`llm.py`](../llm.py) | Multi-provider LLM factory (`get_llm()`) |
-| [`main.py`](../main.py) | CLI entry point, interactive REPL, format output |
+| [`main.py`](../main.py) | CLI entry point, interactive REPL, HITL confirmation loop |
+| [`mcp_layer/registry.py`](../mcp_layer/registry.py) | Unified Tool Registry for Native + MCP server discovery |
+| [`planning/goal_guard.py`](../planning/goal_guard.py) | Deterministic goal verification & multi-step completion tracking |
+| [`observability/trace.py`](../observability/trace.py) | Distributed trace event emission and timing metrics |

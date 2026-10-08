@@ -15,75 +15,57 @@ It unifies:
 
 ## 2. Complete Architecture Topology
 
-```mermaid
-flowchart TD
-    User([👤 User Request]) --> TraceInit[0. Trace & Observability Init<br/><code>trace_init_node</code>]
-    TraceInit --> Router{1. Intent Router<br/><code>intent_router.py</code>}
-
-    %% Branch A: Conversational
-    Router -- "Casual Chat" --> ChatNode[2a. Direct Chat Node<br/><code>chat.py</code>]
-    ChatNode --> SaveHistory
-
-    %% Branch B: Memory Extraction
-    Router -- "Personal Fact" --> MemExtract[2b. Memory Extractor<br/><code>memory_extractor.py</code>]
-    MemExtract --> MemSave[Memory Saver<br/><code>memory_saver_node</code>]
-    MemSave --> MemResp[Memory Response<br/><code>memory_response_node</code>]
-    MemResp --> SaveHistory
-
-    %% Branch C: Research, RAG & Action Execution
-    Router -- "Query / Task / Action" --> RetPlan[2c. Retrieval Planner<br/><code>retrieval_planner.py</code>]
-
-    %% Fan-out Retrieval Subsystem (RAG + Memory)
-    subgraph RetrievalSubsystem ["⚡ Parallel Retrieval Subsystem"]
-        direction TB
-        RetPlan -. "User Context Needed" .-> MemRetriever[Memory Retriever<br/><code>nodes/memory_retriever.py</code>]
-        MemRetriever --> ProfileDB[(User Profile & Facts<br/><code>memory/memory.json</code>)]
-
-        RetPlan -. "Knowledge/Doc Query" .-> RAGRetriever[Hybrid RAG Retriever<br/><code>nodes/rag_retriever.py</code>]
-
-        subgraph RAG_Engine ["📚 Hybrid RAG Search Engine"]
-            direction TB
-            QueryRewrite[Query Rewriter] --> FAISS_Search[(Dense Vector Index<br/><code>faiss_index/</code> MiniLM)]
-            QueryRewrite --> BM25_Search[(Sparse Keyword Index<br/><code>bm25_chunks.pkl</code>)]
-            FAISS_Search --> RRF[Reciprocal Rank Fusion<br/><code>nodes/rrf.py</code>]
-            BM25_Search --> RRF
-            RRF --> Reranker[Cross-Encoder Reranker<br/><code>reranker.py</code>]
-        end
-        RAGRetriever --> RAG_Engine
+```text
+User
+  │
+  ▼
+Request
+  │
+  ▼
+Intent Router
+  ├── Chat Flow
+  ├── Memory Extraction
+  └── Task / Search Flow
+             │
+             ▼
+   ┌──────────────────────┐
+   │ Knowledge Retrieval  │
+   │ - User Profile       │
+   │ - Hybrid RAG         │
+   │ - Dense Search       │
+   │ - Keyword Search     │
+   │ - Rank Fusion        │
+   │ - Re-ranking         │
+   └──────────┬───────────┘
+              │
+              ▼
+       Context Builder
+              │
+              ▼
+         Planner / Agent
+              │
+       ┌──────┼────────┐
+       │      │        │
+       ▼      ▼        ▼
+   Local LLM  Model Router  Cloud LLM
+              │
+              ▼
+      Action Needed?
+          ├── No → Final Answer
+          └── Yes → MCP Tools
+                       │
+          ┌────────────┼──────────────────────┐
+          │            │                      │
+          ▼            ▼                      ▼
+      Calendar    Notes     Reminders   Filesystem
+          │
+          ├── GitHub
+          ├── SQLite
+          └── Web Fetch
+```
+        Tools --> DB[SQLite]
+        Tools --> Web[Web Fetch]
     end
-
-    %% Convergence
-    MemRetriever --> ContextBuilder[3. Context Builder<br/><code>nodes/context_builder.py</code><br/><i>Injects Clock + RAG Docs + Memory</i>]
-    Reranker --> ContextBuilder
-    RetPlan -- "Direct Action (No Retrieval)" --> ContextBuilder
-
-    %% Reasoning & Action ReAct Loop
-    ContextBuilder --> PlannerNode[4. Planner & ReAct Reasoner<br/><code>nodes/planner_node.py</code>]
-
-    subgraph LLM_Provider ["🤖 Multi-LLM Layer (llm.py)"]
-        PlannerNode <--> LLMFactory{"get_llm()<br/>Multi-Provider"}
-        LLMFactory -. $0 Local .-> Ollama["Ollama (qwen3:8b / llama3)"]
-        LLMFactory -. Cloud .-> CloudLLM["Claude 3.5 / GPT-4o / Gemini"]
-    end
-
-    PlannerNode --> ToolDecision{Tool Needed?}
-    
-    ToolDecision -- "Yes (Action Step)" --> ToolNode[5. MCP Tool Executor<br/><code>nodes/tools.py</code>]
-    
-    %% MCP Tool Layer
-    subgraph MCP_Registry ["🛠️ Model Context Protocol (MCP) Server Layer"]
-        ToolNode <--> S1["📅 Calendar Server"]
-        ToolNode <--> S2["📝 Notes Server"]
-        ToolNode <--> S3["⏰ Reminders Server"]
-        ToolNode <--> S4["📁 Filesystem Server"]
-        ToolNode <--> S5["🐙 GitHub Server"]
-        ToolNode <--> S6["🗄️ SQLite Server"]
-        ToolNode <--> S7["🌐 Web Fetch Server"]
-    end
-
-    ToolNode -- "Tool Results Added to State" --> PlannerNode
-    ToolDecision -- "No (Goal Completed / Budget Exhausted)" --> SaveHistory[6. Save History & Trace Persist<br/><code>graph.py</code>]
-    SaveHistory --> FinalAnswer([🏁 Formatted Markdown Output])
 ```
 
 ---
@@ -118,8 +100,10 @@ Unified `get_llm()` factory with plug-and-play provider switching:
 - Sandboxed execution with subprocess crash protection.
 
 ### E. Deterministic Safety & Policy Engine
-1. **Human-in-the-Loop Confirmation**: Destructive operations (`delete_*`, `drop_table`) strictly require human confirmation before execution.
-2. **Filesystem Sandboxing**: All file I/O is restricted to `mcp_sandbox/` with path-traversal prevention (`../`).
-3. **Loop Detection & Execution Budgets**: Signature-and-result alternating loop detection with a 10-step hard execution budget.
-4. **Structured Tracing**: JSONL execution traces persisted in `traces/` with latency metrics.
+1. **Human-in-the-Loop Confirmation**: Destructive operations (`delete_*`, `drop_table`) strictly require human confirmation before execution, pausing the graph in `awaiting_confirmation` status until confirmed.
+2. **Transactional Soft-Delete & Undo Staging**: Deletions in SQLite are staged to shadow tables (`_deleted_records`), and Notes/Reminders deletions are staged to `_trash` dictionaries, enabling instant `undo_delete`.
+3. **Deterministic Goal Fulfillment Guard**: `planning/goal_guard.py` enforces completion of all abstract sub-tasks before allowing the planner to transition to `final`.
+4. **Filesystem Sandboxing**: All file I/O is restricted to `mcp_sandbox/` with path-traversal prevention (`../`).
+5. **Loop Detection & Execution Budgets**: State-aware call-signature hashing catches cyclic oscillations with a 10-step hard execution budget.
+6. **Structured Tracing**: JSONL execution traces persisted in `traces/` with latency metrics.
 

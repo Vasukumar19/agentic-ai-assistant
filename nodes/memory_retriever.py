@@ -13,7 +13,6 @@ import json
 import logging
 from langchain_community.vectorstores import FAISS
 from config import MEMORY_FILE, SEMANTIC_MEMORY_DIR
-from .embeddings import embeddings
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +75,7 @@ def memory_retriever_node(state: dict) -> dict:
     if retrieval_plan.get("semantic", False):
         if (SEMANTIC_MEMORY_DIR / "index.faiss").exists():
             try:
+                from .embeddings import embeddings
                 vector_store = FAISS.load_local(
                     str(SEMANTIC_MEMORY_DIR),
                     embeddings,

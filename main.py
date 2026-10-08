@@ -66,7 +66,13 @@ def main():
     # 2. Discover MCP Tools
     print("\n[2/4] Initializing Model Context Protocol (MCP) Registry...")
     from mcp_layer.registry import registry
-    registry.load_servers_from_config()
+    single_query = " ".join(sys.argv[1:]) if len(sys.argv) > 1 and sys.argv[1] != "-i" else ""
+    if single_query and any(word in single_query.lower() for word in ("gmail", "email", "mail")):
+        registry.load_servers_from_config([
+            {"name": "gmail", "transport": "stdio", "command": sys.executable, "args": ["gmail_server.py"]},
+        ])
+    else:
+        registry.load_servers_from_config()
     count = registry.discover(force=True)
     tools = registry.valid_names()
     print(f"  [OK] Discovered {len(tools)} tools across {len(registry._servers)} servers:")
@@ -109,6 +115,9 @@ def main():
         print(format_output(out))
         return 0
 
+    last_pending_state = None
+    last_query = ""
+
     while True:
         try:
             user_input = input("User > ").strip()
@@ -118,8 +127,30 @@ def main():
                 print("Goodbye!")
                 break
 
+            # Check if resolving a previous pending confirmation
+            if last_pending_state and last_pending_state.get("execution_status") == "awaiting_confirmation":
+                if user_input.lower() in ("yes", "y", "confirm", "proceed", "sure", "ok", "do it"):
+                    print("\n[CONFIRMED] Executing confirmed operation...")
+                    out = app.invoke({"question": last_query, "user_confirmed": True})
+                    last_pending_state = out if out.get("execution_status") == "awaiting_confirmation" else None
+                    print("\nAssistant >", format_output(out))
+                    print("-" * 55)
+                    continue
+                elif user_input.lower() in ("no", "n", "cancel", "abort", "don't", "stop"):
+                    print("\nAssistant > Operation canceled by user. No changes were made.")
+                    print("-" * 55)
+                    last_pending_state = None
+                    last_query = ""
+                    continue
+
             print("\nThinking and coordinating tools...")
+            last_query = user_input
             out = app.invoke({"question": user_input})
+            if out.get("execution_status") == "awaiting_confirmation":
+                last_pending_state = out
+            else:
+                last_pending_state = None
+
             print("\nAssistant >", format_output(out))
             print("-" * 55)
         except (KeyboardInterrupt, EOFError):

@@ -66,6 +66,18 @@ RAG_HINTS = (
     "internal knowledge",
 )
 
+TOOL_HINTS = (
+    "calendar",
+    "gmail",
+    "email",
+    "reminder",
+    "github",
+    "file",
+    "database",
+    "web page",
+    "url",
+)
+
 
 def _normalize_question(question: str) -> str:
     return " ".join(question.strip().lower().split())
@@ -84,6 +96,9 @@ def _heuristic_retrieval_plan(question: str) -> dict | None:
             "semantic": semantic,
             "rag": rag,
         }
+
+    if any(hint in normalized for hint in TOOL_HINTS):
+        return DEFAULT_PLAN
 
     return None
 

@@ -224,9 +224,15 @@ def memory_response_node(state: dict) -> dict:
     if interests:
         parts.append(f"you are interested in {', '.join(map(str, interests))}")
     if extracted_semantic:
-        parts.append(f"you {extracted_semantic[0].lower()}")
-        for mem in extracted_semantic[1:]:
-            parts.append(f"and you {mem.lower()}")
+        def _to_str(m):
+            if isinstance(m, dict):
+                return str(m.get("fact") or m.get("memory") or m.get("text") or (list(m.values())[0] if m else ""))
+            return str(m)
+        str_mems = [_to_str(m).strip() for m in extracted_semantic if _to_str(m).strip()]
+        if str_mems:
+            parts.append(f"you {str_mems[0].lower()}")
+            for mem in str_mems[1:]:
+                parts.append(f"and you {mem.lower()}")
     answer = ", ".join(parts) + "." if parts else "I've updated my memory."
     logger.debug("Memory update confirmation: %s...", answer[:60])
     dur = int((time.perf_counter() - t0) * 1000)

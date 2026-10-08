@@ -7,7 +7,6 @@ import time
 from pathlib import Path
 from langchain_community.vectorstores import FAISS
 from config import FAISS_INDEX_DIR, RETRIEVAL_MODE, RRF_K, TIMEOUT_RETRIEVAL_S
-from .embeddings import embeddings
 from langchain_core.prompts import ChatPromptTemplate
 from llm import llm
 from .bm25 import bm25_search
@@ -53,6 +52,7 @@ def _get_vectorstore():
         return None
 
     try:
+        from .embeddings import embeddings
         _vectorstore = FAISS.load_local(
             str(FAISS_INDEX_DIR),
             embeddings,

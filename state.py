@@ -10,9 +10,38 @@ Key decisions:
 - Supports chat, memory_update, research_query routes
 """
 
-from typing import TypedDict, Annotated, Optional
+from typing import TypedDict, Annotated, Optional, Any
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
+
+
+def _merge_lists(left: Optional[list], right: Optional[list]) -> list:
+    """Reducer that concatenates lists from concurrent node updates."""
+    if left is None:
+        left = []
+    if right is None:
+        right = []
+    return list(left) + list(right)
+
+
+def _merge_dicts(left: Optional[dict], right: Optional[dict]) -> dict:
+    """Reducer that merges dictionary keys from concurrent node updates."""
+    if left is None:
+        left = {}
+    if right is None:
+        right = {}
+    merged = dict(left)
+    merged.update(right)
+    return merged
+
+
+def _max_or_last(left: Optional[int], right: Optional[int]) -> Optional[int]:
+    """Reducer that picks the maximum step or non-None value."""
+    if left is None:
+        return right
+    if right is None:
+        return left
+    return max(left, right)
 
 
 class AgentState(TypedDict):
@@ -72,7 +101,7 @@ class AgentState(TypedDict):
     # Execution State for Orchestration
     current_step: str
     completed_steps: list[str]
-    tool_results: list[dict]
+    tool_results: Optional[list[dict]]
     execution_status: str
     tool_call_count: int
     max_steps: int
@@ -80,14 +109,14 @@ class AgentState(TypedDict):
     tool_loop_detected: Optional[bool]
     execution_trace: Optional[list[dict]]
 
-    # Phase 5 — Observability (all optional so legacy callers still work)
+    # Phase 5 — Observability (concurrent-safe with reducers)
     request_id: Optional[str]
     trace_id: Optional[str]
-    trace_events: Optional[list[dict]]
-    trace_step: Optional[int]
-    latency_breakdown: Optional[dict]
-    tool_failure_counts: Optional[dict]
-    llm_usage: Optional[list[dict]]
+    trace_events: Annotated[Optional[list[dict]], _merge_lists]
+    trace_step: Annotated[Optional[int], _max_or_last]
+    latency_breakdown: Annotated[Optional[dict], _merge_dicts]
+    tool_failure_counts: Annotated[Optional[dict], _merge_dicts]
+    llm_usage: Annotated[Optional[list[dict]], _merge_lists]
     total_latency_ms: Optional[int]
     trace_start_ms: Optional[float]
 
@@ -100,9 +129,11 @@ class AgentState(TypedDict):
     tool_call_history: Optional[list[dict]]  # Phase 8: sig+result history for loop detection
     plan_replans: Optional[int]
 
-    # Phase 13 — Goal Fulfillment & MCP Reliability
+    # Phase 13 — Goal Fulfillment & MCP Reliability & Human In The Loop
     required_operations: Optional[list[str]]
     completed_operations: Optional[list[str]]
     remaining_operations: Optional[list[str]]
     goal_check_status: Optional[str]
     argument_repair_attempts: Optional[dict[str, int]]
+    user_confirmed: Optional[bool]
+    pending_confirmation: Optional[dict]

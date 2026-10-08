@@ -44,6 +44,15 @@ def _init_db() -> None:
             details TEXT
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS _deleted_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            table_name TEXT NOT NULL,
+            record_id INTEGER NOT NULL,
+            data TEXT NOT NULL,
+            deleted_at TEXT NOT NULL
+        )
+    """)
     cursor.execute("SELECT count(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.executemany("INSERT INTO users (name, email, role) VALUES (?, ?, ?)", [
@@ -151,7 +160,7 @@ async def create_record(table_name: str, data: str) -> str:
 
 @mcp.tool()
 async def delete_record(table_name: str, record_id: int) -> str:
-    """Delete a record from a table by ID.
+    """Delete a record from a table by ID (saved to rollback stage for undo).
 
     Args:
         table_name: Table name
@@ -161,19 +170,80 @@ async def delete_record(table_name: str, record_id: int) -> str:
         return "Error: table_name parameter is required"
     if record_id is None:
         return "Error: record_id parameter is required"
+    import datetime
     conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     try:
+        # Fetch existing record for rollback staging
+        cursor.execute(f"SELECT * FROM {table_name} WHERE id = ?", (record_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return f"Error: Record with ID {record_id} not found in {table_name}"
+        
+        row_data = json.dumps(dict(row), ensure_ascii=False)
+        now_iso = datetime.datetime.now().isoformat()
+        cursor.execute(
+            "INSERT INTO _deleted_records (table_name, record_id, data, deleted_at) VALUES (?, ?, ?, ?)",
+            (table_name, record_id, row_data, now_iso)
+        )
         cursor.execute(f"DELETE FROM {table_name} WHERE id = ?", (record_id,))
-        affected = cursor.rowcount
         conn.commit()
         conn.close()
-        if affected == 0:
-            return f"Error: Record with ID {record_id} not found in {table_name}"
-        return json.dumps({"status": "deleted", "id": record_id, "table": table_name}, ensure_ascii=False)
+        return json.dumps({"status": "deleted", "id": record_id, "table": table_name, "undo_available": True}, ensure_ascii=False)
     except Exception as e:
         conn.close()
         return f"Error: Failed to delete from {table_name}: {e}"
+
+
+@mcp.tool()
+async def undo_delete(table_name: str = "", record_id: int = 0) -> str:
+    """Restore the most recently deleted record (or matching specific table and record_id).
+
+    Args:
+        table_name: Optional table name to filter
+        record_id: Optional record ID to restore
+    """
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    try:
+        query = "SELECT * FROM _deleted_records"
+        params = []
+        conds = []
+        if table_name:
+            conds.append("table_name = ?")
+            params.append(table_name)
+        if record_id:
+            conds.append("record_id = ?")
+            params.append(record_id)
+        if conds:
+            query += " WHERE " + " AND ".join(conds)
+        query += " ORDER BY id DESC LIMIT 1"
+        
+        cursor.execute(query, tuple(params))
+        stage_row = cursor.fetchone()
+        if not stage_row:
+            conn.close()
+            return "Error: No deleted records found to restore."
+        
+        del_id = stage_row["id"]
+        t_name = stage_row["table_name"]
+        rec_data = json.loads(stage_row["data"])
+        
+        cols = ", ".join(rec_data.keys())
+        placeholders = ", ".join(["?"] * len(rec_data))
+        values = list(rec_data.values())
+        
+        cursor.execute(f"INSERT OR REPLACE INTO {t_name} ({cols}) VALUES ({placeholders})", values)
+        cursor.execute("DELETE FROM _deleted_records WHERE id = ?", (del_id,))
+        conn.commit()
+        conn.close()
+        return json.dumps({"status": "restored", "table": t_name, "record": rec_data}, ensure_ascii=False)
+    except Exception as e:
+        conn.close()
+        return f"Error: Failed to restore record: {e}"
 
 
 if __name__ == "__main__":

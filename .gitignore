@@ -30,3 +30,11 @@ traces/
 # MCP server runtime state (calendar/notes/reminders JSON stores)
 mcp_data/
 mcp_sandbox/
+
+# OAuth tokens & credentials
+*.token.json
+.gmail_token.json
+.google_token.json
+client_secret.json
+client_secret*.json
+credentials.json

@@ -17,12 +17,12 @@ from typing import Tuple, List, Dict, Any
 
 # Abstract operation definitions and generic action synonyms
 OPERATION_PATTERNS = [
-    ("calculate", re.compile(r"\b(calculate|compute|math|multiply|divide|add up|sum|percentage|% of|double the)\b", re.IGNORECASE)),
-    ("create", re.compile(r"\b(create|make|save|write|set up|set a|schedule|book|new)\b", re.IGNORECASE)),
-    ("update", re.compile(r"\b(update|modify|edit|complete|mark|append|change)\b", re.IGNORECASE)),
-    ("delete", re.compile(r"\b(delete|remove|cancel|clear|wipe)\b", re.IGNORECASE)),
-    ("read", re.compile(r"\b(read|get|fetch|details of|show me note|show me event)\b", re.IGNORECASE)),
-    ("list", re.compile(r"\b(list|search|find|show my|show all|filter|how many)\b", re.IGNORECASE)),
+    ("calculate", re.compile(r"\b(calculate|compute|math|multiply|divide|add up|sum|percentage|% of|double the|work out|evaluate|deduct|subtract)\b", re.IGNORECASE)),
+    ("create", re.compile(r"\b(create|make|save|write|set up|set a|schedule|book|new|record|document|log|store)\b", re.IGNORECASE)),
+    ("update", re.compile(r"\b(update|modify|edit|complete|mark|append|change|alter|revise)\b", re.IGNORECASE)),
+    ("delete", re.compile(r"\b(delete|remove|cancel|clear|wipe|purge|erase|destroy|drop)\b", re.IGNORECASE)),
+    ("read", re.compile(r"\b(read|get|fetch|details of|show me note|show me event|inspect|retrieve|lookup|look up)\b", re.IGNORECASE)),
+    ("list", re.compile(r"\b(list|search|find|show my|show all|filter|how many|query|count)\b", re.IGNORECASE)),
 ]
 
 # Tool -> Abstract Operation mapping
@@ -122,12 +122,15 @@ def goal_fulfillment_check(
         - "BLOCKED": Critical failure prevents further progress.
     """
     required = extract_abstract_operations(query)
+    results = tool_results or []
     
     # Identify completed operations from successful tool results
     completed = []
     has_blocking_error = False
     
-    for r in tool_results:
+    for r in results:
+        if not isinstance(r, dict):
+            continue
         tool = r.get("tool", "")
         res_str = str(r.get("result", ""))
         is_error = res_str.lower().startswith("error") or r.get("error")

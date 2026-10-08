@@ -34,10 +34,46 @@ class CalculatorInput(BaseModel):
 
 @tool("calculator", args_schema=CalculatorInput)
 def calculator(expression: str) -> str:
-    """Evaluate arithmetic expressions: +, -, *, /, **, sqrt, sin, cos, etc."""
+    """Evaluate arithmetic expressions: +, -, *, /, **, sqrt, sin, cos, date arithmetic, etc."""
     try:
+        import re
+        from datetime import datetime, timedelta
+        expr_str = str(expression).strip()
+        
+        # 1. Date Arithmetic Handling (e.g. "30 days after 2026-12-15", "2026-12-15 + 30 days", "2026-12-15 - 10 days")
+        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', expr_str)
+        if date_match and any(w in expr_str.lower() for w in ("day", "days", "after", "before", "from", "ago", "prior", "plus", "+", "-")):
+            try:
+                base_date_str = date_match.group(1)
+                base_date = datetime.strptime(base_date_str, "%Y-%m-%d").date()
+                remainder_str = expr_str.replace(base_date_str, "")
+                days_match = re.search(r'(\d+)', remainder_str)
+                if days_match:
+                    num_days = int(days_match.group(1))
+                    if any(w in expr_str.lower() for w in ("-", "before", "ago", "prior", "subtract", "minus")):
+                        res_date = base_date - timedelta(days=num_days)
+                    else:
+                        res_date = base_date + timedelta(days=num_days)
+                    return f"{res_date.strftime('%Y-%m-%d')} ({res_date.strftime('%A')})"
+            except Exception:
+                pass
+
+        # 2. Currency, comma, and percent sanitization
+        # Strip $, EUR, GBP symbols
+        clean_expr = re.sub(r'[\$,€£]', '', expr_str)
+        # Convert percentages like 40% or 18% into (40/100) or (18/100)
+        clean_expr = re.sub(r'(\d+(?:\.\d+)?)\s*%', r'(\1/100)', clean_expr)
+        # Remove commas in numbers (e.g. 5,000 -> 5000)
+        clean_expr = re.sub(r'(\d+),(\d+)', r'\1\2', clean_expr)
+        # Sanitize leading zeros on integers (e.g. 09 -> 9) to prevent Python octal SyntaxErrors
+        clean_expr = re.sub(r'\b0+([0-9]+)\b', r'\1', clean_expr)
+
+        # If expression has '=' (e.g. "x = 5000 * 0.4"), evaluate RHS
+        if "=" in clean_expr and not ("==" in clean_expr or "<=" in clean_expr or ">=" in clean_expr):
+            clean_expr = clean_expr.split("=")[-1].strip()
+
         aeval = Interpreter()
-        result = aeval(expression)
+        result = aeval(clean_expr)
         if aeval.error:
             return f"Error: {aeval.error[0].get_error()}"
         return str(result)
@@ -140,18 +176,39 @@ def tool_node(state: dict) -> dict:
 
         # human confirmation hook for MCP destructive/write tools
         if requires_confirmation(tool_name, tool_args):
-            from observability.errors import ErrorType as EType
-            err_payload = make_error_payload(EType.TOOL_EXECUTION_ERROR.value, "tools",
-                                             f"tool {tool_name} requires confirmation", retryable=False, trace_id=state.get("trace_id"))
-            ev = make_event(state, "MCP_TOOL_CALL", "tools", status="error",
-                            metadata={"tool": tool_name, "requires_confirmation": True, "server": (registry.get_normalized(tool_name).server if registry.get_normalized(tool_name) else None)},
-                            error=err_payload)
-            append_event(state, ev)
-            # do NOT execute
-            return {"answer": f"Tool '{tool_name}' requires confirmation before execution.",
-                    "execution_status": "awaiting_confirmation",
-                    "trace_events": state.get("trace_events"),
-                    "trace_step": state.get("trace_step"), "latency_breakdown": state.get("latency_breakdown")}
+            user_confirmed = state.get("user_confirmed", False)
+            if not user_confirmed:
+                import sys, json as _json
+                # If interactive terminal and stdin is available
+                if hasattr(sys.stdin, "isatty") and sys.stdin.isatty():
+                    print(f"\n[ACTION REQUIRED] Tool '{tool_name}' with arguments {_json.dumps(tool_args)} requires confirmation.")
+                    try:
+                        ans = input(f"Do you want to proceed and execute '{tool_name}'? (yes/no): ").strip().lower()
+                    except Exception:
+                        ans = "no"
+                    if ans in ("yes", "y", "confirm", "proceed"):
+                        user_confirmed = True
+                    else:
+                        return {"answer": f"Operation '{tool_name}' was declined and canceled by user.",
+                                "execution_status": "canceled_by_user",
+                                "trace_events": state.get("trace_events"),
+                                "trace_step": state.get("trace_step"), "latency_breakdown": state.get("latency_breakdown")}
+            
+            if not user_confirmed:
+                from observability.errors import ErrorType as EType
+                err_payload = make_error_payload(EType.TOOL_EXECUTION_ERROR.value, "tools",
+                                                 f"tool {tool_name} requires confirmation", retryable=False, trace_id=state.get("trace_id"))
+                ev = make_event(state, "MCP_TOOL_CALL", "tools", status="error",
+                                metadata={"tool": tool_name, "requires_confirmation": True, "server": (registry.get_normalized(tool_name).server if registry.get_normalized(tool_name) else None)},
+                                error=err_payload)
+                append_event(state, ev)
+                import json as _json
+                # do NOT execute without confirmation
+                return {"answer": f"Tool '{tool_name}' with arguments {_json.dumps(tool_args)} requires confirmation before execution. Reply 'yes' to proceed or 'no' to cancel.",
+                        "execution_status": "awaiting_confirmation",
+                        "pending_confirmation": {"tool": tool_name, "arguments": tool_args},
+                        "trace_events": state.get("trace_events"),
+                        "trace_step": state.get("trace_step"), "latency_breakdown": state.get("latency_breakdown")}
 
         # circuit breaker
         counts = state.get("tool_failure_counts") or {}

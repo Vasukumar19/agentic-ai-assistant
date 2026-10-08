@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 from typing import Any, Optional
 
 from langchain_core.tools import StructuredTool
@@ -25,9 +26,12 @@ def _infer_policy(tool_name: str, server: str, explicit: dict | None = None) -> 
     if explicit and raw in explicit:
         return explicit[raw]
     low = tool_name.lower()
-    if any(x in low for x in ["delete", "remove", "destroy", "drop"]):
+    # Explicit restorative / non-destructive actions
+    if any(x in low for x in ["undo", "restore", "revert", "recover", "undelete"]):
+        return {"operation": "write", "risk_level": "low", "requires_confirmation": False}
+    if any(x in low for x in ["delete", "remove", "destroy", "drop", "truncate", "purge", "clear", "wipe", "flush", "erase", "unlink"]):
         return {"operation": "destructive", "risk_level": "high", "requires_confirmation": True}
-    if any(x in low for x in ["create", "write", "update", "send", "insert", "add"]):
+    if any(x in low for x in ["create", "write", "update", "send", "insert", "add", "post"]):
         return {"operation": "write", "risk_level": "medium", "requires_confirmation": False}
     return {"operation": "read", "risk_level": "low", "requires_confirmation": False}
 
@@ -77,13 +81,15 @@ class ToolRegistry:
                         servers = []
                 else:
                     servers = [
-                        {"name": "calendar", "transport": "stdio", "command": "python", "args": ["mcp_calendar_server.py"]},
-                        {"name": "notes", "transport": "stdio", "command": "python", "args": ["mcp_notes_server.py"]},
-                        {"name": "reminders", "transport": "stdio", "command": "python", "args": ["mcp_reminders_server.py"]},
-                        {"name": "filesystem", "transport": "stdio", "command": "python", "args": ["mcp_filesystem_server.py"]},
-                        {"name": "github", "transport": "stdio", "command": "python", "args": ["mcp_github_server.py"]},
-                        {"name": "sqlite", "transport": "stdio", "command": "python", "args": ["mcp_sqlite_server.py"]},
-                        {"name": "fetch", "transport": "stdio", "command": "python", "args": ["mcp_fetch_server.py"]},
+                        {"name": "calendar", "transport": "stdio", "command": sys.executable, "args": ["mcp_calendar_server.py"]},
+                        {"name": "notes", "transport": "stdio", "command": sys.executable, "args": ["mcp_notes_server.py"]},
+                        {"name": "reminders", "transport": "stdio", "command": sys.executable, "args": ["mcp_reminders_server.py"]},
+                        {"name": "filesystem", "transport": "stdio", "command": sys.executable, "args": ["mcp_filesystem_server.py"]},
+                        {"name": "github", "transport": "stdio", "command": sys.executable, "args": ["mcp_github_server.py"]},
+                        {"name": "sqlite", "transport": "stdio", "command": sys.executable, "args": ["mcp_sqlite_server.py"]},
+                        {"name": "fetch", "transport": "stdio", "command": sys.executable, "args": ["mcp_fetch_server.py"]},
+                        {"name": "google_calendar", "transport": "stdio", "command": sys.executable, "args": ["google_calendar_server.py"]},
+                        {"name": "gmail", "transport": "stdio", "command": sys.executable, "args": ["gmail_server.py"]},
                     ]
             else:
                 try:

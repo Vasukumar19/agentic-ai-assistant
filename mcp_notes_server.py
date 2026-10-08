@@ -19,7 +19,7 @@ DEFAULT_NOTES = {
     "notes": {
         "note_001": {"title": "Project Review agenda", "content": "Review Q3 goals and milestones. Date: 2026-09-10"},
         "note_002": {"title": "Meeting Notes Q3", "content": "Discuss engineering roadmap and release plan. Date: 2026-09-12"},
-        "note_009": {"title": "Shopping List", "content": "Milk, Bread, Eggs, Butter, Apples"},
+        "note_009": {"title": "Shopping List", "content": "Milk: $3.50, Bread: $2.50, Eggs: $4.00, Butter: $3.00, Apples: $5.00"},
     }
 }
 
@@ -95,14 +95,29 @@ async def update(note_id: str, title: str = "", content: str = "") -> str:
 
 @mcp.tool()
 async def delete(note_id: str) -> str:
-    """Delete a note by id."""
+    """Delete a note by id (moved to trash for rollback/undo)."""
     d = _load()
     notes = d.get("notes", {})
     if note_id not in notes:
         return f"Error: Note not found: {note_id}"
-    del notes[note_id]
+    d.setdefault("_trash", {})[note_id] = notes.pop(note_id)
     _save(d)
-    return f"Deleted {note_id}"
+    return f"Deleted {note_id} (moved to trash, undo available)"
+
+
+@mcp.tool()
+async def undo_delete(note_id: str = "") -> str:
+    """Restore a deleted note from trash. If note_id is empty, restores the most recent."""
+    import json as _json
+    d = _load()
+    trash = d.get("_trash", {})
+    if not trash:
+        return "Error: Trash is empty. No deleted notes to restore."
+    target_id = note_id if note_id and note_id in trash else list(trash.keys())[-1]
+    restored_note = trash.pop(target_id)
+    d.setdefault("notes", {})[target_id] = restored_note
+    _save(d)
+    return _json.dumps({"status": "restored", "note_id": target_id, "title": restored_note.get("title")})
 
 
 if __name__ == "__main__":

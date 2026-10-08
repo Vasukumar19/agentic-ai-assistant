@@ -79,14 +79,29 @@ async def complete(reminder_id: str) -> str:
 
 @mcp.tool()
 async def delete(reminder_id: str) -> str:
-    """Delete a reminder by id."""
+    """Delete a reminder by id (moved to trash for rollback/undo)."""
     d = _load()
     rems = d.get("reminders", {})
     if reminder_id not in rems:
         return f"Error: Reminder not found: {reminder_id}"
-    del rems[reminder_id]
+    d.setdefault("_trash", {})[reminder_id] = rems.pop(reminder_id)
     _save(d)
-    return f"Deleted {reminder_id}"
+    return f"Deleted {reminder_id} (moved to trash, undo available)"
+
+
+@mcp.tool()
+async def undo_delete(reminder_id: str = "") -> str:
+    """Restore a deleted reminder from trash. If reminder_id is empty, restores the most recent."""
+    import json as _json
+    d = _load()
+    trash = d.get("_trash", {})
+    if not trash:
+        return "Error: Trash is empty. No deleted reminders to restore."
+    target_id = reminder_id if reminder_id and reminder_id in trash else list(trash.keys())[-1]
+    restored_rem = trash.pop(target_id)
+    d.setdefault("reminders", {})[target_id] = restored_rem
+    _save(d)
+    return _json.dumps({"status": "restored", "reminder_id": target_id, "text": restored_rem.get("text")})
 
 
 if __name__ == "__main__":

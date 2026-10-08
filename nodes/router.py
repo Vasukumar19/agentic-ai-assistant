@@ -15,14 +15,15 @@ from llm import llm
 
 logger = logging.getLogger(__name__)
 
-ROUTER_PROMPT = """Classify the message route.
+ROUTER_PROMPT = """Classify the user's message route.
 
 Return ONLY valid JSON:
 {"route": "chat" | "memory_update" | "research_query"}
 
-- chat: greetings or small talk only
-- memory_update: user sharing personal facts to store
-- research_query: everything else
+Rules:
+- chat: greetings ("hi", "hello") or general casual small talk only.
+- memory_update: ONLY when the user explicitly shares personal biographical facts about themselves to save in their profile (e.g. "My name is Arjun", "I work as an AI engineer", "My goal is...").
+- research_query: everything else! Including ALL tool actions, commands, questions, scheduling events, note taking, reminders, calculations, file operations, deletions, and confirmations (e.g. "Delete note X", "Create a note titled Hack", "ok delete it", "Read file X", "Calculate total").
 
 Message: {message}"""
 
@@ -30,9 +31,12 @@ GREETINGS = {
     "hi",
     "hello",
     "thanks",
+    "thank you",
     "bye",
     "good morning",
     "good night",
+    "namaste",
+    "hey",
 }
 
 QUESTION_PREFIXES = (
@@ -48,6 +52,38 @@ QUESTION_PREFIXES = (
     "could",
     "does",
     "do",
+)
+
+ACTION_PREFIXES = (
+    "delete",
+    "remove",
+    "create",
+    "make",
+    "schedule",
+    "read",
+    "list",
+    "search",
+    "calculate",
+    "compute",
+    "find",
+    "check",
+    "update",
+    "set",
+    "add",
+    "show",
+    "open",
+    "run",
+    "ok",
+    "yes",
+    "confirm",
+    "proceed",
+    "sure",
+    "go ahead",
+    "please delete",
+    "please create",
+    "please schedule",
+    "please read",
+    "please calculate",
 )
 
 
@@ -74,6 +110,14 @@ def _is_obvious_question(message: str) -> bool:
     return any(
         normalized == prefix or normalized.startswith(f"{prefix} ")
         for prefix in QUESTION_PREFIXES
+    )
+
+
+def _is_action_command(message: str) -> bool:
+    normalized = _normalize_message(message)
+    return any(
+        normalized == prefix or normalized.startswith(f"{prefix} ")
+        for prefix in ACTION_PREFIXES
     )
 
 
@@ -146,7 +190,7 @@ def intent_router(state: dict) -> dict:
     try:
         if _is_greeting(question):
             route = "chat"
-        elif _is_obvious_question(question):
+        elif _is_obvious_question(question) or _is_action_command(question):
             route = "research_query"
         else:
             method = "llm"

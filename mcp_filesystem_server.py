@@ -24,13 +24,11 @@ async def list_allowed_directories() -> str:
 @mcp.tool()
 async def list_directory(path: str = "") -> str:
     """List files and directories in the sandbox. Path is relative to sandbox root."""
-    import os
-    target = (SANDBOX / path).resolve()
-    # security: must be within sandbox
     try:
+        target = (SANDBOX / path).resolve()
         target.relative_to(SANDBOX.resolve())
-    except ValueError:
-        return f"Error: Access denied: {path} is outside sandbox"
+    except (ValueError, Exception):
+        return f"Error: Access denied: {path} is invalid or outside sandbox"
     if not target.exists():
         return f"Error: Path not found: {path}"
     if not target.is_dir():
@@ -44,11 +42,11 @@ async def list_directory(path: str = "") -> str:
 @mcp.tool()
 async def read_file(path: str) -> str:
     """Read a file from the sandbox. Path is relative to sandbox root."""
-    target = (SANDBOX / path).resolve()
     try:
+        target = (SANDBOX / path).resolve()
         target.relative_to(SANDBOX.resolve())
-    except ValueError:
-        return f"Error: Access denied: {path} is outside sandbox"
+    except (ValueError, Exception):
+        return f"Error: Access denied: {path} is invalid or outside sandbox"
     if not target.exists():
         return f"Error: File not found: {path}"
     if not target.is_file():
@@ -63,11 +61,11 @@ async def read_file(path: str) -> str:
 @mcp.tool()
 async def write_file(path: str, content: str) -> str:
     """Write a file to the sandbox. Path is relative to sandbox root."""
-    target = (SANDBOX / path).resolve()
     try:
+        target = (SANDBOX / path).resolve()
         target.relative_to(SANDBOX.resolve())
-    except ValueError:
-        return f"Error: Access denied: {path} is outside sandbox"
+    except (ValueError, Exception):
+        return f"Error: Access denied: {path} is invalid or outside sandbox"
     # ensure parent exists
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content, encoding="utf-8")

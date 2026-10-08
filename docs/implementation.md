@@ -204,7 +204,27 @@ Contains three pipeline node functions:
 |---|---|
 | **Purpose** | Execute native tools and 7 Model Context Protocol (MCP) servers |
 | **Servers** | `calendar`, `notes`, `reminders`, `filesystem`, `github`, `sqlite`, `fetch` |
-| **Safety** | Human-in-the-loop confirmation for destructive actions, `mcp_sandbox/` jail for file operations |
+| **Safety** | Human-in-the-loop confirmation for destructive actions, `mcp_sandbox/` jail for file operations, transactional soft-delete staging (`undo_delete`) |
+
+---
+
+### [`planning/goal_guard.py`](../planning/goal_guard.py)
+
+| | |
+|---|---|
+| **Purpose** | Deterministic goal verification & multi-step completion tracking |
+| **Function** | `goal_fulfillment_check(state, query, tool_results)` |
+| **Key Features** | Abstract capability extraction (`read`, `create`, `update`, `delete`, `list`, `calculate`), ensures all sub-tasks execute before allowing final answer |
+
+---
+
+### Observability & Tracing Subsystem ([`observability/`](../observability/))
+
+| | |
+|---|---|
+| **Purpose** | Distributed tracing, per-step timing, latency breakdown, and error taxonomy |
+| **Key Files** | `observability/trace.py`, `observability/storage.py`, `observability/errors.py`, `observability/ids.py` |
+| **Output** | Structured JSONL traces saved to `traces/<trace_id>.jsonl` with full lifecycle event timelines |
 
 ---
 

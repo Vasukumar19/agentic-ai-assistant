@@ -73,6 +73,7 @@ def get_llm():
             temperature=TEMPERATURE,
             num_ctx=int(os.getenv("OLLAMA_NUM_CTX", "8192")),
             reasoning=os.getenv("OLLAMA_REASONING", "0").lower() not in ("0", "false", "no"),
+            timeout=float(os.getenv("TIMEOUT_LLM_S", "45.0")),
         )
     elif provider == "anthropic":
         from langchain_anthropic import ChatAnthropic
