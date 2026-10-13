@@ -146,50 +146,57 @@ python -m pytest tests/ -v
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Structure (V2 Modular Monolith)
 
 ```text
 agentic-ai-assistant/
-├── main.py                        # Main CLI entrypoint & interactive shell
-├── graph.py                       # LangGraph StateGraph pipeline definition
-├── llm.py                         # Multi-LLM provider factory (Ollama, Claude, OpenAI, Gemini)
-├── config.py                      # Global production configuration
-├── state.py                       # LangGraph AgentState TypedDict
-├── ingest.py                      # Document ingestion pipeline (FAISS + BM25)
-├── reranker.py                    # Cross-encoder reranker
+├── app/                                # V2 Hardened Modular Monolith Core
+│   ├── api/
+│   │   └── server.py                   # FastAPI REST API with header-derived auth & strict validation
+│   ├── core/
+│   │   ├── auth.py                     # UserPrincipal, header auth & fail-closed production access
+│   │   ├── config.py                   # Environment-aware settings & production security policies
+│   │   └── context.py                  # Immutable ExecutionContext & correlation tracking
+│   ├── gateway/
+│   │   ├── approval.py                 # 256-bit HMAC approval tokens with payload tampering validation
+│   │   ├── bootstrap.py                # Tool registration with UTC normalization & calendar delegation
+│   │   ├── dispatcher.py               # Tool gateway with schema validation & side-effect tracking
+│   │   └── manifest.py                 # Declarative tool schemas, risk levels & error codes
+│   ├── knowledge/
+│   │   ├── context_builder.py          # Bounded token budget context builder
+│   │   ├── repository.py               # Unified relational store (Profile facts, Notes, Reminders, Docs)
+│   │   └── retriever.py                # Hybrid semantic retriever with citation provenance validation
+│   ├── observability/
+│   │   └── sink.py                     # Decoupled monotonic trace sink (zero quadratic duplication)
+│   ├── orchestration/
+│   │   ├── deliberate_path.py          # Plan-execute-verify deliberate state machine
+│   │   ├── fast_path.py                # Sub-second single-turn conversation & knowledge synthesis
+│   │   ├── router.py                   # Intent classifier with confidence scoring
+│   │   └── verifier.py                 # Postcondition-based verification (VerificationStatus)
+│   ├── services/
+│   │   ├── calendar.py                 # Tenant-isolated local calendar & Google Calendar bridge
+│   │   └── reminder_scheduler.py       # Atomic background reminder polling & delivery worker
+│   ├── storage/
+│   │   ├── database.py                 # SQLite WAL engine with auto-schema migration & foreign keys
+│   │   └── models.py                   # Normalized SQLAlchemy models with cascade lifecycle
+│   ├── tools/
+│   │   ├── fetch.py                    # SSRF-guarded HTTP fetch with socket IP pinning & TOCTOU defense
+│   │   └── filesystem.py               # Collision-resistant SHA-256 tenant jail with quota enforcement
+│   ├── assistant.py                    # Unified AssistantApp entrypoint & genuine telemetry
+│   └── cli.py                          # Interactive terminal shell & one-shot CLI
 │
-├── documents/                     # Raw enterprise knowledge documents (.txt)
-├── faiss_index/                   # Dense vector index (index.faiss, index.pkl)
-├── bm25_chunks.pkl                # Sparse BM25 keyword index
+├── benchmarks/v2/                      # Deterministic 50-task evaluation benchmark
+│   ├── fixtures.py                     # Tenant-isolated relational seeding & teardown
+│   ├── runner.py                       # Evaluation runner with monotonic metrics
+│   ├── schema.py                       # Typed task & oracle result schemas
+│   └── tasks.py                        # 50 deterministic evaluation tasks across 5 categories
 │
-├── nodes/                         # LangGraph execution nodes
-│   ├── intent_router.py           # Intent routing (chat, memory, research)
-│   ├── chat.py                    # Casual conversation handler
-│   ├── memory_extractor.py        # Fact & preference extractor
-│   ├── memory_retriever.py        # Profile & semantic memory retriever
-│   ├── retrieval_planner.py       # Decides RAG vs memory vs tool paths
-│   ├── rag_retriever.py           # Hybrid RAG search engine
-│   ├── context_builder.py         # Real-time clock & context assembler
-│   ├── planner_node.py            # ReAct planner with goal guards & repair
-│   ├── tools.py                   # Tool execution & confirmation gating
-│   ├── embeddings.py              # Dense vector embeddings
-│   ├── bm25.py                    # Sparse BM25 search
-│   └── rrf.py                     # Reciprocal Rank Fusion
-│
-├── mcp_layer/                     # Model Context Protocol registry & client
-├── mcp_calendar_server.py         # Calendar MCP server
-├── mcp_notes_server.py            # Notes MCP server
-├── mcp_reminders_server.py        # Reminders MCP server
-├── mcp_filesystem_server.py       # Sandboxed filesystem MCP server
-├── mcp_github_server.py           # GitHub integration MCP server
-├── mcp_sqlite_server.py           # SQLite database MCP server
-├── mcp_fetch_server.py            # Web fetch MCP server
-│
-├── memory/                        # Long-term memory store
-├── observability/                 # Tracing, retry, timeout & error handlers
-├── planning/                      # Goal guard, schema validation & planners
-├── scripts/                       # Production utilities (smoke_test.py, inspect_trace.py)
-└── tests/                         # Production integration & security test suite
+├── documents/                          # Source enterprise knowledge documents (.txt)
+├── scripts/
+│   └── migrate_v1_data.py              # Zero-loss V1 JSON-to-SQLite migration utility
+└── tests/
+    ├── remediation/                    # Regression test suite for Priority 0–7 defects
+    └── v2/                             # Stages 1–5 modular monolith validation tests
 ```
 
 ---

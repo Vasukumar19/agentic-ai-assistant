@@ -113,3 +113,11 @@ def emit_event(
     )
     active_sink.emit(event)
     return event
+
+
+def get_trace_events(correlation_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Retrieve trace events recorded in the in-memory sink."""
+    events = _default_memory_sink.get_events()
+    if correlation_id:
+        return [e.to_dict() for e in events if e.correlation_id == correlation_id]
+    return [e.to_dict() for e in events]

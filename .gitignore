@@ -39,10 +39,9 @@ client_secret.json
 client_secret*.json
 credentials.json
 
-# SQLite storage
-storage/*.db
-storage/*.db-wal
-storage/*.db-shm
+# SQLite & Runtime Storage
+storage/
 *.db
 *.db-wal
 *.db-shm
+assistant_v2.db*

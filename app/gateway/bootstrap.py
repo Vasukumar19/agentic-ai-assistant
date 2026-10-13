@@ -73,6 +73,23 @@ def bootstrap_gateway_tools() -> None:
     )
 
     # 2. Reminders Tools
+    def _create_reminder_handler(ctx: ExecutionContext, title: str, due_date: str = "2026-10-20 18:00"):
+        from datetime import timezone
+        if due_date:
+            clean = due_date.replace("Z", "+00:00")
+            try:
+                dt = datetime.fromisoformat(clean)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+            except Exception:
+                try:
+                    dt = datetime.strptime(due_date, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+                except Exception:
+                    raise ValueError(f"Invalid due_date format: '{due_date}'. Expected ISO format.")
+        else:
+            dt = datetime.now(timezone.utc)
+        return {"reminder_id": knowledge_repo.create_reminder(ctx, title, dt), "due_date": dt.isoformat()}
+
     gateway.register_tool(
         manifest=ToolManifest(
             name="reminders.create",
@@ -81,9 +98,7 @@ def bootstrap_gateway_tools() -> None:
             side_effect=SideEffectLevel.REVERSIBLE_WRITE,
             approval=ApprovalRequirement.NEVER,
         ),
-        handler=lambda ctx, title, due_date="2026-10-20 18:00": {
-            "reminder_id": knowledge_repo.create_reminder(ctx, title, datetime.now())
-        },
+        handler=_create_reminder_handler,
     )
 
     gateway.register_tool(
@@ -108,13 +123,11 @@ def bootstrap_gateway_tools() -> None:
         handler=lambda ctx, reminder_id: {"completed": knowledge_repo.complete_reminder(ctx, reminder_id)},
     )
 
-    # 3. Calendar Tools (Local Deterministic Store)
+    # 3. Calendar Tools (Local Calendar Service)
+    from app.services.calendar import calendar_service
+
     def _list_calendar_events(ctx: ExecutionContext, date: str = ""):
-        from benchmarks.v2.fixtures import DETERMINISTIC_CALENDAR
-        events = DETERMINISTIC_CALENDAR.get("events", {})
-        if date:
-            filtered = {k: v for k, v in events.items() if v.get("date") == date}
-            return {"events": filtered}
+        events = calendar_service.list_events(ctx, target_date=date or None)
         return {"events": events}
 
     gateway.register_tool(
@@ -129,9 +142,7 @@ def bootstrap_gateway_tools() -> None:
     )
 
     def _get_calendar_event(ctx: ExecutionContext, event_id: str):
-        from benchmarks.v2.fixtures import DETERMINISTIC_CALENDAR
-        events = DETERMINISTIC_CALENDAR.get("events", {})
-        ev = events.get(event_id)
+        ev = calendar_service.get_event(ctx, event_id)
         if ev:
             return {"event": ev}
         return {"error": f"Event '{event_id}' not found."}

@@ -64,13 +64,13 @@ def migrate_all_v1_data(target_user_id: str = "usr_default") -> None:
             logger.warning("Failed migrating notes.json: %s", e)
 
     # 3. Migrate Documents from documents/*.txt
-    from app.storage.database import get_session
     from app.storage.models import DocumentModel
     with get_session() as session:
         existing_doc_ids = set(
             row[0] for row in session.query(DocumentModel.document_id).filter(DocumentModel.user_id == target_user_id).all()
         )
 
+    docs_dir = PROJECT_ROOT / "documents"
     if docs_dir.exists():
         txt_files = list(docs_dir.glob("*.txt"))
         migrated_docs = 0

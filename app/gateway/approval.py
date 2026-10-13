@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import logging
 import time
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -15,6 +16,8 @@ from app.core.context import ExecutionContext
 from app.gateway.manifest import SideEffectLevel
 from app.storage.database import get_session
 from app.storage.models import ActionApprovalModel
+
+logger = logging.getLogger(__name__)
 
 
 def _canonical_json(data: Dict[str, Any]) -> str:
@@ -34,7 +37,13 @@ class ApprovalTokenEngine:
     """
 
     def __init__(self, secret_key: Optional[str] = None):
-        self.secret_key = (secret_key or settings.APPROVAL_HMAC_SECRET).encode("utf-8")
+        self._custom_secret = secret_key
+
+    @property
+    def secret_key(self) -> bytes:
+        if self._custom_secret:
+            return self._custom_secret.encode("utf-8")
+        return settings.get_approval_hmac_secret().encode("utf-8")
 
     def generate_token(
         self,
@@ -42,12 +51,14 @@ class ApprovalTokenEngine:
         user_id: str,
         tool_name: str,
         args_hash: str,
+        risk_level: str,
         expires_timestamp: int,
     ) -> str:
         """Create HMAC-SHA256 signature token bound to action identity and parameters."""
-        payload = f"{action_id}:{user_id}:{tool_name}:{args_hash}:{expires_timestamp}".encode("utf-8")
+        payload = f"{action_id}:{user_id}:{tool_name}:{args_hash}:{risk_level}:{expires_timestamp}".encode("utf-8")
         sig = hmac.new(self.secret_key, payload, hashlib.sha256).hexdigest()
-        return f"tok_{action_id[:8]}_{sig[:24]}"
+        # Full 64 hex characters HMAC digest
+        return f"tok_{action_id}_{sig}"
 
     def verify_token(
         self,
@@ -55,11 +66,19 @@ class ApprovalTokenEngine:
         user_id: str,
         tool_name: str,
         args_hash: str,
+        risk_level: str,
         expires_timestamp: int,
         token: str,
     ) -> bool:
-        """Verify HMAC-SHA256 token against payload parameters."""
-        expected = self.generate_token(action_id, user_id, tool_name, args_hash, expires_timestamp)
+        """Verify HMAC-SHA256 token against payload parameters in constant time."""
+        expected = self.generate_token(
+            action_id=action_id,
+            user_id=user_id,
+            tool_name=tool_name,
+            args_hash=args_hash,
+            risk_level=risk_level,
+            expires_timestamp=expires_timestamp,
+        )
         return hmac.compare_digest(expected, token)
 
     def stage_approval(
@@ -75,8 +94,9 @@ class ApprovalTokenEngine:
         Stage an approval intent to the database and generate a secure token.
         Returns (action_id, approval_token).
         """
-        action_id = f"act_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
+        action_id = f"act_{int(time.time()*1000)}_{uuid.uuid4().hex[:8]}"
         args_hash = _hash_args(arguments)
+        risk_val = risk_level.value if hasattr(risk_level, "value") else str(risk_level)
         exp_s = expires_seconds or settings.APPROVAL_EXPIRATION_SECONDS
         expires_at = datetime.now(timezone.utc) + timedelta(seconds=exp_s)
         expires_ts = int(expires_at.timestamp())
@@ -86,11 +106,12 @@ class ApprovalTokenEngine:
             user_id=ctx.user_id,
             tool_name=tool_name,
             args_hash=args_hash,
+            risk_level=risk_val,
             expires_timestamp=expires_ts,
         )
 
         with get_session() as session:
-            from app.storage.models import UserModel
+            from app.storage.models import UserModel, ExecutionModel
             user = session.get(UserModel, ctx.user_id)
             if not user:
                 user = UserModel(
@@ -101,15 +122,19 @@ class ApprovalTokenEngine:
                 session.add(user)
                 session.flush()
 
+            exec_row = session.get(ExecutionModel, ctx.execution_id) if ctx.execution_id else None
+            effective_exec_id = exec_row.execution_id if exec_row else None
+
             record = ActionApprovalModel(
                 action_id=action_id,
-                execution_id=None,
+                execution_id=effective_exec_id,
                 user_id=ctx.user_id,
                 tool_name=tool_name,
                 arguments_payload=_canonical_json(arguments),
                 arguments_hash=args_hash,
                 approval_token=token,
                 summary=summary,
+                risk_level=risk_val,
                 status="PENDING",
                 expires_at=expires_at,
             )
@@ -121,28 +146,38 @@ class ApprovalTokenEngine:
         self,
         ctx: ExecutionContext,
         approval_token: str,
-        decision: str,  # "APPROVE" | "REJECT"
+        decision: str = "APPROVE",  # "APPROVE" | "REJECT"
+        action_id: Optional[str] = None,
     ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
         """
-        Validate pending approval token against database and expiration.
+        Validate pending approval token against database, argument hash, and expiration.
+        Performs an atomic state transition to prevent concurrent consumption or replay.
         Returns (is_authorized, tool_name, approved_arguments).
         """
         now = datetime.now(timezone.utc)
         with get_session() as session:
-            record = (
-                session.query(ActionApprovalModel)
-                .filter_by(approval_token=approval_token, status="PENDING")
-                .first()
+            query = session.query(ActionApprovalModel).filter(
+                ActionApprovalModel.approval_token == approval_token
             )
+            if action_id:
+                query = query.filter(ActionApprovalModel.action_id == action_id)
+
+            record = query.first()
             if not record:
+                logger.warning("Approval record not found for token: %s", approval_token[:16])
                 return False, None, None
 
             # Verify tenant match
             if record.user_id != ctx.user_id:
+                logger.warning("Approval tenant mismatch: record=%s, ctx=%s", record.user_id, ctx.user_id)
+                return False, None, None
+
+            # Verify pending status
+            if record.status != "PENDING":
+                logger.warning("Approval record already transitioned: status=%s", record.status)
                 return False, None, None
 
             # Verify expiration
-            # SQLite stores naive or aware datetimes, normalize for comparison
             exp = record.expires_at
             if exp.tzinfo is None:
                 exp = exp.replace(tzinfo=timezone.utc)
@@ -150,29 +185,73 @@ class ApprovalTokenEngine:
                 record.status = "EXPIRED"
                 return False, None, None
 
+            # Re-hash stored canonical arguments to verify DB payload integrity
+            try:
+                args_dict = json.loads(record.arguments_payload)
+            except Exception:
+                logger.error("Failed to parse stored arguments payload for action %s", record.action_id)
+                record.status = "REJECTED"
+                return False, None, None
+
+            recomputed_hash = _hash_args(args_dict)
+            if not hmac.compare_digest(recomputed_hash, record.arguments_hash):
+                logger.error("Arguments hash tampering detected for action %s!", record.action_id)
+                record.status = "REJECTED"
+                return False, None, None
+
             # Verify cryptographic signature
-            args_dict = json.loads(record.arguments_payload)
             is_valid_sig = self.verify_token(
                 action_id=record.action_id,
                 user_id=record.user_id,
                 tool_name=record.tool_name,
                 args_hash=record.arguments_hash,
+                risk_level=record.risk_level or "DESTRUCTIVE",
                 expires_timestamp=int(exp.timestamp()),
                 token=approval_token,
             )
             if not is_valid_sig:
+                logger.warning("Cryptographic signature mismatch for action %s", record.action_id)
                 record.status = "REJECTED"
                 return False, None, None
 
-            # Handle Decision
-            if decision.upper() in ("APPROVE", "CONFIRM", "YES"):
-                record.status = "APPROVED"
-                record.decided_at = now
+            # Atomic State Transition via conditional UPDATE
+            target_status = "CONSUMED" if decision.upper() in ("APPROVE", "CONFIRM", "YES") else "REJECTED"
+            updated = (
+                session.query(ActionApprovalModel)
+                .filter(
+                    ActionApprovalModel.action_id == record.action_id,
+                    ActionApprovalModel.status == "PENDING",
+                )
+                .update(
+                    {
+                        "status": target_status,
+                        "decided_at": now,
+                    },
+                    synchronize_session="fetch",
+                )
+            )
+
+            if updated == 0:
+                logger.warning("Concurrent approval claim collision for action %s", record.action_id)
+                return False, None, None
+
+            if target_status == "CONSUMED":
                 return True, record.tool_name, args_dict
-            else:
-                record.status = "REJECTED"
-                record.decided_at = now
-                return False, record.tool_name, args_dict
+            return False, record.tool_name, args_dict
+
+    def record_execution_outcome(
+        self,
+        action_id: str,
+        status: str,
+        outcome_data: Optional[str] = None,
+    ) -> None:
+        """Record the post-execution outcome of an approved action."""
+        now = datetime.now(timezone.utc)
+        with get_session() as session:
+            rec = session.get(ActionApprovalModel, action_id)
+            if rec:
+                rec.executed_at = now
+                rec.execution_outcome = outcome_data or status
 
 
 # Global default engine instance

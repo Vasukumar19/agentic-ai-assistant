@@ -1,7 +1,8 @@
-"""Tenant-Isolated Sandboxed Filesystem Operations."""
+"""Tenant-Isolated Sandboxed Filesystem Operations with Collision-Resistant Jails."""
 
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 from pathlib import Path
@@ -17,7 +18,8 @@ WINDOWS_RESERVED_NAMES = {
     *(f"LPT{i}" for i in range(1, 10)),
 }
 
-MAX_FILE_READ_BYTES = 50_000  # 50 KB ceiling
+MAX_FILE_READ_BYTES = 50_000      # 50 KB ceiling per read
+MAX_FILE_WRITE_BYTES = 1_000_000  # 1 MB ceiling per write
 
 
 class IsolatedFilesystem:
@@ -28,15 +30,20 @@ class IsolatedFilesystem:
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
     def get_user_jail(self, user_id: str) -> Path:
-        """Return canonical jail directory for a specific user tenant."""
-        safe_user = re.sub(r"[^a-zA-Z0-9_\-]", "_", user_id)
-        jail = (self.base_dir / safe_user).resolve()
+        """
+        Return collision-resistant canonical jail directory for a specific user tenant.
+        Combines safe prefix with SHA-256 hash to prevent collisions (e.g. user@a vs user#a).
+        """
+        safe_prefix = re.sub(r"[^a-zA-Z0-9_\-]", "_", user_id)[:16]
+        user_hash = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:16]
+        jail = (self.base_dir / f"{safe_prefix}_{user_hash}").resolve()
         jail.mkdir(parents=True, exist_ok=True)
         return jail
 
     def _resolve_safe_path(self, user_id: str, relative_path: str) -> Path:
         """
         Resolve relative path inside user jail and strictly enforce containment.
+        Checks for directory traversal, Windows device names, and symlink escapes.
         Raises PermissionError or ValueError on jailbreak attempt.
         """
         jail = self.get_user_jail(user_id)
@@ -48,9 +55,20 @@ class IsolatedFilesystem:
             if stem in WINDOWS_RESERVED_NAMES:
                 raise PermissionError(f"Access denied: Reserved device name '{part}' is forbidden.")
 
+        # Check for symlink escape traversal across intermediate segments
+        curr = jail
+        for part in Path(clean_rel).parts:
+            curr = curr / part
+            if curr.is_symlink():
+                resolved_sym = curr.resolve()
+                try:
+                    resolved_sym.relative_to(jail)
+                except ValueError:
+                    raise PermissionError(f"Access denied: Symlink '{part}' points outside sandbox jail.")
+
         target = (jail / clean_rel).resolve()
 
-        # Enforce boundary: target must be inside jail
+        # Enforce canonical boundary: target must be inside jail
         try:
             target.relative_to(jail)
         except ValueError:
@@ -74,7 +92,10 @@ class IsolatedFilesystem:
         return target.read_text(encoding="utf-8", errors="replace")
 
     def write_file(self, ctx: ExecutionContext, path: str, content: str) -> int:
-        """Write text file within user jail."""
+        """Write text file within user jail with strict quota enforcement."""
+        if len(content.encode("utf-8")) > MAX_FILE_WRITE_BYTES:
+            raise ValueError(f"Content exceeds maximum write quota of {MAX_FILE_WRITE_BYTES} bytes.")
+
         target = self._resolve_safe_path(ctx.user_id, path)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")

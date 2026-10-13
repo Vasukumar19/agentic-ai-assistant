@@ -28,8 +28,11 @@ class ToolErrorCode(str, Enum):
     RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     EXECUTION_TIMEOUT = "EXECUTION_TIMEOUT"
+    NETWORK_ERROR = "NETWORK_ERROR"
+    RATE_LIMITED = "RATE_LIMITED"
     EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR"
     INTERNAL_ERROR = "INTERNAL_ERROR"
+    UNKNOWN_OUTCOME = "UNKNOWN_OUTCOME"
 
 
 class ToolManifest(BaseModel):
@@ -46,21 +49,29 @@ class ToolManifest(BaseModel):
 
 class ToolResultEnvelope(BaseModel):
     """Standardized result returned by the Tool Gateway for every execution."""
-    status: str  # "success" | "error" | "awaiting_approval"
+    status: str  # "success" | "error" | "awaiting_approval" | "unknown_outcome"
     tool_name: str
     data: Optional[Dict[str, Any]] = None
     error_code: Optional[ToolErrorCode] = None
     error_message: Optional[str] = None
     retryable: bool = False
+    side_effect_occurred: bool = False
     duration_ms: int = 0
 
     @classmethod
-    def success(cls, tool_name: str, data: Dict[str, Any], duration_ms: int = 0) -> ToolResultEnvelope:
+    def success(
+        cls,
+        tool_name: str,
+        data: Dict[str, Any],
+        duration_ms: int = 0,
+        side_effect_occurred: bool = False,
+    ) -> ToolResultEnvelope:
         return cls(
             status="success",
             tool_name=tool_name,
             data=data,
             duration_ms=duration_ms,
+            side_effect_occurred=side_effect_occurred,
         )
 
     @classmethod
@@ -70,6 +81,7 @@ class ToolResultEnvelope(BaseModel):
         error_code: ToolErrorCode,
         error_message: str,
         retryable: bool = False,
+        side_effect_occurred: bool = False,
         duration_ms: int = 0,
     ) -> ToolResultEnvelope:
         return cls(
@@ -78,6 +90,7 @@ class ToolResultEnvelope(BaseModel):
             error_code=error_code,
             error_message=error_message,
             retryable=retryable,
+            side_effect_occurred=side_effect_occurred,
             duration_ms=duration_ms,
         )
 

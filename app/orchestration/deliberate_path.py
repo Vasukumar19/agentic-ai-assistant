@@ -11,8 +11,9 @@ from app.core.config import settings
 from app.core.context import ExecutionContext
 from app.gateway.dispatcher import gateway
 from app.gateway.manifest import ToolResultEnvelope
-from app.orchestration.verifier import verifier
+from app.orchestration.verifier import VerificationStatus, verifier
 from app.observability.sink import emit_event
+from app.knowledge.repository import knowledge_repo
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +56,13 @@ class DeliberatePathExecutor:
                 ).first()
                 if staged:
                     args_dict = json.loads(staged.arguments_payload)
+                    act_id = staged.action_id
                     res = gateway.dispatch(
                         ctx=ctx,
                         tool_name=staged.tool_name,
                         arguments=args_dict,
                         approval_token=approval_token,
+                        action_id=act_id,
                     )
                     tool_results.append(res.model_dump())
                     if res.status == "success":
@@ -83,7 +86,13 @@ class DeliberatePathExecutor:
         # A. Note Deletion
         if "delete note" in q_lower or "notes.delete" in q_lower:
             m = re.search(r"\b(note_\w+)\b", query)
-            note_id = m.group(1) if m else "note_101"
+            if not m:
+                return {
+                    "answer": "Which note would you like to delete? Please specify a valid note ID (e.g. note_101).",
+                    "execution_status": "error",
+                    "tool_results": [],
+                }
+            note_id = m.group(1)
 
             res = gateway.dispatch(
                 ctx=ctx,
@@ -116,7 +125,13 @@ class DeliberatePathExecutor:
         # B. SQLite Record Deletion
         if "delete" in q_lower and ("sqlite" in q_lower or "user record" in q_lower or "table" in q_lower):
             m_id = re.search(r"\bid\s+(\d+)\b", query)
-            rec_id = int(m_id.group(1)) if m_id else 2
+            if not m_id:
+                return {
+                    "answer": "Which record ID would you like to delete from SQLite table 'users'?",
+                    "execution_status": "error",
+                    "tool_results": [],
+                }
+            rec_id = int(m_id.group(1))
             res = gateway.dispatch(
                 ctx=ctx,
                 tool_name="sqlite.delete_record",
@@ -150,9 +165,15 @@ class DeliberatePathExecutor:
         # ----------------------------------------------------------------------
 
         # C. Filesystem Sandbox Read
-        if "read file" in q_lower or ("filesystem" in q_lower and "passwd" in q_lower):
+        if "read file" in q_lower or ("filesystem" in q_lower and ("passwd" in q_lower or "file" in q_lower)):
             m_p = re.search(r"(?:read file\s+|file\s+)(['\"]?[^'\s\"]+['\"]?)", query, re.IGNORECASE)
-            target_path = m_p.group(1).strip("'\"") if m_p else "../../etc/passwd"
+            if not m_p:
+                return {
+                    "answer": "Please specify the file path to read inside the sandbox.",
+                    "execution_status": "error",
+                    "tool_results": [],
+                }
+            target_path = m_p.group(1).strip("'\"")
             res = gateway.dispatch(
                 ctx=ctx,
                 tool_name="filesystem.read_file",
@@ -172,7 +193,13 @@ class DeliberatePathExecutor:
         # D. Safe HTTP Fetch (SSRF-Guarded)
         if "fetch" in q_lower and ("url" in q_lower or "http" in q_lower):
             m_u = re.search(r"(https?://[^\s'\"]+)", query)
-            target_url = m_u.group(1) if m_u else "http://169.254.169.254/latest/meta-data/"
+            if not m_u:
+                return {
+                    "answer": "Please provide a valid HTTP or HTTPS URL to fetch.",
+                    "execution_status": "error",
+                    "tool_results": [],
+                }
+            target_url = m_u.group(1)
             res = gateway.dispatch(
                 ctx=ctx,
                 tool_name="fetch.get_url",
@@ -189,7 +216,7 @@ class DeliberatePathExecutor:
                 "tool_results": tool_results,
             }
 
-        # E. SQLite Read Query (SQL Injection Defended)
+        # E. SQLite Read Query
         if "sqlite" in q_lower and ("select" in q_lower or "drop" in q_lower or "query" in q_lower):
             res = gateway.dispatch(
                 ctx=ctx,
@@ -213,12 +240,15 @@ class DeliberatePathExecutor:
 
         # F. Reminder Creation
         if "create a reminder" in q_lower or "create reminder" in q_lower or "reminders.create" in q_lower:
-            title_m = re.search(r"titled\s+['\"]?([^'\"\n]+)['\"]?", query, re.IGNORECASE)
+            title_m = re.search(r"titled\s+['\"]?([^'\"\n]+?)['\"]?(?:\s+(?:at|on|due)\s+|$)", query, re.IGNORECASE)
             title = title_m.group(1).strip() if title_m else "New Reminder"
+            date_m = re.search(r"\b(\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?)\b", query)
+            due_str = date_m.group(1) if date_m else "2026-10-20 18:00"
+
             res = gateway.dispatch(
                 ctx=ctx,
                 tool_name="reminders.create",
-                arguments={"title": title, "due_date": "2026-10-20 18:00"},
+                arguments={"title": title, "due_date": due_str},
             )
             tool_results.append(res.model_dump())
             return {
@@ -230,7 +260,13 @@ class DeliberatePathExecutor:
         # G. Reminder Completion
         if "complete reminder" in q_lower:
             m = re.search(r"\b(rem_\w+)\b", query)
-            rid = m.group(1) if m else "rem_102"
+            if not m:
+                return {
+                    "answer": "Which reminder would you like to complete? Please specify the reminder ID (e.g. rem_101).",
+                    "execution_status": "error",
+                    "tool_results": [],
+                }
+            rid = m.group(1)
             res = gateway.dispatch(
                 ctx=ctx,
                 tool_name="reminders.complete",
@@ -248,13 +284,9 @@ class DeliberatePathExecutor:
             res = gateway.dispatch(ctx=ctx, tool_name="reminders.list", arguments={})
             tool_results.append(res.model_dump())
             rems = res.data.get("reminders", []) if res.data else []
-            if not rems:
-                # Also check deterministic fixtures
-                from benchmarks.v2.fixtures import DETERMINISTIC_REMINDERS
-                rems = list(DETERMINISTIC_REMINDERS.get("reminders", {}).values())
             rem_lines = [f"- [{r.get('status', 'pending')}] {r.get('title')} (Due: {r.get('due_date', '')})" for r in rems]
             return {
-                "answer": "Here are your active reminders:\n" + "\n".join(rem_lines),
+                "answer": "Here are your active reminders:\n" + ("\n".join(rem_lines) if rem_lines else "No reminders found."),
                 "execution_status": "completed",
                 "tool_results": tool_results,
             }
@@ -282,28 +314,26 @@ class DeliberatePathExecutor:
         date_m = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", query)
         target_date = date_m.group(1) if date_m else "2026-10-14"
 
-        # 1. Fetch Calendar Events
+        # 1. Fetch Calendar Events via Gateway
         res_cal = gateway.dispatch(ctx=ctx, tool_name="calendar.list_events", arguments={"date": target_date})
         tool_results.append(res_cal.model_dump())
         events_data = res_cal.data.get("events", {}) if res_cal.data else {}
 
-        # 2. Fetch Relevant Notes if applicable
+        # 2. Fetch Relevant Notes from user repository
         notes_context = ""
-        from benchmarks.v2.fixtures import DETERMINISTIC_NOTES
-        all_notes = DETERMINISTIC_NOTES.get("notes", {})
         if any(w in q_lower for w in ["note", "prep", "interview", "executive", "hardware", "agenda", "brief"]):
             res_notes = gateway.dispatch(ctx=ctx, tool_name="notes.list", arguments={})
             tool_results.append(res_notes.model_dump())
-            notes_context = "\n".join([f"- Note {nid}: {n.get('title')} -> {n.get('content')}" for nid, n in all_notes.items()])
+            all_notes = res_notes.data.get("notes", []) if res_notes.data else []
+            notes_context = "\n".join([f"- Note {n.get('note_id')}: {n.get('title')} -> {n.get('content')}" for n in all_notes])
 
-        # 3. Fetch Reminders if applicable
+        # 3. Fetch Reminders from user repository
         reminders_context = ""
-        from benchmarks.v2.fixtures import DETERMINISTIC_REMINDERS
-        all_reminders = DETERMINISTIC_REMINDERS.get("reminders", {})
         if any(w in q_lower for w in ["reminder", "brief", "timeline", "due", "expense"]):
             res_rem = gateway.dispatch(ctx=ctx, tool_name="reminders.list", arguments={})
             tool_results.append(res_rem.model_dump())
-            reminders_context = "\n".join([f"- Reminder {rid}: {r.get('title')} (Due: {r.get('due_date')}, Status: {r.get('status')})" for rid, r in all_reminders.items()])
+            all_reminders = res_rem.data.get("reminders", []) if res_rem.data else []
+            reminders_context = "\n".join([f"- Reminder {r.get('reminder_id')}: {r.get('title')} (Due: {r.get('due_date')}, Status: {r.get('status')})" for r in all_reminders])
 
         # 4. Fetch Policy Documents if applicable
         citations = []
@@ -351,9 +381,13 @@ Answer:"""
 
         emit_event(ctx, "deliberate_path", "SYNTHESIS_COMPLETED")
 
+        # 6. Postcondition Verification
+        v_res = verifier.verify(ctx, goal=query, tool_results=tool_results)
+
         return {
             "answer": final_answer,
-            "execution_status": "completed",
+            "execution_status": "completed" if v_res.is_satisfied else "incomplete",
+            "verification": v_res.model_dump(),
             "tool_results": tool_results,
             "citations": [c.model_dump() for c in citations],
             "rag_context": doc_context,
@@ -362,4 +396,3 @@ Answer:"""
 
 # Global default deliberate executor
 deliberate_path = DeliberatePathExecutor()
-

@@ -136,5 +136,43 @@ class HybridKnowledgeRetriever:
         return citations
 
 
+def validate_citation_provenance(ctx: ExecutionContext, citation: CitationRecord) -> Tuple[bool, Optional[str]]:
+    """
+    Validate that a CitationRecord has verifiable provenance:
+      - Belongs to the authenticated tenant
+      - References an existing Document and DocumentChunk
+      - Has matching document metadata and excerpt content
+    """
+    from app.storage.database import get_session
+    from app.storage.models import DocumentModel, DocumentChunkModel
+
+    with get_session() as session:
+        chunk = (
+            session.query(DocumentChunkModel)
+            .filter_by(chunk_id=citation.chunk_id, user_id=ctx.user_id)
+            .first()
+        )
+        if not chunk:
+            return False, f"Chunk '{citation.chunk_id}' does not exist or belongs to another tenant."
+
+        doc = (
+            session.query(DocumentModel)
+            .filter_by(document_id=citation.document_id, user_id=ctx.user_id)
+            .first()
+        )
+        if not doc:
+            return False, f"Document '{citation.document_id}' does not exist or belongs to another tenant."
+
+        if doc.filename != citation.document_name:
+            return False, f"Document name mismatch: expected '{doc.filename}', got '{citation.document_name}'."
+
+        # Verify quote matches source content
+        cleaned_quote = citation.exact_quote.rstrip(".")
+        if cleaned_quote not in chunk.content and chunk.content[:len(cleaned_quote)] != cleaned_quote:
+            return False, "Citation exact_quote does not match source chunk content."
+
+        return True, None
+
+
 # Global retriever instance
 knowledge_retriever = HybridKnowledgeRetriever()

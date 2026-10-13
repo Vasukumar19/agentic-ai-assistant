@@ -35,6 +35,9 @@ class AssistantApp:
         Primary execution entrypoint for queries and turns.
         Supports both string queries and LangGraph state dictionaries.
         """
+        import time
+        t0 = time.perf_counter()
+
         if isinstance(query, dict):
             query_str = query.get("question") or query.get("query", "")
             user_id = query.get("user_id", user_id)
@@ -73,19 +76,25 @@ class AssistantApp:
             result = deliberate_path.execute(ctx, query=query_str, approval_token=approval_token)
 
         # Attach execution identity and telemetry
+        dur_ms = int((time.perf_counter() - t0) * 1000)
+        from app.observability.sink import get_trace_events
         result["correlation_id"] = ctx.correlation_id
         result["user_id"] = ctx.user_id
         result["session_id"] = ctx.session_id
+        result["duration_ms"] = dur_ms
         if "route" not in result:
             result["route"] = classification.route
-        result["trace_events"] = []  # Zero quadratic trace duplication in state!
-        result["llm_usage"] = [{"total_tokens": 150}]
+        result["trace_events"] = get_trace_events(ctx.correlation_id)
+        # Preserve genuine provider token usage if available; otherwise None (no fabricated placeholders)
+        if "llm_usage" not in result:
+            result["llm_usage"] = None
 
         emit_event(
             ctx=ctx,
             component="assistant",
             event_type="RESPONSE_COMPLETED",
             payload={"status": result.get("execution_status")},
+            duration_ms=dur_ms,
         )
 
         return result

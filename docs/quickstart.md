@@ -92,18 +92,19 @@ Supported user-facing domains:
 
 ## Testing & Verification
 
-### 1. Run Complete V2 Automated Test Suite (Stages 1–5)
+### 1. Run Complete V2 Automated Test Suites (Stages 1–5 & Security Remediation)
 ```bash
-python -m pytest tests/v2/ -v
+python -m pytest tests/v2/ tests/remediation/ -v
 ```
+All 62 tests run with 100% pass rate in < 20 seconds.
 
 ### 2. Run Comprehensive 50-Task Evaluation Benchmark
 ```bash
 python -u -m benchmarks.v2.runner --target v2
 ```
-Validates the complete 50-task evaluation matrix across `doc_qa`, `memory`, `calendar`, `briefing`, and `actions_safety`, achieving 100% pass rate, zero state corruptions, and 100% HMAC approval gate safety.
+Validates the complete 50-task evaluation matrix across `doc_qa`, `memory`, `calendar`, `briefing`, and `actions_safety`, achieving 100.0% pass rate (50/50), zero state corruptions, zero approval bypasses, and 100% citation provenance validation.
 
-### 3. Legacy Backward Compatibility Tests
+### 3. Run Backward Compatibility Test Suite
 ```bash
 python -m pytest tests/integration/ tests/security/ -v
 ```

@@ -187,6 +187,9 @@ class ReminderModel(Base):
     recurrence_rule = Column(String(128), nullable=True)
     delivery_channel = Column(String(64), default="CLI")
     delivered_at = Column(DateTime(timezone=True), nullable=True)
+    delivery_attempts = Column(Integer, default=0)
+    last_attempt_at = Column(DateTime(timezone=True), nullable=True)
+    delivery_error = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=_utc_now)
 
     # Relationships
@@ -246,9 +249,12 @@ class ActionApprovalModel(Base):
     arguments_hash = Column(String(64), nullable=False)
     approval_token = Column(String(128), unique=True, nullable=False, index=True)
     summary = Column(String(512), nullable=True)
-    status = Column(String(32), default="PENDING", index=True)  # PENDING | APPROVED | REJECTED | EXPIRED
+    risk_level = Column(String(32), default="DESTRUCTIVE")
+    status = Column(String(32), default="PENDING", index=True)  # PENDING | APPROVED | CONSUMED | REJECTED | EXPIRED
     expires_at = Column(DateTime(timezone=True), nullable=False)
     decided_at = Column(DateTime(timezone=True), nullable=True)
+    executed_at = Column(DateTime(timezone=True), nullable=True)
+    execution_outcome = Column(Text, nullable=True)
 
     # Relationships
     execution = relationship("ExecutionModel", back_populates="approvals")

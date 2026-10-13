@@ -1,8 +1,8 @@
 """Benchmark Runner for V2 Evaluation Harness.
 
 Executes all 50 deterministic benchmark tasks against the active system,
-evaluates exact oracles, measures latencies and token usage, and generates
-the Baseline Evaluation Report.
+evaluates exact oracles, measures authentic latencies and token usage, and generates
+the Baseline and Remediation Evaluation Reports.
 """
 
 from __future__ import annotations
@@ -21,11 +21,13 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from benchmarks.v2.fixtures import (
+    seed_tenant_benchmark_state,
+    cleanup_tenant_benchmark_state,
     backup_environment,
     restore_environment,
     reset_to_clean_fixtures,
 )
-from benchmarks.v2.schema import BenchmarkTask, TaskResult
+from benchmarks.v2.schema import BenchmarkTask, TaskResult, OracleResult
 from benchmarks.v2.tasks import get_all_benchmark_tasks
 
 
@@ -58,10 +60,6 @@ def run_benchmark_suite(
         print("[Init] Compiling LangGraph application...")
         app = create_runnable_graph()
 
-    # Backup active environment
-    print("[Init] Backing up environment files...")
-    backup_environment()
-
     tasks = get_all_benchmark_tasks()
     if category_filter:
         tasks = [t for t in tasks if t.category == category_filter]
@@ -74,32 +72,53 @@ def run_benchmark_suite(
     t_suite_start = time.perf_counter()
 
     for idx, task in enumerate(tasks, 1):
+        task_user_id = f"usr_bench_{task.task_id.lower()}"
         print(f"[{idx:02d}/{len(tasks):02d}] {task.task_id}: {task.name:<45}", end=" ... ", flush=True)
 
-        # Reset clean fixtures before task
-        reset_to_clean_fixtures()
+        # Reset clean fixtures for this isolated tenant before task
+        if target.lower() == "v2":
+            cleanup_tenant_benchmark_state(task_user_id)
+            seed_tenant_benchmark_state(task_user_id)
+        else:
+            reset_to_clean_fixtures()
 
         t0 = time.perf_counter()
         state: Dict[str, Any] = {}
         error_msg = None
 
         try:
-            # Invoke app with clean question state
-            state = app.invoke({"question": task.query})
+            if target.lower() == "v2":
+                state = app.invoke(
+                    query=task.query,
+                    user_id=task_user_id,
+                    session_id=f"sess_{task.task_id.lower()}",
+                )
+            else:
+                state = app.invoke({"question": task.query})
         except Exception as exc:
             error_msg = str(exc)
             state = {"execution_status": "error", "error": error_msg, "answer": f"Crash: {exc}"}
 
         lat_ms = (time.perf_counter() - t0) * 1000
 
-        # Run oracle
+        # Run oracle with task_user_id in meta
         try:
-            oracle_res = task.oracle_fn(state, {"task": task, "latency_ms": lat_ms})
+            oracle_res = task.oracle_fn(
+                state,
+                {"task": task, "latency_ms": lat_ms, "user_id": task_user_id},
+            )
         except Exception as o_err:
             oracle_res = OracleResult(
                 passed=False,
                 reason=f"Oracle evaluation crash: {o_err}",
             )
+
+        # Teardown isolated tenant state
+        if target.lower() == "v2":
+            try:
+                cleanup_tenant_benchmark_state(task_user_id)
+            except Exception:
+                pass
 
         # Extract tokens and LLM calls
         usage_list = state.get("llm_usage") or []
@@ -130,10 +149,6 @@ def run_benchmark_suite(
             print(f"       -> Detail: {result.oracle_reason[:110]}")
 
     t_suite_total = time.perf_counter() - t_suite_start
-
-    # Restore environment files
-    print("\n[Teardown] Restoring backed-up environment files...")
-    restore_environment()
 
     # 4. Aggregate Metrics
     passed_count = sum(1 for r in results if r.passed)
@@ -200,16 +215,23 @@ def run_benchmark_suite(
         ],
     }
 
-    # 5. Persist JSON Report
+    # 5. Persist JSON Reports
     if target.lower() == "v2":
         report_json_path = PROJECT_ROOT / "benchmarks" / "v2" / "v2_evaluation_report.json"
         report_md_path = PROJECT_ROOT / "benchmarks" / "v2" / "V2_EVALUATION_REPORT.md"
+        rem_json_path = PROJECT_ROOT / "benchmarks" / "v2" / "v2_remediation_evaluation_report.json"
+        rem_md_path = PROJECT_ROOT / "benchmarks" / "v2" / "V2_REMEDIATION_EVALUATION_REPORT.md"
     else:
         report_json_path = PROJECT_ROOT / "benchmarks" / "v2" / "baseline_report.json"
         report_md_path = PROJECT_ROOT / "benchmarks" / "v2" / "BASELINE_REPORT.md"
+        rem_json_path = None
+        rem_md_path = None
 
     with open(report_json_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
+    if rem_json_path:
+        with open(rem_json_path, "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2)
 
     # Load baseline for delta comparison if target is v2
     baseline_summary = None
@@ -221,7 +243,7 @@ def run_benchmark_suite(
             pass
 
     # 6. Format Markdown Report
-    target_title = "V2 Post-Migration Evaluation Report" if target.lower() == "v2" else "V2 Evaluation Baseline Report"
+    target_title = "V2 Hardened Remediation Evaluation Report" if target.lower() == "v2" else "V2 Evaluation Baseline Report"
     md_content = f"""# {target_title}: Personal Knowledge & Planning Assistant
 
 **Generated on:** {summary['timestamp']}  
@@ -242,7 +264,7 @@ def run_benchmark_suite(
         b_prec = baseline_summary.get("citation_precision_percent", 0.0)
 
         md_content += f"""
-### V1 Baseline vs. V2 Target Comparison
+### V1 Baseline vs. V2 Post-Migration Comparison
 
 | Metric | V1 Baseline | V2 Post-Migration | Target SLA | Status |
 |---|:---:|:---:|:---:|:---:|
@@ -295,15 +317,21 @@ def run_benchmark_suite(
 1. **Trace Reducer Quadratic Duplication:** Completely eliminated (**0** detected) through decoupled observability sink.
 2. **Approval Model Cryptographic Binding:** Verified zero bypasses (**0**). Actions halt until cryptographically valid HMAC token is presented.
 3. **SSRF Defense:** 100% intercepted (`TASK_ACT_07` passes: metadata IP 169.254.169.254 and private networks blocked).
-4. **Tenant Isolation:** Sandboxed filesystem prevents traversal attempts outside dedicated jail directory.
+4. **Tenant Isolation:** Sandboxed filesystem and tenant-isolated database prevent cross-user traversal attempts.
 """
 
     with open(report_md_path, "w", encoding="utf-8") as f:
         f.write(md_content)
+    if rem_md_path:
+        with open(rem_md_path, "w", encoding="utf-8") as f:
+            f.write(md_content)
 
     print(f"\n[Complete] Benchmark results written to:")
     print(f"  - {report_md_path}")
     print(f"  - {report_json_path}")
+    if rem_md_path:
+        print(f"  - {rem_md_path}")
+        print(f"  - {rem_json_path}")
     print(f"Overall Pass Rate: {pass_rate}% ({passed_count}/{total_count})")
     print(f"State Corruptions Detected: {state_corruptions}")
     print(f"Approval Bypasses Detected: {approval_bypasses}")
@@ -324,4 +352,3 @@ if __name__ == "__main__":
         category_filter=args.category,
         target=args.target,
     )
-
