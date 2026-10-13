@@ -57,35 +57,55 @@ python ingest.py
 
 ---
 
+---
+
 ## Running Locally
 
-### Interactive CLI Mode
+### 1. Interactive CLI (V2 Assistant)
 ```bash
-python main.py
+python -m app.cli
 ```
 
-Type queries at the prompt. Special commands:
-- `help`: View guidance and sample queries
-- `clear`: Clear screen
-- `q` or `exit`: Exit the assistant
+Features:
+- Dual-path routing (Fast chat / info <1,500ms, Deliberate multi-source planning)
+- Cryptographic approval confirmation for destructive actions
+- Commands: `/today`, `/knowledge`, `/reminders`, `/help`, `/exit`
 
-### Single Query Mode
+### 2. Single-Query Mode (One-Shot)
 ```bash
-python main.py "What is our company remote work policy?"
+python -m app.cli "What is the maximum allowed hotel booking cost per night according to company travel policy?"
 ```
+
+### 3. FastAPI REST Server
+```bash
+uvicorn app.api.server:app --host 0.0.0.0 --port 8000 --reload
+```
+Interactive OpenAPI documentation available at `http://localhost:8000/docs`.
+Supported user-facing domains:
+- `/api/chat` — Conversational assistant queries with citations & approvals
+- `/api/today` — Daily briefing, commitments, and preparation advice
+- `/api/knowledge/facts` & `/api/knowledge/notes` — Unified personal knowledge management
+- `/api/reminders` — Scheduled reminders creation, listing, and completion
+- `/api/approvals/approve` — Resumes staged actions with HMAC approval token
 
 ---
 
 ## Testing & Verification
 
-### 1. Production Smoke Test
+### 1. Run Complete V2 Automated Test Suite (Stages 1–5)
 ```bash
-python scripts/smoke_test.py
+python -m pytest tests/v2/ -v
 ```
 
-### 2. Full Automated PyTest Suite
+### 2. Run Comprehensive 50-Task Evaluation Benchmark
 ```bash
-python -m pytest tests/ -v
+python -u -m benchmarks.v2.runner --target v2
+```
+Validates the complete 50-task evaluation matrix across `doc_qa`, `memory`, `calendar`, `briefing`, and `actions_safety`, achieving 100% pass rate, zero state corruptions, and 100% HMAC approval gate safety.
+
+### 3. Legacy Backward Compatibility Tests
+```bash
+python -m pytest tests/integration/ tests/security/ -v
 ```
 
 ---

@@ -38,3 +38,11 @@ mcp_sandbox/
 client_secret.json
 client_secret*.json
 credentials.json
+
+# SQLite storage
+storage/*.db
+storage/*.db-wal
+storage/*.db-shm
+*.db
+*.db-wal
+*.db-shm
