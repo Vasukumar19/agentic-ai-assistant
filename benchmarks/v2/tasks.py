@@ -90,39 +90,34 @@ def _check_citation_accuracy(
     if not matching_citations:
         return 0.0, 0.0, False
 
-    provenance_verified = False
+    # Fail closed: provenance cannot be authoritatively verified without tenant context
+    if not (meta and isinstance(meta, dict) and "user_id" in meta):
+        return 0.0, 0.0, False
+
+    from app.core.context import ExecutionContext
+    from app.knowledge.retriever import CitationRecord, validate_citation_provenance
+
+    ctx = ExecutionContext.create(user_id=meta["user_id"])
+    all_prov_ok = True
     valid_citations_count = 0
-
-    if meta and "user_id" in meta:
-        from app.core.context import ExecutionContext
-        from app.knowledge.retriever import CitationRecord, validate_citation_provenance
-
-        ctx = ExecutionContext.create(user_id=meta["user_id"])
-        all_prov_ok = True
-        for c in citations_data:
-            if not isinstance(c, dict):
+    for c in citations_data:
+        if not isinstance(c, dict):
+            all_prov_ok = False
+            break
+        try:
+            c_rec = CitationRecord(**c)
+            if not c_rec.exact_quote or not c_rec.exact_quote.strip():
                 all_prov_ok = False
                 break
-            try:
-                c_rec = CitationRecord(**c)
-                if not c_rec.exact_quote or not c_rec.exact_quote.strip():
-                    all_prov_ok = False
-                    break
-                is_valid, _ = validate_citation_provenance(ctx, c_rec)
-                if not is_valid:
-                    all_prov_ok = False
-                    break
-                valid_citations_count += 1
-            except Exception:
+            is_valid, _ = validate_citation_provenance(ctx, c_rec)
+            if not is_valid:
                 all_prov_ok = False
                 break
-        provenance_verified = all_prov_ok and (valid_citations_count > 0)
-    else:
-        for c in matching_citations:
-            quote = c.get("exact_quote", "")
-            if quote and quote.strip() and c.get("chunk_id") and c.get("document_id"):
-                valid_citations_count += 1
-        provenance_verified = valid_citations_count > 0
+            valid_citations_count += 1
+        except Exception:
+            all_prov_ok = False
+            break
+    provenance_verified = all_prov_ok and (valid_citations_count > 0)
 
     if not provenance_verified:
         return 0.0, 0.0, False

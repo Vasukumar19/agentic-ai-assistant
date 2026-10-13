@@ -119,6 +119,7 @@ class ToolDispatcher:
                 tool_name=tool_name,
                 error_code=ToolErrorCode.RESOURCE_NOT_FOUND,
                 error_message=f"Tool '{tool_name}' is not registered in the Tool Gateway.",
+                side_effect_occurred=False,
             )
 
         manifest, handler = entry
@@ -131,6 +132,7 @@ class ToolDispatcher:
                 tool_name=tool_name,
                 error_code=ToolErrorCode.VALIDATION_ERROR,
                 error_message=f"Validation error for '{tool_name}': {validation_err}",
+                side_effect_occurred=False,
             )
 
         # 2. Human Approval Gating
@@ -176,6 +178,7 @@ class ToolDispatcher:
                         tool_name=tool_name,
                         error_code=ToolErrorCode.PERMISSION_DENIED,
                         error_message="Action denied: approval token is invalid, expired, already consumed, or parameter mismatch.",
+                        side_effect_occurred=False,
                     )
                 # Enforce execution with the exact authorized arguments (preventing TOCTOU tampering)
                 args = authorized_args or args
@@ -285,21 +288,31 @@ class ToolDispatcher:
             )
         except TimeoutError as te:
             dur_ms = int((time.perf_counter() - t0) * 1000)
+            is_read_only = (manifest.side_effect == SideEffectLevel.READ_ONLY)
             if staged_action_id:
-                approval_engine.record_execution_outcome(staged_action_id, "FAILED", str(te))
+                approval_engine.record_execution_outcome(
+                    staged_action_id,
+                    "FAILED" if is_read_only else "UNCERTAIN",
+                    str(te),
+                )
             return ToolResultEnvelope.error(
                 tool_name=tool_name,
                 error_code=ToolErrorCode.EXECUTION_TIMEOUT,
                 error_message=str(te),
                 retryable=True,
-                side_effect_occurred=False,
+                side_effect_occurred=False if is_read_only else None,
                 duration_ms=dur_ms,
             )
         except Exception as e:
             dur_ms = int((time.perf_counter() - t0) * 1000)
             logger.error("Error executing %s: %s", tool_name, e, exc_info=True)
+            is_read_only = (manifest.side_effect == SideEffectLevel.READ_ONLY)
             if staged_action_id:
-                approval_engine.record_execution_outcome(staged_action_id, "FAILED", str(e))
+                approval_engine.record_execution_outcome(
+                    staged_action_id,
+                    "FAILED" if is_read_only else "UNCERTAIN",
+                    str(e),
+                )
             emit_event(
                 ctx=ctx,
                 component="gateway",
@@ -312,7 +325,7 @@ class ToolDispatcher:
                 tool_name=tool_name,
                 error_code=ToolErrorCode.INTERNAL_ERROR,
                 error_message=f"Execution of '{tool_name}' failed: {e}",
-                side_effect_occurred=side_effect_started,
+                side_effect_occurred=False if is_read_only else None,
                 duration_ms=dur_ms,
             )
 

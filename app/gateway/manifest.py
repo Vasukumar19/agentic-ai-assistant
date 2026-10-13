@@ -55,7 +55,7 @@ class ToolResultEnvelope(BaseModel):
     error_code: Optional[ToolErrorCode] = None
     error_message: Optional[str] = None
     retryable: bool = False
-    side_effect_occurred: bool = False
+    side_effect_occurred: Optional[bool] = False
     duration_ms: int = 0
 
     @classmethod
@@ -64,7 +64,7 @@ class ToolResultEnvelope(BaseModel):
         tool_name: str,
         data: Dict[str, Any],
         duration_ms: int = 0,
-        side_effect_occurred: bool = False,
+        side_effect_occurred: Optional[bool] = False,
     ) -> ToolResultEnvelope:
         return cls(
             status="success",
@@ -81,7 +81,7 @@ class ToolResultEnvelope(BaseModel):
         error_code: ToolErrorCode,
         error_message: str,
         retryable: bool = False,
-        side_effect_occurred: bool = False,
+        side_effect_occurred: Optional[bool] = False,
         duration_ms: int = 0,
     ) -> ToolResultEnvelope:
         return cls(

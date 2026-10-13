@@ -795,3 +795,210 @@ def test_dispatcher_truthful_side_effects():
     assert res_create.status == "success"
     assert res_create.side_effect_occurred is True
 
+
+
+def test_citation_accuracy_fails_closed_without_metadata_or_user_id():
+    """Verify _check_citation_accuracy strictly fails closed when metadata or user_id is absent."""
+    from benchmarks.v2.tasks import _check_citation_accuracy
+
+    fake_state = {
+        "citations": [
+            {
+                "citation_id": "c1",
+                "document_id": "doc_fake_1",
+                "document_name": "travel_policy.txt",
+                "chunk_id": "chk_fake_1",
+                "exact_quote": "The maximum allowed hotel booking cost is $250.",
+            }
+        ],
+        "rag_context": "travel_policy.txt: The maximum allowed hotel booking cost is $250.",
+        "answer": "The limit is $250 per travel_policy.txt.",
+    }
+
+    # 1. meta is None -> fails closed
+    p1, r1, ok1 = _check_citation_accuracy(fake_state, "travel_policy.txt", meta=None)
+    assert ok1 is False
+    assert (p1, r1) == (0.0, 0.0)
+
+    # 2. meta is empty dict -> fails closed
+    p2, r2, ok2 = _check_citation_accuracy(fake_state, "travel_policy.txt", meta={})
+    assert ok2 is False
+    assert (p2, r2) == (0.0, 0.0)
+
+    # 3. meta lacks user_id -> fails closed
+    p3, r3, ok3 = _check_citation_accuracy(fake_state, "travel_policy.txt", meta={"task_id": "TASK_01"})
+    assert ok3 is False
+    assert (p3, r3) == (0.0, 0.0)
+
+
+def test_dispatcher_side_effects_on_exceptions_and_timeouts():
+    """Verify dispatcher distinguishes confirmed absent side effects from indeterminate outcomes on errors."""
+    from app.gateway.dispatcher import ToolDispatcher
+    from app.gateway.manifest import ToolManifest, SideEffectLevel, ToolErrorCode
+
+    custom_dispatcher = ToolDispatcher()
+
+    def mutating_timeout(ctx, **kwargs):
+        raise TimeoutError("Database lock wait timeout mid-mutation")
+
+    def mutating_crash(ctx, **kwargs):
+        raise RuntimeError("Network split during external mutating write")
+
+    def read_timeout(ctx, **kwargs):
+        raise TimeoutError("Read query timed out")
+
+    def read_crash(ctx, **kwargs):
+        raise RuntimeError("Read query syntax error")
+
+    custom_dispatcher.register_tool(
+        manifest=ToolManifest(
+            name="test.mutate_timeout",
+            description="Mutating tool that times out",
+            side_effect=SideEffectLevel.REVERSIBLE_WRITE,
+        ),
+        handler=mutating_timeout,
+    )
+    custom_dispatcher.register_tool(
+        manifest=ToolManifest(
+            name="test.mutate_crash",
+            description="Mutating tool that crashes",
+            side_effect=SideEffectLevel.DESTRUCTIVE,
+        ),
+        handler=mutating_crash,
+    )
+    custom_dispatcher.register_tool(
+        manifest=ToolManifest(
+            name="test.read_timeout",
+            description="Read-only tool that times out",
+            side_effect=SideEffectLevel.READ_ONLY,
+        ),
+        handler=read_timeout,
+    )
+    custom_dispatcher.register_tool(
+        manifest=ToolManifest(
+            name="test.read_crash",
+            description="Read-only tool that crashes",
+            side_effect=SideEffectLevel.READ_ONLY,
+        ),
+        handler=read_crash,
+    )
+
+    ctx = ExecutionContext.create(user_id="usr_side_fx_err_test")
+
+    # 1. Mutating tool on Timeout -> indeterminate outcome (side_effect_occurred is None)
+    res_m_to = custom_dispatcher.dispatch(ctx=ctx, tool_name="test.mutate_timeout", arguments={})
+    assert res_m_to.status == "error"
+    assert res_m_to.error_code == ToolErrorCode.EXECUTION_TIMEOUT
+    assert res_m_to.side_effect_occurred is None
+
+    # 2. Mutating tool on Exception -> indeterminate outcome (side_effect_occurred is None)
+    res_m_cr = custom_dispatcher.dispatch(ctx=ctx, tool_name="test.mutate_crash", arguments={})
+    assert res_m_cr.status == "error"
+    assert res_m_cr.error_code == ToolErrorCode.INTERNAL_ERROR
+    assert res_m_cr.side_effect_occurred is None
+
+    # 3. Read-only tool on Timeout -> confirmed absent (side_effect_occurred is False)
+    res_r_to = custom_dispatcher.dispatch(ctx=ctx, tool_name="test.read_timeout", arguments={})
+    assert res_r_to.status == "error"
+    assert res_r_to.error_code == ToolErrorCode.EXECUTION_TIMEOUT
+    assert res_r_to.side_effect_occurred is False
+
+    # 4. Read-only tool on Exception -> confirmed absent (side_effect_occurred is False)
+    res_r_cr = custom_dispatcher.dispatch(ctx=ctx, tool_name="test.read_crash", arguments={})
+    assert res_r_cr.status == "error"
+    assert res_r_cr.error_code == ToolErrorCode.INTERNAL_ERROR
+    assert res_r_cr.side_effect_occurred is False
+
+
+def test_typed_postconditions_domain_verification():
+    """Verify TypedPostcondition assertions evaluate authoritative database state rather than naive text matching."""
+    from app.orchestration.verifier import (
+        OutcomeVerifier,
+        TypedPostcondition,
+        PostconditionType,
+        VerificationStatus,
+    )
+
+    uid = f"usr_postcond_{uuid.uuid4().hex[:8]}"
+    ctx = ExecutionContext.create(user_id=uid)
+    v = OutcomeVerifier()
+
+    # 1. Note existence postcondition
+    nid = knowledge_repo.create_note(ctx, "Test Note", "Active note content")
+    cond_exists = TypedPostcondition(
+        condition_type=PostconditionType.NOTE_STATE,
+        entity_id=nid,
+        expected_state="exists",
+    )
+    ok, msg = cond_exists.evaluate(ctx)
+    assert ok is True
+    assert "verified in repository" in msg
+
+    # 2. Note deletion postcondition fails while active, passes once deleted
+    cond_deleted = TypedPostcondition(
+        condition_type=PostconditionType.NOTE_STATE,
+        entity_id=nid,
+        expected_state="deleted",
+    )
+    ok_del_before, msg_del_before = cond_deleted.evaluate(ctx)
+    assert ok_del_before is False
+    assert "still present/active" in msg_del_before
+
+    knowledge_repo.delete_note(ctx, nid)
+    ok_del_after, msg_del_after = cond_deleted.evaluate(ctx)
+    assert ok_del_after is True
+    assert "confirmed deleted" in msg_del_after
+
+    # 3. Reminder completion postcondition
+    rid = knowledge_repo.create_reminder(
+        ctx,
+        title="Postcond Reminder",
+        due_date=datetime.now(timezone.utc) + timedelta(days=1),
+    )
+    cond_rem_comp = TypedPostcondition(
+        condition_type=PostconditionType.REMINDER_STATE,
+        entity_id=rid,
+        expected_state="completed",
+    )
+    # Reminder is PENDING: completion check fails
+    ok_rem_pend, msg_rem_pend = cond_rem_comp.evaluate(ctx)
+    assert ok_rem_pend is False
+    assert "expected COMPLETED" in msg_rem_pend
+
+    # Mark completed in DB
+    with get_session() as session:
+        rem_rec = session.get(ReminderModel, rid)
+        rem_rec.status = "COMPLETED"
+
+    ok_rem_done, msg_rem_done = cond_rem_comp.evaluate(ctx)
+    assert ok_rem_done is True
+    assert "confirmed COMPLETED" in msg_rem_done
+
+    # 4. Verifier rejects generic tool success if expected postcondition fails in DB
+    uncreated_nid = f"note_nonexistent_{uuid.uuid4().hex[:6]}"
+    res_spurious = v.verify(
+        ctx=ctx,
+        goal="Create note",
+        # Tool reports generic success:
+        tool_results=[{"tool_name": "notes.create", "status": "success", "data": {"note_id": uncreated_nid}}],
+        # But postcondition expects note to genuinely exist in DB:
+        expected_postconditions=[
+            TypedPostcondition(
+                condition_type=PostconditionType.NOTE_STATE,
+                entity_id=uncreated_nid,
+                expected_state="exists",
+            )
+        ],
+    )
+    assert res_spurious.status == VerificationStatus.INCOMPLETE
+    assert res_spurious.is_satisfied is False
+    assert len(res_spurious.failed_postconditions) > 0
+    assert any("not found" in f for f in res_spurious.failed_postconditions)
+
+    # 5. Canonical string format parsing
+    parsed_cond = TypedPostcondition.from_spec(f"note:{nid}:deleted")
+    assert parsed_cond.condition_type == PostconditionType.NOTE_STATE
+    assert parsed_cond.entity_id == nid
+    assert parsed_cond.expected_state == "deleted"
+    ok_parsed, _ = parsed_cond.evaluate(ctx)
+    assert ok_parsed is True
