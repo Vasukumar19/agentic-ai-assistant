@@ -155,6 +155,10 @@ def validate_citation_provenance(ctx: ExecutionContext, citation: CitationRecord
         if not chunk:
             return False, f"Chunk '{citation.chunk_id}' does not exist or belongs to another tenant."
 
+        # Verify chunk belongs to the claimed document
+        if chunk.document_id != citation.document_id:
+            return False, f"Chunk '{citation.chunk_id}' belongs to document '{chunk.document_id}', not '{citation.document_id}'."
+
         doc = (
             session.query(DocumentModel)
             .filter_by(document_id=citation.document_id, user_id=ctx.user_id)
@@ -166,9 +170,13 @@ def validate_citation_provenance(ctx: ExecutionContext, citation: CitationRecord
         if doc.filename != citation.document_name:
             return False, f"Document name mismatch: expected '{doc.filename}', got '{citation.document_name}'."
 
+        if not citation.exact_quote or not citation.exact_quote.strip():
+            return False, "Citation exact_quote cannot be empty."
+
         # Verify quote matches source content
-        cleaned_quote = citation.exact_quote.rstrip(".")
-        if cleaned_quote not in chunk.content and chunk.content[:len(cleaned_quote)] != cleaned_quote:
+        cleaned_quote = " ".join(citation.exact_quote.split()).rstrip(".")
+        cleaned_chunk = " ".join(chunk.content.split())
+        if cleaned_quote.lower() not in cleaned_chunk.lower() and citation.exact_quote.rstrip(".") not in chunk.content:
             return False, "Citation exact_quote does not match source chunk content."
 
         return True, None

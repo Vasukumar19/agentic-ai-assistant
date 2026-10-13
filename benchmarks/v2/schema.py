@@ -42,12 +42,13 @@ class TaskResult:
     name: str
     passed: bool
     latency_ms: float
-    total_tokens: int
-    llm_calls: int
-    oracle_reason: str
-    state_corruption_detected: bool
-    approval_bypass_detected: bool
-    citation_precision: Optional[float]
-    citation_recall: Optional[float]
+    total_tokens: Optional[int] = None
+    llm_calls: int = 0
+    oracle_reason: str = ""
+    state_corruption_detected: bool = False
+    approval_bypass_detected: bool = False
+    citation_precision: Optional[float] = None
+    citation_recall: Optional[float] = None
     error: Optional[str] = None
     raw_status: Optional[str] = None
+    execution_route: Optional[str] = None

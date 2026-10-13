@@ -12,21 +12,38 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
+from contextlib import asynccontextmanager
+
 from app.assistant import assistant_app
 from app.core.auth import UserPrincipal, get_current_principal, verify_resource_ownership
 from app.core.config import settings
 from app.core.context import ExecutionContext
 from app.knowledge.repository import knowledge_repo
+from app.services.reminder_scheduler import reminder_scheduler
 
 logger = logging.getLogger(__name__)
 
-# Validate security configuration at startup
-settings.validate_security_configuration()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 1. Startup validation
+    settings.validate_security_configuration()
+    # 2. Recover any stale reminder jobs stuck in DELIVERING state from prior process crash
+    reminder_scheduler.recover_stale_delivering_reminders()
+    # 3. Start persistent background scheduler
+    reminder_scheduler.start()
+    try:
+        yield
+    finally:
+        # Shutdown: stop background scheduler gracefully
+        reminder_scheduler.stop()
+
 
 app = FastAPI(
     title="Personal Knowledge & Planning Assistant API",
     description="Enterprise-grade local-first API with authenticated principal identity and cryptographic safety.",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
 # ------------------------------------------------------------------------------

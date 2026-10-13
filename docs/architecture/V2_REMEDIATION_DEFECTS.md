@@ -170,3 +170,55 @@
   - *Status*: `FIXED_AND_TESTED`
   - *Remediation*: Stopped mutating legacy files. Benchmarks now seed and tear down isolated relational tenants (`usr_bench_{task_id}`) per task. Invokes assistant through official `app.invoke()` contract. Oracles assert database state changes and provenance.
   - *Verification*: Full 50-task evaluation benchmark (`benchmarks/v2/runner.py`) passed 50/50 with zero state corruptions, zero bypasses, and authentic metrics.
+
+---
+
+### Priority 10: Deep Hardening & Staff-Level Remediation (Stage 3)
+
+- **DEF-22: Synthetic Test Token Backdoor in Production**
+  - *Location*: `app/core/auth.py`, `app/core/config.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Evaluated `settings.AUTH_MODE` and `settings.ENVIRONMENT` strictly. In production mode, test tokens (`tok_test_admin_*`, `tok_test_user_*`) and developer headers are strictly rejected with 401 Unauthorized. Lifespan validator enforces `AUTH_MODE == "production"` whenever `ENVIRONMENT == "production"`.
+  - *Regression Test*: `tests/remediation/test_p0_p1_p2_security.py::test_production_rejects_synthetic_admin_tokens`, `test_production_rejects_synthetic_user_tokens`, `test_production_rejects_inconsistent_auth_mode`.
+
+- **DEF-23: Short API Key Prefix Collision in Identity Derivation**
+  - *Location*: `app/core/auth.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Replaced `x_api_key[:6]` prefix slicing with full SHA-256 digest (`usr_apikey_{sha256(key)[:16]}`), guaranteeing collision-resistant principal identity.
+  - *Regression Test*: `tests/remediation/test_p0_p1_p2_security.py::test_api_key_sha256_identity_collision_prevention`.
+
+- **DEF-24: Staged Approval Execution States, Concurrency & Crash Recovery**
+  - *Location*: `app/gateway/approval.py`, `app/gateway/dispatcher.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Expanded lifecycle states to `PENDING` -> `EXECUTING` -> `COMPLETED` / `FAILED` / `UNCERTAIN`. Atomic conditional update (`WHERE status = 'PENDING'`) prevents race conditions between simultaneous threads. Added `recover_stale_executing_approvals()` to safely transition interrupted executions to `UNCERTAIN` after system crashes.
+  - *Regression Test*: `tests/remediation/test_p0_p1_p2_security.py::test_approval_multithreaded_concurrent_consumption`, `test_approval_lifecycle_states_and_crash_recovery`.
+
+- **DEF-25: Incomplete Lifespan Lifecycle for ReminderScheduler**
+  - *Location*: `app/api/server.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Wired `ReminderScheduler` into FastAPI `lifespan` handler. On application startup, recovers stale jobs stuck in `DELIVERING` from prior crashes and launches background polling worker; gracefully terminates thread on shutdown.
+  - *Regression Test*: Validated FastAPI lifespan integration and clean start/stop lifecycle.
+
+- **DEF-26: Dishonest Delivery Status for Unsupported Notification Channels & Stale Recovery**
+  - *Location*: `app/services/reminder_scheduler.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Supported channels restricted to `CLI`, `LOCAL`, and registered adapters. Unconfigured external channels (e.g. `SLACK`, `EMAIL`) raise `NotImplementedError`, transitioning reminder to `FAILED` with explicit error details rather than falsely logging success. Implemented `recover_stale_delivering_reminders()` with bounded retries.
+  - *Regression Test*: `tests/remediation/test_p3_p4_p5_execution.py::test_reminder_scheduler_unsupported_channel_fails_truthfully`, `test_reminder_scheduler_stale_recovery`.
+
+- **DEF-27: Broken Direct HTTPS Socket IP Pinning (`set_tunnel` on Direct HTTPS)**
+  - *Location*: `app/tools/fetch.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Replaced incorrect proxy tunneling (`set_tunnel(hostname)`) on `HTTPSConnection` with `PinnedHTTPSConnection`, creating a raw TCP socket to pinned destination IP and wrapping it via `ssl_ctx.wrap_socket(sock, server_hostname=hostname)`. Direct TLS connection preserves SNI and verifies certificates without proxy overhead or socket errors.
+  - *Regression Test*: Tested direct pinned TLS handshake against public HTTPS endpoints and local SSRF blocked ranges.
+
+- **DEF-28: Cross-Document Citation Provenance Mismatch Hole**
+  - *Location*: `app/knowledge/retriever.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Enforced `chunk.document_id == citation.document_id` and `chunk.document_id == doc.document_id` in `validate_citation_provenance()`. Required non-empty `exact_quote` and normalized whitespace substring matching.
+  - *Regression Test*: `tests/remediation/test_p3_p4_p5_execution.py::test_citation_mismatched_document_id_rejected`, `test_citation_empty_quote_rejected`.
+
+- **DEF-29: Loose / Weak Benchmark Evaluation Oracles**
+  - *Location*: `benchmarks/v2/tasks.py`, `benchmarks/v2/runner.py`, `benchmarks/v2/schema.py`
+  - *Status*: `FIXED_AND_TESTED`
+  - *Remediation*: Repaired doc QA oracles to enforce database citation provenance verification (`prov_valid is True`). Replaced single-keyword calendar assertions with multi-event matching. Enforced bounded execution with valid termination in budget test. Distinguish unavailable token telemetry from fabricated zero tokens. Added negative controls.
+  - *Regression Test*: `tests/remediation/test_p3_p4_p5_execution.py::test_oracle_negative_controls`.

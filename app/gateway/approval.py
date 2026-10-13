@@ -214,8 +214,8 @@ class ApprovalTokenEngine:
                 record.status = "REJECTED"
                 return False, None, None
 
-            # Atomic State Transition via conditional UPDATE
-            target_status = "CONSUMED" if decision.upper() in ("APPROVE", "CONFIRM", "YES") else "REJECTED"
+            # Atomic State Transition via conditional UPDATE to claim execution lock
+            target_status = "EXECUTING" if decision.upper() in ("APPROVE", "CONFIRM", "YES") else "REJECTED"
             updated = (
                 session.query(ActionApprovalModel)
                 .filter(
@@ -235,9 +235,15 @@ class ApprovalTokenEngine:
                 logger.warning("Concurrent approval claim collision for action %s", record.action_id)
                 return False, None, None
 
-            if target_status == "CONSUMED":
+            if target_status == "EXECUTING":
                 return True, record.tool_name, args_dict
             return False, record.tool_name, args_dict
+
+    def get_action_id_by_token(self, approval_token: str) -> Optional[str]:
+        """Look up the staged action_id associated with an approval token."""
+        with get_session() as session:
+            rec = session.query(ActionApprovalModel).filter_by(approval_token=approval_token).first()
+            return rec.action_id if rec else None
 
     def record_execution_outcome(
         self,
@@ -247,11 +253,40 @@ class ApprovalTokenEngine:
     ) -> None:
         """Record the post-execution outcome of an approved action."""
         now = datetime.now(timezone.utc)
+        normalized_status = (
+            "COMPLETED" if status in ("SUCCESS", "COMPLETED")
+            else "FAILED" if status in ("FAILED", "ERROR")
+            else status
+        )
         with get_session() as session:
             rec = session.get(ActionApprovalModel, action_id)
             if rec:
+                rec.status = normalized_status
                 rec.executed_at = now
                 rec.execution_outcome = outcome_data or status
+
+    def recover_stale_executing_approvals(self, timeout_seconds: int = 300) -> int:
+        """
+        Recover actions left in EXECUTING state due to process crash/restart.
+        Transitions state to UNCERTAIN to prevent dangling locks.
+        """
+        cutoff = datetime.now(timezone.utc) - timedelta(seconds=timeout_seconds)
+        with get_session() as session:
+            stale = (
+                session.query(ActionApprovalModel)
+                .filter(
+                    ActionApprovalModel.status == "EXECUTING",
+                    (ActionApprovalModel.decided_at <= cutoff) | (ActionApprovalModel.decided_at.is_(None)),
+                )
+                .update(
+                    {
+                        "status": "UNCERTAIN",
+                        "execution_outcome": "Execution interrupted by system restart or timeout before completion confirmation.",
+                    },
+                    synchronize_session="fetch",
+                )
+            )
+            return stale
 
 
 # Global default engine instance

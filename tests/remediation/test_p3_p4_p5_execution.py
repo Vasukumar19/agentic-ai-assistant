@@ -185,12 +185,13 @@ def test_provenance_citation_validation():
     ctx_other = ExecutionContext.create(user_id=f"usr_other_{uuid.uuid4().hex[:8]}")
 
     # Ingest document
+    cid = f"chunk_hotel_{uuid.uuid4().hex[:8]}"
     did = knowledge_repo.save_document(
         ctx=ctx_owner,
         filename="travel_policy.txt",
         content="Employees are eligible for $200 per night hotel reimbursement.",
         chunks=[{
-            "chunk_id": "chunk_hotel_01",
+            "chunk_id": cid,
             "content": "Employees are eligible for $200 per night hotel reimbursement.",
             "page_number": 1,
         }],
@@ -200,7 +201,7 @@ def test_provenance_citation_validation():
         citation_id="cite_01",
         document_id=did,
         document_name="travel_policy.txt",
-        chunk_id="chunk_hotel_01",
+        chunk_id=cid,
         page_number=1,
         relevance_score=0.95,
         exact_quote="Employees are eligible for $200 per night hotel reimbursement.",
@@ -233,3 +234,181 @@ def test_assistant_invoke_monotonically_timed_and_not_fabricated():
     # LLM usage is either genuine metadata or None/empty, not hardcoded constant 150
     if res.get("llm_usage"):
         assert res["llm_usage"] != [{"total_tokens": 150}]
+
+
+def test_citation_mismatched_document_id_rejected():
+    """validate_citation_provenance rejects chunk when paired with a different document ID."""
+    uid = f"usr_mismatch_{uuid.uuid4().hex[:8]}"
+    ctx = ExecutionContext.create(user_id=uid)
+
+    cid1 = f"c1_{uuid.uuid4().hex[:6]}"
+    did1 = knowledge_repo.save_document(
+        ctx=ctx,
+        filename="doc1.txt",
+        content="Content of document 1.",
+        chunks=[{"chunk_id": cid1, "content": "Content of document 1."}],
+    )
+
+    cid2 = f"c2_{uuid.uuid4().hex[:6]}"
+    did2 = knowledge_repo.save_document(
+        ctx=ctx,
+        filename="doc2.txt",
+        content="Content of document 2.",
+        chunks=[{"chunk_id": cid2, "content": "Content of document 2."}],
+    )
+
+    # Citation claims chunk 1 belongs to Doc 2
+    forged_cite = CitationRecord(
+        citation_id="cite_forged",
+        document_id=did2,
+        document_name="doc2.txt",
+        chunk_id=cid1,
+        page_number=1,
+        relevance_score=0.9,
+        exact_quote="Content of document 1.",
+    )
+
+    is_valid, err = validate_citation_provenance(ctx, forged_cite)
+    assert is_valid is False
+    assert "belongs to document" in err
+    assert did1 in err
+
+
+def test_citation_empty_quote_rejected():
+    """validate_citation_provenance rejects empty or whitespace exact_quote."""
+    uid = f"usr_empty_quote_{uuid.uuid4().hex[:8]}"
+    ctx = ExecutionContext.create(user_id=uid)
+    cid = f"c_eq_{uuid.uuid4().hex[:6]}"
+    did = knowledge_repo.save_document(
+        ctx=ctx,
+        filename="notes.txt",
+        content="Some valid notes here.",
+        chunks=[{"chunk_id": cid, "content": "Some valid notes here."}],
+    )
+
+    empty_cite = CitationRecord(
+        citation_id="cite_empty",
+        document_id=did,
+        document_name="notes.txt",
+        chunk_id=cid,
+        page_number=1,
+        relevance_score=0.9,
+        exact_quote="   ",
+    )
+    is_valid, err = validate_citation_provenance(ctx, empty_cite)
+    assert is_valid is False
+    assert "cannot be empty" in err
+
+
+def test_reminder_scheduler_unsupported_channel_fails_truthfully():
+    """Reminders with unsupported external channels fail honestly rather than reporting false success."""
+    uid = f"usr_chan_test_{uuid.uuid4().hex[:8]}"
+    ctx = ExecutionContext.create(user_id=uid)
+    past_due = datetime.now(timezone.utc) - timedelta(minutes=1)
+
+    # Create reminder specifying unsupported channel SLACK
+    with get_session() as session:
+        from app.storage.models import UserModel
+        user = session.get(UserModel, uid)
+        if not user:
+            session.add(UserModel(user_id=uid, email=f"{uid}@local", full_name=uid))
+            session.flush()
+
+        rid = f"rem_slack_{uuid.uuid4().hex[:8]}"
+        rec = ReminderModel(
+            reminder_id=rid,
+            user_id=uid,
+            title="Slack Notification Test",
+            due_date=past_due,
+            status="PENDING",
+            delivery_channel="SLACK",
+        )
+        session.add(rec)
+
+    delivered = reminder_scheduler.poll_and_deliver_due_reminders()
+    assert rid not in delivered
+
+    with get_session() as session:
+        saved = session.get(ReminderModel, rid)
+        assert saved is not None
+        # Must record delivery error
+        assert saved.delivery_error is not None
+        assert "not supported" in saved.delivery_error.lower()
+
+
+def test_reminder_scheduler_stale_recovery():
+    """Reminders stuck in DELIVERING state after a worker crash are safely recovered."""
+    uid = f"usr_crash_rec_{uuid.uuid4().hex[:8]}"
+    ctx = ExecutionContext.create(user_id=uid)
+    stale_time = datetime.now(timezone.utc) - timedelta(minutes=10)
+
+    with get_session() as session:
+        from app.storage.models import UserModel
+        user = session.get(UserModel, uid)
+        if not user:
+            session.add(UserModel(user_id=uid, email=f"{uid}@local", full_name=uid))
+            session.flush()
+
+        # Job 1: 1 attempt, should recover to PENDING
+        rid1 = f"rem_stale1_{uuid.uuid4().hex[:8]}"
+        session.add(ReminderModel(
+            reminder_id=rid1,
+            user_id=uid,
+            title="Stale 1",
+            due_date=stale_time,
+            status="DELIVERING",
+            delivery_attempts=1,
+            last_attempt_at=stale_time,
+        ))
+
+        # Job 2: 3 attempts (max), should recover to FAILED
+        rid2 = f"rem_stale2_{uuid.uuid4().hex[:8]}"
+        session.add(ReminderModel(
+            reminder_id=rid2,
+            user_id=uid,
+            title="Stale 2",
+            due_date=stale_time,
+            status="DELIVERING",
+            delivery_attempts=3,
+            last_attempt_at=stale_time,
+        ))
+
+    recovered = reminder_scheduler.recover_stale_delivering_reminders(timeout_seconds=300)
+    assert recovered >= 2
+
+    with get_session() as session:
+        r1 = session.get(ReminderModel, rid1)
+        assert r1.status == "PENDING"
+        assert "recovered" in r1.delivery_error.lower()
+
+        r2 = session.get(ReminderModel, rid2)
+        assert r2.status == "FAILED"
+        assert "maximum attempts" in r2.delivery_error.lower()
+
+
+def test_oracle_negative_controls():
+    """Repaired oracles strictly reject incorrect answers and missing provenance."""
+    from benchmarks.v2.tasks import make_doc_tasks
+
+    doc_tasks = {t.task_id: t for t in make_doc_tasks()}
+    task_01 = doc_tasks["TASK_DOC_01"]
+
+    # 1. Incorrect value fails oracle
+    wrong_answer_state = {
+        "answer": "The maximum hotel reimbursement is $999 according to policy.",
+        "rag_context": "travel_policy.txt: Employees can claim up to $250.",
+        "execution_status": "completed",
+    }
+    res_wrong = task_01.oracle_fn(wrong_answer_state, {})
+    assert res_wrong.passed is False
+
+    # 2. Correct value without verified provenance fails oracle
+    unverified_state = {
+        "answer": "The hotel reimbursement limit is $250 per night.",
+        "rag_context": "",  # Missing document in context
+        "citations": [],
+        "execution_status": "completed",
+    }
+    res_unverified = task_01.oracle_fn(unverified_state, {})
+    assert res_unverified.passed is False
+

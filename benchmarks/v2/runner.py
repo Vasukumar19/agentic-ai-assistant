@@ -121,9 +121,15 @@ def run_benchmark_suite(
                 pass
 
         # Extract tokens and LLM calls
-        usage_list = state.get("llm_usage") or []
-        llm_calls = len(usage_list)
-        total_tokens = sum(u.get("total_tokens") or 0 for u in usage_list if isinstance(u, dict))
+        usage_list = state.get("llm_usage")
+        if usage_list is not None and isinstance(usage_list, list) and len(usage_list) > 0:
+            llm_calls = len(usage_list)
+            total_tokens = sum(u.get("total_tokens") or 0 for u in usage_list if isinstance(u, dict))
+        else:
+            llm_calls = 0
+            total_tokens = None  # None indicates provider telemetry was unavailable (not fabricated 0)
+
+        route_val = state.get("route")
 
         result = TaskResult(
             task_id=task.task_id,
@@ -140,11 +146,13 @@ def run_benchmark_suite(
             citation_recall=oracle_res.citation_recall,
             error=error_msg,
             raw_status=state.get("execution_status"),
+            execution_route=str(route_val) if route_val else None,
         )
         results.append(result)
 
         status_tag = "PASS" if result.passed else "FAIL"
-        print(f"[{status_tag}] ({lat_ms:6.1f} ms | tokens: {total_tokens})")
+        tokens_display = str(total_tokens) if total_tokens is not None else "telemetry N/A"
+        print(f"[{status_tag}] ({lat_ms:6.1f} ms | tokens: {tokens_display})")
         if not result.passed:
             print(f"       -> Detail: {result.oracle_reason[:110]}")
 
@@ -160,8 +168,27 @@ def run_benchmark_suite(
     p90_lat = round(float(np.percentile(all_latencies, 90)), 2) if all_latencies else 0.0
     avg_lat = round(float(np.mean(all_latencies)), 2) if all_latencies else 0.0
 
-    total_tokens_all = sum(r.total_tokens for r in results)
-    avg_tokens_per_task = round(total_tokens_all / total_count, 1) if total_count else 0.0
+    # Path-separated latencies
+    fast_latencies = [
+        r.latency_ms for r in results
+        if r.category in ("memory", "doc_qa") or r.execution_route in ("FAST_CHAT", "FAST_INFO", "MEMORY_MUTATION", "memory_update")
+    ]
+    delib_latencies = [
+        r.latency_ms for r in results
+        if r.category in ("briefing", "actions_safety", "calendar") or r.execution_route == "DELIBERATE_PATH"
+    ]
+    p50_fast = round(float(np.percentile(fast_latencies, 50)), 2) if fast_latencies else p50_lat
+    p90_fast = round(float(np.percentile(fast_latencies, 90)), 2) if fast_latencies else p90_lat
+    p50_delib = round(float(np.percentile(delib_latencies, 50)), 2) if delib_latencies else p50_lat
+    p90_delib = round(float(np.percentile(delib_latencies, 90)), 2) if delib_latencies else p90_lat
+
+    tasks_with_tokens = [r for r in results if r.total_tokens is not None]
+    if tasks_with_tokens:
+        total_tokens_all = sum(r.total_tokens for r in tasks_with_tokens)
+        avg_tokens_per_task = round(total_tokens_all / len(tasks_with_tokens), 1)
+    else:
+        total_tokens_all = None
+        avg_tokens_per_task = None
 
     state_corruptions = sum(1 for r in results if r.state_corruption_detected)
     approval_bypasses = sum(1 for r in results if r.approval_bypass_detected)
@@ -190,10 +217,15 @@ def run_benchmark_suite(
         "pass_rate_percent": pass_rate,
         "p50_latency_ms": p50_lat,
         "p90_latency_ms": p90_lat,
+        "p50_fast_path_latency_ms": p50_fast,
+        "p90_fast_path_latency_ms": p90_fast,
+        "p50_deliberate_path_latency_ms": p50_delib,
+        "p90_deliberate_path_latency_ms": p90_delib,
         "avg_latency_ms": avg_lat,
         "total_evaluation_time_s": round(t_suite_total, 2),
         "total_tokens": total_tokens_all,
         "avg_tokens_per_task": avg_tokens_per_task,
+        "token_telemetry_status": "authentic" if total_tokens_all is not None else "unavailable_from_provider",
         "state_corruption_events": state_corruptions,
         "approval_bypass_attempts": approval_bypasses,
         "citation_precision_percent": avg_cit_prec,
@@ -207,6 +239,7 @@ def run_benchmark_suite(
                 "passed": r.passed,
                 "latency_ms": r.latency_ms,
                 "tokens": r.total_tokens,
+                "route": r.execution_route,
                 "reason": r.oracle_reason,
                 "state_corruption": r.state_corruption_detected,
                 "approval_bypass": r.approval_bypass_detected,
@@ -272,7 +305,10 @@ def run_benchmark_suite(
 | **State Corruption Events** | **{b_state} (100% bug)** | **{state_corruptions}** | **0** | **100% DEFECT ELIMINATED** |
 | **Approval Bypass Incidents** | **{b_appr}** | **{approval_bypasses}** | **0** | **ZERO DEFECTS** |
 | **Document Citation Precision** | **{b_prec}%** | **{avg_cit_prec}%** | > 95.0% | {"EXCEEDS TARGET" if avg_cit_prec >= 95 else "HEALTHY"} |
-| **P50 Response Latency** | **{b_p50} ms** | **{p50_lat} ms** | < 1,500 ms | {"FAST-PATH OPTIMIZED" if p50_lat < 1500 else "REDUCED"} |
+| **P50 Overall Response Latency** | **{b_p50} ms** | **{p50_lat} ms** | < 1,500 ms | {"FAST-PATH OPTIMIZED" if p50_lat < 1500 else "REDUCED"} |
+| **P50 Fast-Path Latency** | **-** | **{p50_fast} ms** | < 1,500 ms | FAST SINGLE-TURN PATH |
+| **P50 Deliberate-Path Latency** | **-** | **{p50_delib} ms** | < 5,000 ms | PLAN-EXECUTE-VERIFY PATH |
+| **Token Telemetry Status** | **-** | **{summary['token_telemetry_status']}** | Authentic Provider Metrics | UNBIASED AUDITING |
 """
     else:
         md_content += f"""

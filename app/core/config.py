@@ -119,6 +119,10 @@ class Settings(BaseSettings):
     def validate_security_configuration(self) -> None:
         """Perform startup security assertions."""
         if self.ENVIRONMENT == "production":
+            if self.AUTH_MODE != "production":
+                raise ValueError(
+                    "Production security failure: AUTH_MODE must be 'production' when ENVIRONMENT is 'production'."
+                )
             if not self.APPROVAL_HMAC_SECRET or len(self.APPROVAL_HMAC_SECRET) < 32:
                 raise ValueError(
                     "Production security failure: APPROVAL_HMAC_SECRET must be explicitly set and >= 32 characters."

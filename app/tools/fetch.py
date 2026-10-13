@@ -117,6 +117,35 @@ def validate_url_destination(url: str) -> Tuple[str, str, int, str]:
     return scheme, hostname, port, pinned_ip
 
 
+class PinnedHTTPSConnection(http.client.HTTPSConnection):
+    """
+    Direct HTTPS connection to a verified pinned IP with original hostname SNI
+    and strict TLS certificate validation. Eliminates DNS-rebinding races
+    without broken HTTP proxy CONNECT tunneling.
+    """
+    def __init__(
+        self,
+        pinned_ip: str,
+        hostname: str,
+        port: int,
+        timeout: float,
+        context: ssl.SSLContext,
+    ):
+        super().__init__(pinned_ip, port=port, timeout=timeout, context=context)
+        self.server_hostname = hostname
+
+    def connect(self):
+        # Directly connect TCP socket to pinned IP
+        self.sock = socket.create_connection(
+            (self.host, self.port), self.timeout, self.source_address
+        )
+        # Wrap TCP socket with TLS: SNI and cert verification matched against original hostname
+        self.sock = self._context.wrap_socket(
+            self.sock,
+            server_hostname=self.server_hostname,
+        )
+
+
 class SafeHttpClient:
     """
     Hardened HTTP client protected against:
@@ -145,13 +174,13 @@ class SafeHttpClient:
             if scheme == "https":
                 # Create SSL context verifying cert against original hostname (SNI)
                 ssl_ctx = ssl.create_default_context()
-                conn = http.client.HTTPSConnection(
+                conn = PinnedHTTPSConnection(
                     pinned_ip,
+                    hostname=hostname,
                     port=port,
                     timeout=self.timeout_s,
                     context=ssl_ctx,
                 )
-                conn.set_tunnel(hostname) if hasattr(conn, "set_tunnel") else None
             else:
                 conn = http.client.HTTPConnection(
                     pinned_ip,

@@ -107,6 +107,7 @@ def test_cross_tenant_approval_denied(client):
 def test_production_startup_rejects_wildcard_cors(monkeypatch):
     """In production, wildcard CORS origin with credentials raises ValueError."""
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "AUTH_MODE", "production")
     monkeypatch.setattr(settings, "APPROVAL_HMAC_SECRET", "a" * 32)
     monkeypatch.setattr(settings, "CORS_ALLOWED_ORIGINS", ["*"])
 
@@ -219,3 +220,150 @@ def test_approval_atomic_single_consumption():
     assert is_auth_2 is False
     assert tool_2 is None
     assert args_2 is None
+
+
+def test_production_rejects_synthetic_admin_tokens(client, monkeypatch):
+    """In production mode, tok_test_admin_ tokens fail closed with 401 instead of granting admin."""
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "AUTH_MODE", "production")
+
+    res = client.post(
+        "/api/chat",
+        json={"query": "Hello"},
+        headers={"Authorization": "Bearer tok_test_admin_attacker"},
+    )
+    assert res.status_code == 401
+    assert res.json()["error_code"] == "INVALID_TOKEN"
+
+
+def test_production_rejects_synthetic_user_tokens(client, monkeypatch):
+    """In production mode, tok_test_user_ tokens fail closed with 401."""
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "AUTH_MODE", "production")
+
+    res = client.get(
+        "/api/knowledge/notes",
+        headers={"Authorization": "Bearer tok_test_user_victim"},
+    )
+    assert res.status_code == 401
+    assert res.json()["error_code"] == "INVALID_TOKEN"
+
+
+def test_api_key_sha256_identity_collision_prevention():
+    """Two API keys with identical prefix generate distinct, collision-resistant user IDs."""
+    from unittest.mock import MagicMock
+    from app.core.auth import get_current_principal
+
+    key1 = "sk-prod-enterprise-key-alpha-12345"
+    key2 = "sk-prod-enterprise-key-beta-67890"
+
+    settings_keys = [key1, key2]
+    original_keys = settings.AUTH_API_KEYS
+    try:
+        settings.AUTH_API_KEYS = settings_keys
+
+        req1 = MagicMock()
+        req2 = MagicMock()
+
+        p1 = get_current_principal(request=req1, bearer=None, x_api_key=key1)
+        p2 = get_current_principal(request=req2, bearer=None, x_api_key=key2)
+
+        assert p1.user_id != p2.user_id
+        assert p1.user_id.startswith("usr_apikey_")
+        assert p2.user_id.startswith("usr_apikey_")
+        assert len(p1.user_id) > 15
+    finally:
+        settings.AUTH_API_KEYS = original_keys
+
+
+def test_production_rejects_inconsistent_auth_mode(monkeypatch):
+    """Refuse application startup if ENVIRONMENT is production but AUTH_MODE is not."""
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "AUTH_MODE", "development")
+    monkeypatch.setattr(settings, "APPROVAL_HMAC_SECRET", "a" * 32)
+
+    with pytest.raises(ValueError, match="AUTH_MODE must be 'production'"):
+        settings.validate_security_configuration()
+
+
+def test_approval_multithreaded_concurrent_consumption():
+    """Simultaneous consumption attempts in multiple threads allow exactly ONE to succeed."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    ctx = ExecutionContext.create(user_id="usr_test_concurrency")
+    act_id, token = approval_engine.stage_approval(
+        ctx=ctx,
+        tool_name="notes.delete",
+        arguments={"note_id": "note_concurrent_target"},
+        summary="Concurrent delete attempt",
+    )
+
+    def attempt_consume(_):
+        is_auth, tool, args = approval_engine.validate_and_consume(
+            ctx=ctx,
+            approval_token=token,
+            decision="APPROVE",
+            action_id=act_id,
+        )
+        return is_auth
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        results = list(executor.map(attempt_consume, range(10)))
+
+    # Exactly 1 thread must succeed, 9 must be rejected
+    assert results.count(True) == 1
+    assert results.count(False) == 9
+
+
+def test_approval_lifecycle_states_and_crash_recovery():
+    """Verify transition from PENDING -> EXECUTING -> COMPLETED and crash recovery to UNCERTAIN."""
+    ctx = ExecutionContext.create(user_id="usr_test_lifecycle")
+    act_id, token = approval_engine.stage_approval(
+        ctx=ctx,
+        tool_name="notes.delete",
+        arguments={"note_id": "note_state_123"},
+        summary="Test state lifecycle",
+    )
+
+    with get_session() as session:
+        rec = session.get(ActionApprovalModel, act_id)
+        assert rec.status == "PENDING"
+
+    # Claiming approval transitions status to EXECUTING
+    is_auth, tool, args = approval_engine.validate_and_consume(ctx=ctx, approval_token=token)
+    assert is_auth is True
+
+    with get_session() as session:
+        rec = session.get(ActionApprovalModel, act_id)
+        assert rec.status == "EXECUTING"
+
+    # Post-execution recording transitions to COMPLETED
+    approval_engine.record_execution_outcome(act_id, "SUCCESS")
+
+    with get_session() as session:
+        rec = session.get(ActionApprovalModel, act_id)
+        assert rec.status == "COMPLETED"
+        assert rec.executed_at is not None
+
+    # Test stale recovery for an interrupted execution
+    act_id2, token2 = approval_engine.stage_approval(
+        ctx=ctx,
+        tool_name="notes.delete",
+        arguments={"note_id": "note_crash_test"},
+        summary="Crash test",
+    )
+    approval_engine.validate_and_consume(ctx=ctx, approval_token=token2)
+
+    # Simulate crash timeout by modifying decided_at in DB
+    with get_session() as session:
+        rec2 = session.get(ActionApprovalModel, act_id2)
+        rec2.decided_at = datetime.now(timezone.utc) - timedelta(minutes=10)
+
+    # Recover stale executing actions
+    recovered = approval_engine.recover_stale_executing_approvals(timeout_seconds=300)
+    assert recovered >= 1
+
+    with get_session() as session:
+        rec2 = session.get(ActionApprovalModel, act_id2)
+        assert rec2.status == "UNCERTAIN"
+        assert "interrupted" in rec2.execution_outcome.lower()

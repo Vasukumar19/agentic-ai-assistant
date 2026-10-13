@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from dataclasses import dataclass, field
 from typing import List, Optional
@@ -40,7 +41,8 @@ def get_current_principal(
     """
     Derive the verified identity principal from authentication headers.
     In production mode:
-      - Strictly enforces valid API Key or Bearer token.
+      - Strictly enforces valid API Key or verified Bearer token.
+      - Test tokens (tok_test_*) and dev headers are strictly prohibited.
       - Fails closed with 401 Unauthorized if missing or invalid.
     In development & testing mode:
       - Accepts configured credentials or dev/test headers.
@@ -50,12 +52,19 @@ def get_current_principal(
     token = bearer.credentials if bearer else None
     principal: Optional[UserPrincipal] = None
 
+    is_non_prod = (
+        settings.AUTH_MODE in ("development", "testing")
+        and settings.ENVIRONMENT in ("development", "testing")
+    )
+
     # 1. API Key validation
-    if x_api_key and settings.AUTH_API_KEYS:
-        if x_api_key in settings.AUTH_API_KEYS:
+    if x_api_key and isinstance(x_api_key, str):
+        if settings.AUTH_API_KEYS and x_api_key in settings.AUTH_API_KEYS:
+            # Deterministic, collision-resistant identity from SHA-256 of API key
+            key_hash = hashlib.sha256(x_api_key.encode("utf-8")).hexdigest()[:16]
             principal = UserPrincipal(
-                user_id=f"usr_apikey_{x_api_key[:6]}",
-                email=f"apikey_{x_api_key[:6]}@system",
+                user_id=f"usr_apikey_{key_hash}",
+                email=f"apikey_{key_hash}@system",
                 roles=["user", "service"],
             )
         else:
@@ -65,27 +74,29 @@ def get_current_principal(
             )
 
     # 2. Bearer Token validation
-    if not principal and token:
-        if token.startswith("tok_test_admin_"):
-            principal = UserPrincipal(
-                user_id=token.replace("tok_test_admin_", "usr_"),
-                email=f"{token}@test",
-                roles=["admin", "user"],
-            )
-        elif token.startswith("tok_test_user_"):
-            uid = token.replace("tok_test_user_", "usr_")
-            principal = UserPrincipal(
-                user_id=uid,
-                email=f"{uid}@test",
-                roles=["user"],
-            )
-        elif settings.AUTH_MODE in ("development", "testing") and len(token) >= 8:
-            principal = UserPrincipal(
-                user_id=f"usr_{token[:8]}",
-                email=f"user_{token[:8]}@local",
-                roles=["user"],
-            )
-        elif settings.AUTH_MODE == "production":
+    if not principal and token and isinstance(token, str):
+        if is_non_prod:
+            if token.startswith("tok_test_admin_"):
+                principal = UserPrincipal(
+                    user_id=token.replace("tok_test_admin_", "usr_"),
+                    email=f"{token}@test",
+                    roles=["admin", "user"],
+                )
+            elif token.startswith("tok_test_user_"):
+                uid = token.replace("tok_test_user_", "usr_")
+                principal = UserPrincipal(
+                    user_id=uid,
+                    email=f"{uid}@test",
+                    roles=["user"],
+                )
+            elif len(token) >= 8:
+                principal = UserPrincipal(
+                    user_id=f"usr_{token[:8]}",
+                    email=f"user_{token[:8]}@local",
+                    roles=["user"],
+                )
+        else:
+            # In production: test tokens are STRICTLY REJECTED
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"error_code": "INVALID_TOKEN", "message": "Bearer token is invalid or expired."},
@@ -93,9 +104,14 @@ def get_current_principal(
 
     # 3. Environment-specific development & test fallbacks
     if not principal:
-        if settings.AUTH_MODE in ("development", "testing"):
+        if is_non_prod:
             # Check explicit test headers first
-            effective_uid = x_test_user_id or x_dev_user
+            effective_uid = None
+            if isinstance(x_test_user_id, str):
+                effective_uid = x_test_user_id
+            elif isinstance(x_dev_user, str):
+                effective_uid = x_dev_user
+
             if not effective_uid:
                 # Check query parameter for dev/test mode convenience
                 effective_uid = request.query_params.get("user_id")
@@ -115,7 +131,7 @@ def get_current_principal(
             )
 
     # 4. Explicit Administrative Impersonation
-    if x_impersonate_user:
+    if x_impersonate_user and isinstance(x_impersonate_user, str):
         if not principal.has_role("admin"):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

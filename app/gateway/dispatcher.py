@@ -179,7 +179,7 @@ class ToolDispatcher:
                     )
                 # Enforce execution with the exact authorized arguments (preventing TOCTOU tampering)
                 args = authorized_args or args
-                staged_action_id = action_id
+                staged_action_id = action_id or approval_engine.get_action_id_by_token(approval_token)
 
         # 3. Execution
         side_effect_started = manifest.side_effect != SideEffectLevel.READ_ONLY
@@ -252,6 +252,8 @@ class ToolDispatcher:
             )
         except FileNotFoundError as fe:
             dur_ms = int((time.perf_counter() - t0) * 1000)
+            if staged_action_id:
+                approval_engine.record_execution_outcome(staged_action_id, "FAILED", str(fe))
             return ToolResultEnvelope.error(
                 tool_name=tool_name,
                 error_code=ToolErrorCode.RESOURCE_NOT_FOUND,
@@ -260,6 +262,8 @@ class ToolDispatcher:
             )
         except ValueError as ve:
             dur_ms = int((time.perf_counter() - t0) * 1000)
+            if staged_action_id:
+                approval_engine.record_execution_outcome(staged_action_id, "FAILED", str(ve))
             return ToolResultEnvelope.error(
                 tool_name=tool_name,
                 error_code=ToolErrorCode.VALIDATION_ERROR,
