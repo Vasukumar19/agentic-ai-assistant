@@ -68,6 +68,8 @@ def _run_schema_migrations(eng: Engine) -> None:
                 conn.execute(text("ALTER TABLE reminders ADD COLUMN last_attempt_at DATETIME"))
             if "delivery_error" not in cols:
                 conn.execute(text("ALTER TABLE reminders ADD COLUMN delivery_error TEXT"))
+            if "idempotency_key" not in cols:
+                conn.execute(text("ALTER TABLE reminders ADD COLUMN idempotency_key VARCHAR(128)"))
 
         conn.commit()
 

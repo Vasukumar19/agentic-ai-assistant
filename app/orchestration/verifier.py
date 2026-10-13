@@ -43,7 +43,17 @@ class OutcomeVerifier:
         """
         Evaluate execution results against explicit postconditions.
         """
+        from app.knowledge.repository import knowledge_repo
+
+        # Audit no-tool executions: legitimate only when no postconditions were expected
         if not tool_results:
+            if expected_postconditions:
+                return VerificationResult(
+                    status=VerificationStatus.INCOMPLETE,
+                    is_satisfied=False,
+                    explanation=f"Illegitimate execution: no tool actions executed, but postconditions {expected_postconditions} were required.",
+                    failed_postconditions=list(expected_postconditions),
+                )
             return VerificationResult(
                 status=VerificationStatus.COMPLETE,
                 is_satisfied=True,
@@ -55,6 +65,7 @@ class OutcomeVerifier:
         approvals_pending: List[str] = []
         errors: List[str] = []
         successful_tools: List[str] = []
+        unknown_tools: List[str] = []
 
         for r in tool_results:
             st = r.get("status")
@@ -69,31 +80,65 @@ class OutcomeVerifier:
                 failed_checks.append(f"Tool {tname} failed with: {err_msg}")
             elif st == "success":
                 successful_tools.append(tname)
-                # Specific domain postcondition assertions
+                # Specific domain postcondition assertions verified against authoritative repository state
                 if tname == "notes.delete":
+                    nid = data.get("note_id") or data.get("result", {}).get("note_id")
                     if data.get("deleted") is True or data.get("result", {}).get("deleted") is True:
-                        completed_checks.append(f"Note successfully marked deleted in repository.")
+                        note = knowledge_repo.get_note(ctx, nid) if nid else None
+                        if note is None or note.get("is_deleted") is True:
+                            completed_checks.append(f"Note '{nid or 'target'}' confirmed deleted in repository.")
+                        else:
+                            failed_checks.append(f"Note '{nid}' still present/active in repository.")
                     else:
                         failed_checks.append(f"Note delete operation reported false or missing target.")
                 elif tname == "notes.create":
                     nid = data.get("note_id") or data.get("result", {}).get("note_id")
                     if nid:
-                        completed_checks.append(f"Note '{nid}' created and persisted.")
+                        note = knowledge_repo.get_note(ctx, nid)
+                        if note:
+                            completed_checks.append(f"Note '{nid}' created and verified in repository.")
+                        else:
+                            failed_checks.append(f"Note '{nid}' not found in repository.")
                     else:
                         failed_checks.append(f"Note creation did not return a valid note_id.")
                 elif tname == "reminders.create":
                     rid = data.get("reminder_id") or data.get("result", {}).get("reminder_id")
                     if rid:
-                        completed_checks.append(f"Reminder '{rid}' scheduled and persisted.")
+                        rems = knowledge_repo.list_reminders(ctx)
+                        if any(rem.get("reminder_id") == rid for rem in rems):
+                            completed_checks.append(f"Reminder '{rid}' scheduled and verified in repository.")
+                        else:
+                            failed_checks.append(f"Reminder '{rid}' not found in repository.")
                     else:
                         failed_checks.append(f"Reminder creation did not return a valid reminder_id.")
                 elif tname == "reminders.complete":
+                    rid = data.get("reminder_id") or data.get("result", {}).get("reminder_id")
                     if data.get("completed") is True or data.get("result", {}).get("completed") is True:
-                        completed_checks.append(f"Reminder status transitioned to COMPLETED.")
+                        rems = knowledge_repo.list_reminders(ctx, status="COMPLETED")
+                        if not rid or any(rem.get("reminder_id") == rid for rem in rems):
+                            completed_checks.append(f"Reminder confirmed COMPLETED in repository.")
+                        else:
+                            failed_checks.append(f"Reminder '{rid}' not marked COMPLETED in repository.")
                     else:
                         failed_checks.append(f"Reminder completion failed or target not found.")
+                elif tname in (
+                    "calendar.list_events", "calendar.get_event", "notes.list",
+                    "notes.read", "reminders.list", "filesystem.read_file",
+                    "filesystem.write_file", "fetch.get_url", "sqlite.read_query",
+                ):
+                    completed_checks.append(f"Tool {tname} executed successfully.")
                 else:
-                    completed_checks.append(f"Tool {tname} returned valid output.")
+                    # Uncheckable external tool: mark UNKNOWN rather than claiming verified success
+                    unknown_tools.append(tname)
+                    completed_checks.append(f"Tool {tname} returned output (unverified domain postcondition: UNKNOWN).")
+
+        # Evaluate explicit expected_postconditions if provided
+        if expected_postconditions:
+            for exp in expected_postconditions:
+                exp_l = exp.lower()
+                satisfied = any(exp_l in c.lower() for c in completed_checks)
+                if not satisfied:
+                    failed_checks.append(f"Expected postcondition '{exp}' was not satisfied.")
 
         # 1. Blocked by required approval
         if approvals_pending:
@@ -123,10 +168,20 @@ class OutcomeVerifier:
                 failed_postconditions=failed_checks,
             )
 
+        # 3. Uncheckable / Ambiguous tools without authoritative repository verification
+        if unknown_tools and (set(successful_tools) == set(unknown_tools) or not any("confirmed" in c for c in completed_checks)):
+            return VerificationResult(
+                status=VerificationStatus.UNKNOWN,
+                is_satisfied=False,
+                explanation=f"Execution outcome cannot be verified: tools {unknown_tools} lack verifiable domain postconditions.",
+                completed_postconditions=completed_checks,
+                failed_postconditions=failed_checks,
+            )
+
         return VerificationResult(
             status=VerificationStatus.COMPLETE,
             is_satisfied=True,
-            explanation=f"All requested operations ({', '.join(successful_tools)}) completed successfully.",
+            explanation=f"All requested operations ({', '.join(successful_tools)}) completed and verified successfully.",
             completed_postconditions=completed_checks,
             failed_postconditions=failed_checks,
         )

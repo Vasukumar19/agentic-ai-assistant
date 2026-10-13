@@ -190,6 +190,7 @@ class ReminderModel(Base):
     delivery_attempts = Column(Integer, default=0)
     last_attempt_at = Column(DateTime(timezone=True), nullable=True)
     delivery_error = Column(Text, nullable=True)
+    idempotency_key = Column(String(128), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), default=_utc_now)
 
     # Relationships

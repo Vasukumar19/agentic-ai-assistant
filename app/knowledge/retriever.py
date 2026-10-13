@@ -20,7 +20,7 @@ class CitationRecord(BaseModel):
     document_name: str                  # Human-readable filename
     chunk_id: str                       # Exact chunk identifier
     page_number: Optional[int] = None   # Source page
-    relevance_score: float              # Cross-Encoder or cosine relevance score
+    relevance_score: float = 1.0        # Cross-Encoder or cosine relevance score
     exact_quote: str                    # Passage text excerpt
 
 

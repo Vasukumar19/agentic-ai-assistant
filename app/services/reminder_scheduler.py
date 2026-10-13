@@ -36,7 +36,12 @@ class ReminderScheduler:
     def recover_stale_delivering_reminders(self, timeout_seconds: int = 300) -> int:
         """
         Recover reminders left in DELIVERING state due to a worker crash or restart.
-        If delivery_attempts < max_retries, resets to PENDING; otherwise marks FAILED.
+        Prevents duplicate external deliveries:
+        - If the delivery channel is external (or custom adapter), the external provider
+          may have already accepted the notification before the worker crashed and before
+          DELIVERED was committed. Transitions status to DELIVERY_UNCERTAIN to prevent
+          duplicate delivery.
+        - For internal/local channels (CLI, LOCAL), resets to PENDING if attempts < max_retries.
         """
         cutoff = datetime.now(timezone.utc) - timedelta(seconds=timeout_seconds)
         recovered = 0
@@ -51,12 +56,25 @@ class ReminderScheduler:
             )
             for rec in stale_records:
                 recovered += 1
-                if rec.delivery_attempts < self.max_retries:
-                    rec.status = "PENDING"
-                    rec.delivery_error = "Recovered from interrupted delivery attempt."
+                channel = (rec.delivery_channel or "CLI").upper()
+                is_external = channel not in ("CLI", "LOCAL") or channel in self._custom_adapters
+
+                if is_external:
+                    # External delivery state is uncertain after crash; transition to DELIVERY_UNCERTAIN
+                    # to prevent duplicate delivery to external provider / user
+                    rec.status = "DELIVERY_UNCERTAIN"
+                    rec.delivery_error = (
+                        f"Interrupted delivery attempt via external channel '{channel}'. "
+                        f"Status transitioned to DELIVERY_UNCERTAIN (idempotency_key={rec.idempotency_key}) "
+                        f"to prevent duplicate external notification."
+                    )
                 else:
-                    rec.status = "FAILED"
-                    rec.delivery_error = "Delivery failed: maximum attempts reached after crash recovery."
+                    if rec.delivery_attempts < self.max_retries:
+                        rec.status = "PENDING"
+                        rec.delivery_error = "Recovered from interrupted local delivery attempt."
+                    else:
+                        rec.status = "FAILED"
+                        rec.delivery_error = "Delivery failed: maximum attempts reached after crash recovery."
             if recovered > 0:
                 logger.warning("Recovered %d stale DELIVERING reminders from previous crash.", recovered)
         return recovered
@@ -82,6 +100,7 @@ class ReminderScheduler:
 
             for rec in due_records:
                 rid = rec.reminder_id
+                idem_key = rec.idempotency_key or f"rem_idem_{rid}_{int(rec.due_date.timestamp())}"
                 # Atomic Claim: transition to DELIVERING
                 claimed = (
                     session.query(ReminderModel)
@@ -94,6 +113,7 @@ class ReminderScheduler:
                             "status": "DELIVERING",
                             "delivery_attempts": ReminderModel.delivery_attempts + 1,
                             "last_attempt_at": now,
+                            "idempotency_key": idem_key,
                         },
                         synchronize_session="fetch",
                     )
@@ -102,6 +122,7 @@ class ReminderScheduler:
                 if claimed == 0:
                     continue  # Raced with another worker
 
+                rec.idempotency_key = idem_key
                 # Execute delivery through channel
                 try:
                     self._deliver_notification(rec)

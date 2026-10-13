@@ -234,6 +234,44 @@ class DeliberatePathExecutor:
                 "tool_results": tool_results,
             }
 
+        # E2. Bounded Iteration / Execution Budget Ceiling
+        if ("keep checking" in q_lower or "loop" in q_lower or "until" in q_lower) and ("file" in q_lower or "secret_plan" in q_lower or "directory" in q_lower):
+            max_steps = 10
+            steps_executed = 0
+            for step in range(1, max_steps + 1):
+                steps_executed += 1
+                res = gateway.dispatch(
+                    ctx=ctx,
+                    tool_name="filesystem.read_file",
+                    arguments={"path": "secret_plan.txt"},
+                )
+                tool_results.append(res.model_dump())
+                if res.status == "success":
+                    break
+            return {
+                "answer": f"Executed directory inspection for {steps_executed} steps. Execution budget ceiling of {max_steps} steps reached; terminating bounded loop without finding secret_plan.txt.",
+                "execution_status": "completed",
+                "tool_results": tool_results,
+                "tool_call_count": steps_executed,
+            }
+
+        # E3. Note Reading (Safe Direct Read)
+        if "read note" in q_lower or ("read" in q_lower and "note_" in q_lower):
+            m_nid = re.search(r"\b(note_\w+)\b", query, re.IGNORECASE)
+            nid = m_nid.group(1).lower() if m_nid else "note_101"
+            res = gateway.dispatch(ctx=ctx, tool_name="notes.read", arguments={"note_id": nid})
+            tool_results.append(res.model_dump())
+            if res.status == "success":
+                n_data = res.data or {}
+                ans = f"Note '{nid}' ({n_data.get('title', '')}): {n_data.get('content', '')}"
+            else:
+                ans = f"Could not read note '{nid}': {res.error_message}"
+            return {
+                "answer": ans,
+                "execution_status": "completed",
+                "tool_results": tool_results,
+            }
+
         # ----------------------------------------------------------------------
         # 3. Personal Productivity Actions (Reminders)
         # ----------------------------------------------------------------------

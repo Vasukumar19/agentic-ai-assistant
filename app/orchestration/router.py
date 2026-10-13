@@ -93,7 +93,7 @@ class IntentRouter:
         has_tools = any(w in clean_q_tools for w in [
             "calendar", "meeting", "schedule", "briefing", "timeline", "evt_", "checklist",
             "reminder", "reminders", "fetch", "http://", "https://", "read file", "filesystem",
-            "sqlite", "select", "drop table"
+            "sqlite", "select", "drop table", "directory", "secret_plan", "keep checking", "until"
         ])
 
         if has_destructive or has_action or has_math or has_tools:

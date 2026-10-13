@@ -182,7 +182,6 @@ class ToolDispatcher:
                 staged_action_id = action_id or approval_engine.get_action_id_by_token(approval_token)
 
         # 3. Execution
-        side_effect_started = manifest.side_effect != SideEffectLevel.READ_ONLY
         try:
             emit_event(
                 ctx=ctx,
@@ -204,7 +203,7 @@ class ToolDispatcher:
                         error_code=ToolErrorCode.EXTERNAL_SERVICE_ERROR,
                         error_message=raw_res,
                         duration_ms=dur_ms,
-                        side_effect_occurred=side_effect_started,
+                        side_effect_occurred=False,
                     )
                 data_dict = {"result": raw_res}
             elif isinstance(raw_res, dict):
@@ -217,7 +216,7 @@ class ToolDispatcher:
                         error_code=ToolErrorCode.RESOURCE_NOT_FOUND if "not found" in err_msg.lower() else ToolErrorCode.EXTERNAL_SERVICE_ERROR,
                         error_message=err_msg,
                         duration_ms=dur_ms,
-                        side_effect_occurred=side_effect_started,
+                        side_effect_occurred=False,
                     )
                 data_dict = raw_res
             else:
@@ -225,6 +224,20 @@ class ToolDispatcher:
 
             if staged_action_id:
                 approval_engine.record_execution_outcome(staged_action_id, "SUCCESS")
+
+            # Determine genuine side effect outcome: must be mutating capability and not a reported no-op
+            if manifest.side_effect == SideEffectLevel.READ_ONLY:
+                actual_side_effect = False
+            else:
+                if (
+                    data_dict.get("deleted") is False
+                    or data_dict.get("completed") is False
+                    or data_dict.get("created") is False
+                    or data_dict.get("updated") is False
+                ):
+                    actual_side_effect = False
+                else:
+                    actual_side_effect = True
 
             emit_event(
                 ctx=ctx,
@@ -237,7 +250,7 @@ class ToolDispatcher:
                 tool_name=tool_name,
                 data=data_dict,
                 duration_ms=dur_ms,
-                side_effect_occurred=side_effect_started,
+                side_effect_occurred=actual_side_effect,
             )
 
         except PermissionError as pe:
@@ -279,7 +292,7 @@ class ToolDispatcher:
                 error_code=ToolErrorCode.EXECUTION_TIMEOUT,
                 error_message=str(te),
                 retryable=True,
-                side_effect_occurred=side_effect_started,
+                side_effect_occurred=False,
                 duration_ms=dur_ms,
             )
         except Exception as e:

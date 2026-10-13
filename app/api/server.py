@@ -18,6 +18,7 @@ from app.assistant import assistant_app
 from app.core.auth import UserPrincipal, get_current_principal, verify_resource_ownership
 from app.core.config import settings
 from app.core.context import ExecutionContext
+from app.gateway.approval import approval_engine
 from app.knowledge.repository import knowledge_repo
 from app.services.reminder_scheduler import reminder_scheduler
 
@@ -30,7 +31,9 @@ async def lifespan(app: FastAPI):
     settings.validate_security_configuration()
     # 2. Recover any stale reminder jobs stuck in DELIVERING state from prior process crash
     reminder_scheduler.recover_stale_delivering_reminders()
-    # 3. Start persistent background scheduler
+    # 3. Recover any stale approvals stuck in EXECUTING state from prior process crash
+    approval_engine.recover_stale_executing_approvals()
+    # 4. Start persistent background scheduler
     reminder_scheduler.start()
     try:
         yield
